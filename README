@@ -1,0 +1,12 @@
+InfinyJump is an infite runner for the Atari 2600 written
+using my assembler lasm. This project serves to test 
+the functionality of the assembler.
+
+TODO:
+
+Implement score
+Implement collision
+After certain score add Bird that flies at top of screen
+
+use missile objects as "invisible" collision helpers for left/right collision 
+only if missile does not collide but p0 did allow jump
