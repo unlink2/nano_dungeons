@@ -1,5 +1,5 @@
 CC=lasm 
-BIN=main.bin 
+BIN=main.nes 
 LST=main.sym
 
 BINDIR=./bin
@@ -7,7 +7,7 @@ MAIN = main.asm
 
 # main
 
-nesrpg: | init
+nesblox: | init
 	$(CC) -o$(BINDIR)/$(BIN) -l${BINDIR}/${LST} $(MAIN)
 
 # other useful things
