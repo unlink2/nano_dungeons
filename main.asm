@@ -7,7 +7,7 @@
 .db $00 ; no prg ram 
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
 
-.define MOVE_DELAY_FRAMES 5
+.define MOVE_DELAY_FRAMES 10
 
 .enum $00
 frame_count 1
@@ -101,6 +101,10 @@ nmi:
     jsr convert_tile_location
 
     inc frame_count
+    ldx move_delay
+    beq @skip_move_delay
+    dec move_delay
+@skip_move_delay:
 
     bit $2002 ; read ppu status to reset latch
 
@@ -165,47 +169,82 @@ input_handler:
 
     lda $4016 ; p1 - up
     and #%0000001
-    bne @no_up
+    beq @no_up
     jsr go_up
 @no_up:
 
     lda $4016 ; p1 - down
     and #%00000001
-    bne @no_down 
+    beq @no_down 
     jsr go_down
 @no_down:
 
     lda $4016 ; p1 - left
     and #%00000001
-    bne @no_left 
+    beq @no_left 
     jsr go_left
 @no_left:
 
     lda $4016 ; p1 - right 
     and #%00000001
-    bne @no_right 
+    beq @no_right 
     jsr go_right
 @no_right:
     rts     
 
+; make movement check
+; uses move delay
+; if move delay is nonzero
+; dec move delay
+; inputs:
+;   none 
+; returns:
+;   a -> 0 if move can go ahead
+;   a -> 1 if move cannot go ahead 
+can_move:
+    lda move_delay 
+    beq @done
+@done:
+    rts 
+
 ; left input
 go_left:
+    jsr can_move
+    bne @done
     dec player_x
+    lda #MOVE_DELAY_FRAMES
+    sta move_delay
+@done:
     rts 
 
 ; right input
 go_right:
+    jsr can_move
+    bne @done 
     inc player_x
+    lda #MOVE_DELAY_FRAMES
+    sta move_delay
+@done:
     rts 
 
 ; up input
 go_up:
+    jsr can_move
+    bne @done 
     dec player_y
+    lda #MOVE_DELAY_FRAMES
+    sta move_delay
+@done:
     rts 
 
 ; down input
 go_down:
+    jsr can_move
+    bne @done
     inc player_y
+    lda #MOVE_DELAY_FRAMES
+    sta move_delay
+@done: 
     rts 
 
 palette_data:
@@ -216,7 +255,7 @@ palette_data_end:
 ; lookup table of all possible tile conversion positions
 tile_convert_table:
 .mrep $FF
-.db .ri./8
+.db .ri.*8
 .endrep
 
 .pad $FFFA
