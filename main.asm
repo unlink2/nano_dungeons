@@ -2,7 +2,7 @@
 .db $4E, $45, $53, $1A, ; NES + MS-DOS EOF
 .db $01 ; prg rom size in 16kb 
 .db $01 ; chr rom in 8k bits
-.db $00 ; mapper 0 no special stuff
+.db %00000010 ; mapper 1 contains sram at $6000-$7FFF
 .db $01 ; mirroring
 .db $00 ; no prg ram 
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
@@ -22,9 +22,10 @@ game_mode 1
 move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
 
-level_ptr 2 ; points to the current level in rom
+level_ptr 2 ; points to the current level in ram
+level_data_ptr 2 ; pointer to rom/sram of level
 attr_ptr 2 ; points to the attributes for the current level
-level_ptr_temp 2 ; 16 bit loop index for level loading
+level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
 .end 
 
 ; sprite memory
@@ -32,6 +33,7 @@ level_ptr_temp 2 ; 16 bit loop index for level loading
 sprite_data 256 ; all sprite data
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
+level_data LEVEL_SIZE ; copy of uncompressed level in ram
 .end 
 
 .macro @vblank_wait
@@ -104,6 +106,8 @@ load_palette_loop:
     lda #>test_attr
     sta attr_ptr+1
 
+    jsr clear_level
+
     jsr load_level
     jsr load_attr
 
@@ -139,6 +143,7 @@ nmi:
     lda #$>sprite_data
     sta $4014  ; set the high byte (02) of the RAM address, start the transfer
 
+    lda #$00
     sta $2005 ; no horizontal scroll 
     sta $2005 ; no vertical scroll
 
@@ -153,14 +158,14 @@ nmi:
 convert_tile_location:
     ldx player_y
     lda tile_convert_table, x 
-    clc 
-    sbc #$02
+    sec 
+    sbc #$01
     sta sprite_data
 
     ldx player_x
     lda tile_convert_table, x 
     clc 
-    sbc #$01
+    adc #$00
     sta sprite_data+3
     rts 
 
@@ -299,6 +304,18 @@ go_down:
 @done: 
     rts 
 
+; sub routine that is going to decompress level data from rom
+; and store it in ram at level_ptr
+; At this point in time the level data are not compressed and will
+; be used directly 
+; inputs:
+;   level_data_ptr -> ptr to ROM/SRAM location of compressed level
+;   level_ptr -> copy destination
+; side effects:
+;   overwrites level_data_ptr 
+decompress_level:
+    rts 
+
 ; this sub routine loads all attributes for NT1
 ; inputs:
 ;   attr_ptr -> pointing to attributes
@@ -377,6 +394,50 @@ load_level_iter:
     iny 
     cpy #$FF 
     bne @load_level_loop
+    rts 
+
+; this sub routine clears all bytes 
+; used by level_ptr
+; inputs:
+;   level_ptr pointing to RAM
+; effects:
+;   clears everything at level_ptr
+;   uses level_ptr_temp to clear
+clear_level:
+    ; copy the pointer to 
+    ; save the original one
+    lda level_ptr
+    sta level_ptr_temp
+    lda level_ptr+1
+    sta level_ptr_temp+1
+
+    jsr clear_level_iter 
+    jsr inc_level_temp_ptr
+
+    jsr clear_level_iter 
+    jsr inc_level_temp_ptr
+
+    jsr clear_level_iter 
+    jsr inc_level_temp_ptr
+
+    ; last iteration is different so no jsr
+    ldy #$00 ; remainder
+    lda #$00 
+@clear_level_loop:
+    sta (level_ptr_temp), y 
+    iny 
+    cpy #$C3
+    bne @clear_level_loop 
+
+    rts 
+
+clear_level_iter:
+    ldy #$FF 
+    lda #$00
+@clear_level_loop:
+    sta (level_ptr_temp), y
+    dex 
+    bne @clear_level_loop
     rts 
 
 palette_data:

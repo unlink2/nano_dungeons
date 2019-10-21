@@ -33,3 +33,19 @@ One bank of sram should also be enough depending on how well compression works.
 
 All graphics design can be easily done using Mesens PPU viewer.
 Once done simply export the CHR ROM to a dump and it can be included using .incbin.
+
+Part 3: Level Compression:
+==========================
+Level compression is implemented using a very simple format.
+It is simply stores a number of repeates followed by the tile to be repeated.
+A repeate sequence is indicated with a value of $FF consequently making $FF an invalid 
+tile not to be used. If an FF does not preceede a value it simply means it is a single occurance of a tile.
+The end of data is indicated by $FF $00 $00
+Example:
+
+$01 $02 $02 $03 $FF $09 $FA $FF $00 $00
+
+This will expand to:
+$01 $02 $02 $03 $FA $FA $FA $FA $FA $FA $FA $FA $FA 
+
+This simple example saved 3 bytes in total.
