@@ -8,12 +8,23 @@
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
 
 .define MOVE_DELAY_FRAMES 10
+.define GAME_MODE_MENU 0
+.define GAME_MODE_PUZZLE 1
+.define GAME_MODE_EDITOR 2
+
+.define LEVEL_SIZE 960 ; uncompressed level size
+.define ATTR_SIZE 60 ; uncompressed attr size
 
 .enum $00
 frame_count 1
 rand8 1
 game_mode 1
 move_delay 1 ; delay between move inputs
+select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
+
+level_ptr 2 ; points to the current level in rom
+attr_ptr 2 ; points to the attributes for the current level
+level_ptr_temp 2 ; 16 bit loop index for level loading
 .end 
 
 ; sprite memory
@@ -78,14 +89,23 @@ load_palette_loop:
     cpx #palette_data_end-palette_data
     bne load_palette_loop 
 
-    ; test sprite 0
-    lda #$80
-    sta sprite_data ; put sprite 0 in center ($80) of screen vert
-    sta sprite_data+3 ; put sprite 0 in center ($80) of screen horiz
-    lda #$00
-    sta sprite_data+1 ; tile number = 0
-    sta sprite_data+2 ; color = 0, no flipping
-  ; end test
+    ; set up game mode for editor for now
+    lda #GAME_MODE_EDITOR 
+    sta game_mode
+
+    ; set up test level
+    lda #<test_level
+    sta level_ptr
+    lda #>test_level
+    sta level_ptr+1
+
+    lda #<test_attr
+    sta attr_ptr
+    lda #>test_attr
+    sta attr_ptr+1
+
+    jsr load_level
+    jsr load_attr
 
 start:
     lda #%10000000   ; enable NMI, sprites from Pattern Table 0
@@ -105,6 +125,11 @@ nmi:
     beq @skip_move_delay
     dec move_delay
 @skip_move_delay:
+
+    lda select_delay
+    beq @skip_select_delay 
+    dec select_delay
+@skip_select_delay:
 
     bit $2002 ; read ppu status to reset latch
 
@@ -128,10 +153,14 @@ nmi:
 convert_tile_location:
     ldx player_y
     lda tile_convert_table, x 
+    clc 
+    sbc #$02
     sta sprite_data
 
     ldx player_x
     lda tile_convert_table, x 
+    clc 
+    sbc #$01
     sta sprite_data+3
     rts 
 
@@ -145,25 +174,25 @@ input_handler:
 
     lda $4016 ; p1 - A
     and #%00000001 
-    bne @no_a
+    beq @no_a
     ; TODO A button press
 @no_a:
 
     lda $4016 ; p1 - B
     and #%00000001
-    bne @no_b
+    beq @no_b
     ; TODO B button press
 @no_b:
 
     lda $4016 ; p1 - select
     and #%00000001
-    bne @no_select
-    ; TODO select button press
+    beq @no_select
+    jsr select_input
 @no_select:
 
     lda $4016 ; p1 - start
     and #%00000001
-    bne @no_start 
+    beq @no_start 
     ; TODO start button press
 @no_start:
 
@@ -194,8 +223,6 @@ input_handler:
 
 ; make movement check
 ; uses move delay
-; if move delay is nonzero
-; dec move delay
 ; inputs:
 ;   none 
 ; returns:
@@ -203,8 +230,33 @@ input_handler:
 ;   a -> 1 if move cannot go ahead 
 can_move:
     lda move_delay 
-    beq @done
-@done:
+    rts 
+
+; makse select check,
+; uses select delay
+; inputs:
+;   none 
+; returns:
+; a-> 0 if select possible
+; a-> 1 if select cannot go ahead
+can_select:
+    lda select_delay
+    rts 
+
+
+; select button input
+select_input:
+    jsr can_select
+    bne @done
+    lda game_mode
+    cmp #GAME_MODE_EDITOR 
+    bne @done
+
+    lda #MOVE_DELAY_FRAMES
+    sta select_delay
+    ; change sprite 0s sprite index
+    inc sprite_data+1
+@done: 
     rts 
 
 ; left input
@@ -247,15 +299,106 @@ go_down:
 @done: 
     rts 
 
+; this sub routine loads all attributes for NT1
+; inputs:
+;   attr_ptr -> pointing to attributes
+load_attr:
+    lda $2002 ; read PPU status to reset the high/low latch
+    lda #$23 ; write $23C0 to ppu as start address
+    sta $2006
+    lda #$C0
+    sta $2006 ; set up ppu for attribute transfer
+
+    ldy #$00
+@attr_loop:
+    lda (attr_ptr), y 
+    sta $2007 ; transfer
+    iny 
+    cpy #ATTR_SIZE
+    bne @attr_loop
+
+    rts 
+
+; this sub routine loads a level into NT1
+; inputs:
+;   level_ptr -> pointing to level data
+load_level:
+    lda $2002 ; read PPU status to reset the high/low latch
+    lda #$20 ; write $2000 to ppu as start address
+    sta $2006
+    lda #$00
+    sta $2006 ; set up ppu for level transfer
+
+    ; copy the pointer to 
+    ; save the original one
+    lda level_ptr
+    sta level_ptr_temp
+    lda level_ptr+1
+    sta level_ptr_temp+1
+
+    jsr load_level_iter
+
+    ; same loop again, but add $FF to level ptr
+    jsr inc_level_temp_ptr
+    jsr load_level_iter
+    jsr inc_level_temp_ptr
+    jsr load_level_iter
+    jsr inc_level_temp_ptr
+    ; last iteration is different so no jsr
+    ldy #$00 ; remainder 
+@load_level_loop:
+    lda (level_ptr_temp), y 
+    sta $2007 ; write to ppu
+    iny 
+    cpy #$C3
+    bne @load_level_loop 
+
+    rts 
+
+; increments level ptr by FF
+inc_level_temp_ptr:
+    lda level_ptr_temp 
+    clc 
+    adc #$FF 
+    sta level_ptr_temp
+    bcc @no_carry:
+    lda level_ptr_temp+1 
+    adc #$00 ; add carry
+    sta level_ptr_temp+1
+@no_carry:
+    rts 
+
+; first second and third iteration of load level
+load_level_iter:
+    ldy #$00 ; loop counter
+@load_level_loop:
+    lda (level_ptr_temp), y 
+    sta $2007 ; write to ppu
+    iny 
+    cpy #$FF 
+    bne @load_level_loop
+    rts 
+
 palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
 .db $0F,$1C,$15,$14,$0F,$02,$38,$3C,$0F,$1C,$15,$14,$0F,$02,$38,$3C  ;sprite palette data
 palette_data_end:
 
+test_level: 
+.mrep 960
+.db .ri.
+.endrep
+
+test_attr:
+.mrep 60
+.db 0
+.endrep
+
+
 ; lookup table of all possible tile conversion positions
 tile_convert_table:
 .mrep $FF
-.db .ri.*8
+.db (.ri.*8)
 .endrep
 
 .pad $FFFA
