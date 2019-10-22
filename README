@@ -40,10 +40,10 @@ Level compression is implemented using a very simple format.
 It is simply stores a number of repeates followed by the tile to be repeated.
 A repeate sequence is indicated with a value of $FF consequently making $FF an invalid 
 tile not to be used. If an FF does not preceede a value it simply means it is a single occurance of a tile.
-The end of data is indicated by $FF $00 $00
+The end of data is indicated by $FF $00
 Example:
 
-$01 $02 $02 $03 $FF $09 $FA $FF $00 $00
+$01 $02 $02 $03 $FF $09 $FA $FF $00
 
 This will expand to:
 $01 $02 $02 $03 $FA $FA $FA $FA $FA $FA $FA $FA $FA 

@@ -13,6 +13,7 @@
 .define GAME_MODE_EDITOR 2
 
 .define LEVEL_SIZE 960 ; uncompressed level size
+.define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
 .define ATTR_SIZE 60 ; uncompressed attr size
 
 .enum $00
@@ -26,6 +27,7 @@ level_ptr 2 ; points to the current level in ram
 level_data_ptr 2 ; pointer to rom/sram of level
 attr_ptr 2 ; points to the attributes for the current level
 level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
+temp 4 ; 4 bytes of universal temporary storage
 .end 
 
 ; sprite memory
@@ -34,6 +36,19 @@ sprite_data 256 ; all sprite data
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
 level_data LEVEL_SIZE ; copy of uncompressed level in ram
+.end 
+
+; start of prg ram
+; which is used as sram in this case
+; prg ram ends at $7FFF
+; each save is the size of a LEVEL + 2 for the terminator
+; this allows the user to store an entire screen without compression
+; in thory 
+; compression will still be applied however.
+.enum $6000 
+save_1 SAVE_SIZE ; saveslot 1
+save_2 SAVE_SIZE ; saveslot 2
+save_3 SAVE_SIZE ; saveslot 3
 .end 
 
 .macro @vblank_wait
@@ -96,10 +111,18 @@ load_palette_loop:
     sta game_mode
 
     ; set up test level
-    lda #<test_level
-    sta level_ptr
-    lda #>test_level
+    ; TODO REMOVE
+    lda #<test_decompress
+    sta level_data_ptr
+    lda #>test_decompress
+    sta level_data_ptr+1
+
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
     sta level_ptr+1
+
+    jsr decompress_level
 
     lda #<test_attr
     sta attr_ptr
@@ -110,6 +133,9 @@ load_palette_loop:
 
     jsr load_level
     jsr load_attr
+
+    ; end of test code 
+    ; TODO REMOVE
 
 start:
     lda #%10000000   ; enable NMI, sprites from Pattern Table 0
@@ -304,157 +330,22 @@ go_down:
 @done: 
     rts 
 
-; sub routine that is going to decompress level data from rom
-; and store it in ram at level_ptr
-; At this point in time the level data are not compressed and will
-; be used directly 
-; inputs:
-;   level_data_ptr -> ptr to ROM/SRAM location of compressed level
-;   level_ptr -> copy destination
-; side effects:
-;   overwrites level_data_ptr 
-decompress_level:
-    rts 
 
-; this sub routine loads all attributes for NT1
-; inputs:
-;   attr_ptr -> pointing to attributes
-load_attr:
-    lda $2002 ; read PPU status to reset the high/low latch
-    lda #$23 ; write $23C0 to ppu as start address
-    sta $2006
-    lda #$C0
-    sta $2006 ; set up ppu for attribute transfer
-
-    ldy #$00
-@attr_loop:
-    lda (attr_ptr), y 
-    sta $2007 ; transfer
-    iny 
-    cpy #ATTR_SIZE
-    bne @attr_loop
-
-    rts 
-
-; this sub routine loads a level into NT1
-; inputs:
-;   level_ptr -> pointing to level data
-load_level:
-    lda $2002 ; read PPU status to reset the high/low latch
-    lda #$20 ; write $2000 to ppu as start address
-    sta $2006
-    lda #$00
-    sta $2006 ; set up ppu for level transfer
-
-    ; copy the pointer to 
-    ; save the original one
-    lda level_ptr
-    sta level_ptr_temp
-    lda level_ptr+1
-    sta level_ptr_temp+1
-
-    jsr load_level_iter
-
-    ; same loop again, but add $FF to level ptr
-    jsr inc_level_temp_ptr
-    jsr load_level_iter
-    jsr inc_level_temp_ptr
-    jsr load_level_iter
-    jsr inc_level_temp_ptr
-    ; last iteration is different so no jsr
-    ldy #$00 ; remainder 
-@load_level_loop:
-    lda (level_ptr_temp), y 
-    sta $2007 ; write to ppu
-    iny 
-    cpy #$C3
-    bne @load_level_loop 
-
-    rts 
-
-; increments level ptr by FF
-inc_level_temp_ptr:
-    lda level_ptr_temp 
-    clc 
-    adc #$FF 
-    sta level_ptr_temp
-    bcc @no_carry:
-    lda level_ptr_temp+1 
-    adc #$00 ; add carry
-    sta level_ptr_temp+1
-@no_carry:
-    rts 
-
-; first second and third iteration of load level
-load_level_iter:
-    ldy #$00 ; loop counter
-@load_level_loop:
-    lda (level_ptr_temp), y 
-    sta $2007 ; write to ppu
-    iny 
-    cpy #$FF 
-    bne @load_level_loop
-    rts 
-
-; this sub routine clears all bytes 
-; used by level_ptr
-; inputs:
-;   level_ptr pointing to RAM
-; effects:
-;   clears everything at level_ptr
-;   uses level_ptr_temp to clear
-clear_level:
-    ; copy the pointer to 
-    ; save the original one
-    lda level_ptr
-    sta level_ptr_temp
-    lda level_ptr+1
-    sta level_ptr_temp+1
-
-    jsr clear_level_iter 
-    jsr inc_level_temp_ptr
-
-    jsr clear_level_iter 
-    jsr inc_level_temp_ptr
-
-    jsr clear_level_iter 
-    jsr inc_level_temp_ptr
-
-    ; last iteration is different so no jsr
-    ldy #$00 ; remainder
-    lda #$00 
-@clear_level_loop:
-    sta (level_ptr_temp), y 
-    iny 
-    cpy #$C3
-    bne @clear_level_loop 
-
-    rts 
-
-clear_level_iter:
-    ldy #$FF 
-    lda #$00
-@clear_level_loop:
-    sta (level_ptr_temp), y
-    dex 
-    bne @clear_level_loop
-    rts 
+.include "./map.asm"
 
 palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
 .db $0F,$1C,$15,$14,$0F,$02,$38,$3C,$0F,$1C,$15,$14,$0F,$02,$38,$3C  ;sprite palette data
 palette_data_end:
 
-test_level: 
-.mrep 960
-.db .ri.
-.endrep
-
 test_attr:
 .mrep 60
 .db 0
 .endrep
 
+; test decompress data
+test_decompress:
+.db $01, $02, $02, $03, $FF, $09, $FA, $FF, $00
 
 ; lookup table of all possible tile conversion positions
 tile_convert_table:
