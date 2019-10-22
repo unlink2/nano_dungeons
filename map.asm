@@ -1,0 +1,295 @@
+; this file contains all map related sub routines
+
+
+; sub routine that is going to decompress level data from rom
+; and store it in ram at level_ptr
+; At this point in time the level data are not compressed and will
+; be used directly 
+; inputs:
+;   level_data_ptr -> ptr to ROM/SRAM location of compressed level
+;   level_ptr -> copy destination
+; side effects:
+;   all registers and flags may be changed
+;   temp is written to
+decompress_level:
+    ; save level data ptr
+    lda level_data_ptr 
+    pha 
+    lda level_data_ptr+1 
+    pha 
+
+    ; to decompress a level we need to loop for a while
+    ; until we find the terminating sequence of $FF $00
+    lda level_ptr
+    sta level_ptr_temp
+    lda level_ptr+1
+    sta level_ptr_temp+1
+
+    lda #$01
+    sta temp ; increment by 1 every time
+
+@decompress_loop:
+    ldy #$00
+    ldx #$01 ; x is loop write counter
+
+    lda (level_data_ptr), y ; load first byte of data
+    cmp #$FF ; if it is a ff we can assume we need to decompress
+    bne @single_value ; if not ff it is a single value
+
+    jsr inc_level_data_ptr ; look for next byte
+    lda (level_data_ptr), y ; load next byte
+    cmp #$00 ; if it is 00 we have found $FF $00 
+    beq @decompress_done ; we are done here
+
+    tax ; a holds x index
+    jsr inc_level_data_ptr ; next byte
+    lda (level_data_ptr), y ; a now holds tile 
+
+@single_value:
+    jsr write_decompressed_byte ; write byte
+    dex ; x is always at least 1
+    bne @single_value
+
+    ; increment level
+    jsr inc_level_data_ptr ; next byte
+    jmp @decompress_loop ; always loop
+@decompress_done:
+
+    ; restore original level data ptr
+    pla 
+    sta level_data_ptr
+    pla 
+    sta level_data_ptr+1
+
+    rts 
+
+; increments level data ptr
+; inputs:
+;   level_data_ptr -> pointing to compressed level
+;   temp -> increment by
+; side effects:
+;   a register and acarry flag are modified
+inc_level_data_ptr:
+    ; 16 bit add
+    lda level_data_ptr
+    clc 
+    adc temp 
+    sta level_data_ptr
+    lda level_data_ptr+1
+    adc #$00
+    sta level_data_ptr+1
+    rts 
+
+; writes the decompressed byte contained in a 
+; to level_ptr_temp
+; inputs:
+;   level_ptr_temp pointing to the next byte location
+; side effects:
+;   increments level_ptr_temp for each iteration
+;   y is set to 0
+write_decompressed_byte:
+    ldy #$00 
+    sta (level_ptr_temp), y
+    pha ; store current value
+
+    ; 16 bit add
+    lda level_ptr_temp
+    clc 
+    adc #$01 
+    sta level_ptr_temp
+    lda level_ptr_temp+1
+    adc #$00
+    sta level_ptr_temp+1
+
+    pla ; restore tile value
+    rts 
+
+; this sub routine compresses a level 
+; it will follow the rules desribed in README
+; inputs:
+;   level_data_ptr -> pointing to destination
+;   level_ptr -> pointing to uncompressed level in RAM/ROM
+; side effects:
+;   all registers and flags may be changed
+;   temp, temp+1 and temp+2 are written to
+compress_level:
+    ; save level data ptr
+    lda level_data_ptr 
+    pha 
+    lda level_data_ptr+1 
+    pha 
+
+    ; to compress a level we need to loop for a while
+    ; until we reach LEVEL_SIZE bytes
+    lda level_ptr
+    sta level_ptr_temp
+    sta temp+1
+    lda level_ptr+1
+    sta level_ptr_temp+1
+    sta temp+2
+
+    ; add 1 every time
+    lda #$01
+    sta temp
+
+    ; pre-calculate end address of level 
+    ; temp+1 and +2 are holding the end address
+    ; size is FF+FF+FF+C3
+    ldx #$03 ; do this 3 times
+@end_calc_loop:
+    lda temp+1
+    clc 
+    adc #$FF 
+    sta temp+1
+    lda temp+2 
+    adc #$00 ; add carry
+    sta temp+2
+    dex 
+    bne @end_calc_loop
+    ; add rest 
+    lda temp+1 
+    clc 
+    adc #$C3+1 ; +1 since we break after 
+    sta temp+1
+    lda temp+2
+    adc #$00 ; carry
+    sta temp+2 
+
+    ; loop until level_ptr_temp is the same as the end address
+@compress_loop:
+
+    
+
+    jmp @compress_loop 
+@compress_done:
+
+    ; restore original level data ptr
+    pla 
+    sta level_data_ptr
+    pla 
+    sta level_data_ptr+1
+    rts 
+
+; this sub routine loads all attributes for NT1
+; inputs:
+;   attr_ptr -> pointing to attributes
+load_attr:
+    lda $2002 ; read PPU status to reset the high/low latch
+    lda #$23 ; write $23C0 to ppu as start address
+    sta $2006
+    lda #$C0
+    sta $2006 ; set up ppu for attribute transfer
+
+    ldy #$00
+@attr_loop:
+    lda (attr_ptr), y 
+    sta $2007 ; transfer
+    iny 
+    cpy #ATTR_SIZE
+    bne @attr_loop
+
+    rts 
+
+; this sub routine loads a level into NT1
+; inputs:
+;   level_ptr -> pointing to level data
+load_level:
+    lda $2002 ; read PPU status to reset the high/low latch
+    lda #$20 ; write $2000 to ppu as start address
+    sta $2006
+    lda #$00
+    sta $2006 ; set up ppu for level transfer
+
+    ; copy the pointer to 
+    ; save the original one
+    lda level_ptr
+    sta level_ptr_temp
+    lda level_ptr+1
+    sta level_ptr_temp+1
+
+    jsr load_level_iter
+
+    ; same loop again, but add $FF to level ptr
+    jsr inc_level_temp_ptr
+    jsr load_level_iter
+    jsr inc_level_temp_ptr
+    jsr load_level_iter
+    jsr inc_level_temp_ptr
+    ; last iteration is different so no jsr
+    ldy #$00 ; remainder 
+@load_level_loop:
+    lda (level_ptr_temp), y 
+    sta $2007 ; write to ppu
+    iny 
+    cpy #$C3
+    bne @load_level_loop 
+
+    rts 
+
+; increments level ptr by FF
+inc_level_temp_ptr:
+    lda level_ptr_temp 
+    clc 
+    adc #$FF 
+    sta level_ptr_temp
+    bcc @no_carry:
+    lda level_ptr_temp+1 
+    adc #$00 ; add carry
+    sta level_ptr_temp+1
+@no_carry:
+    rts 
+
+; first second and third iteration of load level
+load_level_iter:
+    ldy #$00 ; loop counter
+@load_level_loop:
+    lda (level_ptr_temp), y 
+    sta $2007 ; write to ppu
+    iny 
+    cpy #$FF 
+    bne @load_level_loop
+    rts 
+
+; this sub routine clears all bytes 
+; used by level_ptr
+; inputs:
+;   level_ptr pointing to RAM
+; effects:
+;   clears everything at level_ptr
+;   uses level_ptr_temp to clear
+clear_level:
+    ; copy the pointer to 
+    ; save the original one
+    lda level_ptr
+    sta level_ptr_temp
+    lda level_ptr+1
+    sta level_ptr_temp+1
+
+    jsr clear_level_iter 
+    jsr inc_level_temp_ptr
+
+    jsr clear_level_iter 
+    jsr inc_level_temp_ptr
+
+    jsr clear_level_iter 
+    jsr inc_level_temp_ptr
+
+    ; last iteration is different so no jsr
+    ldy #$00 ; remainder
+    lda #$00 
+@clear_level_loop:
+    sta (level_ptr_temp), y 
+    iny 
+    cpy #$C3
+    bne @clear_level_loop 
+
+    rts 
+
+clear_level_iter:
+    ldy #$FF 
+    lda #$00
+@clear_level_loop:
+    sta (level_ptr_temp), y
+    dex 
+    bne @clear_level_loop
+    rts
