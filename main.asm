@@ -2,8 +2,8 @@
 .db $4E, $45, $53, $1A, ; NES + MS-DOS EOF
 .db $01 ; prg rom size in 16kb 
 .db $01 ; chr rom in 8k bits
-.db $12 ; mapper 1 contains sram at $6000-$7FFF
-.db $01 ; mirroring
+.db $02 ; mapper 0 contains sram at $6000-$7FFF
+.db $00 ; mirroring
 .db $00 ; no prg ram 
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
 

@@ -345,6 +345,7 @@ load_level_iter:
     bne @load_level_loop
     rts 
 
+; TODO
 ; this sub routine clears all bytes 
 ; used by level_ptr
 ; inputs:
@@ -353,38 +354,4 @@ load_level_iter:
 ;   clears everything at level_ptr
 ;   uses level_ptr_temp to clear
 clear_level:
-    ; copy the pointer to 
-    ; save the original one
-    lda level_ptr
-    sta level_ptr_temp
-    lda level_ptr+1
-    sta level_ptr_temp+1
-
-    jsr clear_level_iter 
-    jsr inc_level_temp_ptr
-
-    jsr clear_level_iter 
-    jsr inc_level_temp_ptr
-
-    jsr clear_level_iter 
-    jsr inc_level_temp_ptr
-
-    ; last iteration is different so no jsr
-    ldy #$00 ; remainder
-    lda #$00 
-@clear_level_loop:
-    sta (level_ptr_temp), y 
-    iny 
-    cpy #$C3
-    bne @clear_level_loop 
-
     rts 
-
-clear_level_iter:
-    ldy #$FF 
-    lda #$00
-@clear_level_loop:
-    sta (level_ptr_temp), y
-    dex 
-    bne @clear_level_loop
-    rts
