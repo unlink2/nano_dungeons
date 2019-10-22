@@ -25,8 +25,8 @@ decompress_level:
     lda level_ptr+1
     sta level_ptr_temp+1
 
-    lda #$01
-    sta temp ; increment by 1 every time
+    ; lda #$01
+    ; sta temp ; increment by 1 every time
 
 @decompress_loop:
     ldy #$00
@@ -38,10 +38,10 @@ decompress_level:
 
     jsr inc_level_data_ptr ; look for next byte
     lda (level_data_ptr), y ; load next byte
+    tax ; a holds x index
     cmp #$00 ; if it is 00 we have found $FF $00 
     beq @decompress_done ; we are done here
 
-    tax ; a holds x index
     jsr inc_level_data_ptr ; next byte
     lda (level_data_ptr), y ; a now holds tile 
 
@@ -66,14 +66,14 @@ decompress_level:
 ; increments level data ptr
 ; inputs:
 ;   level_data_ptr -> pointing to compressed level
-;   temp -> increment by
 ; side effects:
 ;   a register and acarry flag are modified
+;   level_data_ptr is incremented
 inc_level_data_ptr:
     ; 16 bit add
     lda level_data_ptr
     clc 
-    adc temp 
+    adc #$01 
     sta level_data_ptr
     lda level_data_ptr+1
     adc #$00
@@ -89,6 +89,11 @@ inc_level_data_ptr:
 ;   y is set to 0
 write_decompressed_byte:
     ldy #$00 
+    ; debug instructions
+    cmp #$00 
+    bne @skip_brk
+    brk 
+@skip_brk
     sta (level_ptr_temp), y
     pha ; store current value
 
@@ -128,8 +133,8 @@ compress_level:
     sta level_ptr_temp+1
     sta temp+2
 
-    ; add 1 every time
-    lda #$01
+    ; temp will hold the las tile read
+    lda #$00
     sta temp
 
     ; pre-calculate end address of level 
@@ -149,7 +154,7 @@ compress_level:
     ; add rest 
     lda temp+1 
     clc 
-    adc #$C3+1 ; +1 since we break after 
+    adc #$C3 ; +1 since we break after 
     sta temp+1
     lda temp+2
     adc #$00 ; carry
@@ -157,17 +162,108 @@ compress_level:
 
     ; loop until level_ptr_temp is the same as the end address
 @compress_loop:
+    ldy #$00 ; used for indirect access
+    ldx #$01 ; start off at count 1
+    lda (level_ptr_temp), y ; get first tile for comparison
+    jmp @next_byte ; start loop
+@count_repeates:
+    ; sta temp ; store last tile, or if at start store first tile again
+    lda (level_ptr_temp), y ; get tile from ram
+    ; check for different tile
+    cmp temp 
+    bne @store_data
+    inx
+    cpx #$FF 
+    beq @store_data
+    bne @next_byte
+@store_data
+    lda temp
+    jsr write_compressed_data
+    cpx #$FF ; if we did hit FF we need to go to next byte
+    bne @compress_loop ; if not ff continue on normall
+@next_byte:
+    sta temp ; store last tile now
+    ; increment pointer 16 bit math
+    lda level_ptr_temp 
+    clc 
+    adc #$01 
+    sta level_ptr_temp
+    lda level_ptr_temp+1
+    adc #$00 
+    sta level_ptr_temp+1
 
-    
-
-    jmp @compress_loop 
+    ; compare to end pointer
+    lda level_ptr_temp
+    cmp temp+1 
+    bne @not_done
+    lda level_ptr_temp+1
+    cmp temp+2
+    bne @not_done
+    beq @compress_done ; if both are equal we are done
+@not_done:
+    cpx #$FF ; if $ff start over from start
+    beq @compress_loop
+    bne @count_repeates
 @compress_done:
+    lda temp 
+    jsr write_compressed_data ; add last data
+
+    lda #$FF 
+    ldx #$01 
+    ; write FF at the end 
+    jsr write_compressed_data
+    lda #$00
+    ldx #$01
+    ; write 00 at the end
+    jsr write_compressed_data 
 
     ; restore original level data ptr
     pla 
     sta level_data_ptr
     pla 
     sta level_data_ptr+1
+    rts 
+
+; sub routine that writes compressed data to output pointer
+; inputs:
+;   level_ptr -> the output ptr, gets incremented
+;   a -> the tile to write
+;   x -> tile count
+; side effects:
+;   increments level_ptr by  1-3 bytes
+write_compressed_data:
+    pha ; save tile state
+
+    ; first determine what needs to be done
+    cpx #$03
+    bcc @single_values ; branch if less than
+
+@compress:
+    ; add an ff first
+    lda #$FF 
+    sta (level_data_ptr), y
+    jsr inc_level_data_ptr
+    txa ; write amount
+    sta (level_data_ptr), y
+    jsr inc_level_data_ptr
+
+    pla ; get tile 
+    sta (level_data_ptr), y ; store tile id
+    pha ; push it back since inc will destroy the value
+    jsr inc_level_data_ptr
+    pla ; get tile again
+    ; ldx #$00
+    rts ; done
+@single_values:
+    ldy #$00 ; index
+    sta (level_data_ptr), y
+    pha ; save a's state
+    jsr inc_level_data_ptr
+    pla 
+    dex 
+    bne @single_values
+@done:
+    pla ; restore tile state
     rts 
 
 ; this sub routine loads all attributes for NT1
@@ -208,7 +304,6 @@ load_level:
     sta level_ptr_temp+1
 
     jsr load_level_iter
-
     ; same loop again, but add $FF to level ptr
     jsr inc_level_temp_ptr
     jsr load_level_iter

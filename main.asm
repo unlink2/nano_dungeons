@@ -2,7 +2,7 @@
 .db $4E, $45, $53, $1A, ; NES + MS-DOS EOF
 .db $01 ; prg rom size in 16kb 
 .db $01 ; chr rom in 8k bits
-.db %00000010 ; mapper 1 contains sram at $6000-$7FFF
+.db $12 ; mapper 1 contains sram at $6000-$7FFF
 .db $01 ; mirroring
 .db $00 ; no prg ram 
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
@@ -124,12 +124,20 @@ load_palette_loop:
 
     jsr decompress_level
 
+    ; test compression
+    lda #<save_1
+    sta level_data_ptr
+    lda #>save_1
+    sta level_data_ptr+1
+
+    jsr compress_level
+
     lda #<test_attr
     sta attr_ptr
     lda #>test_attr
     sta attr_ptr+1
 
-    jsr clear_level
+    ; jsr clear_level
 
     jsr load_level
     jsr load_attr
@@ -331,6 +339,7 @@ go_down:
     rts 
 
 
+
 .include "./map.asm"
 
 palette_data:
@@ -345,7 +354,7 @@ test_attr:
 
 ; test decompress data
 test_decompress:
-.db $01, $02, $02, $03, $FF, $09, $FA, $FF, $00
+.db $01, $02, $02, $03, $FF, $09, $FA, $FF, $FF, $01, $FF, $FF, $01, $FF, $FF, $03, $FF, $B6, $04, $FF, $00
 
 ; lookup table of all possible tile conversion positions
 tile_convert_table:
