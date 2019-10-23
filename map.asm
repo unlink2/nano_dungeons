@@ -89,11 +89,7 @@ inc_level_data_ptr:
 ;   y is set to 0
 write_decompressed_byte:
     ldy #$00 
-    ; debug instructions
-    cmp #$00 
-    bne @skip_brk
-    brk 
-@skip_brk
+
     sta (level_ptr_temp), y
     pha ; store current value
 
@@ -343,6 +339,72 @@ load_level_iter:
     iny 
     cpy #$FF 
     bne @load_level_loop
+    rts 
+
+; this sub routine updates a tile at
+; the player's current x/y position (tile location)
+; with the player's currently active tile
+; inputs:
+;   player_x -> x position
+;   player_y -> y position
+;   sprite_data+1 -> the tile to place
+; side effects:
+;   updates level_data and nametable
+;   changes registers and flags
+update_tile:
+    ; store all pointers
+    lda level_ptr
+    pha 
+    lda level_ptr+1
+    pha 
+
+    ; temp holds pointer to ppu ram
+    lda #$00
+    sta temp 
+    lda #$20 
+    sta temp+1
+
+    ldx player_y 
+    lda tile_update_table_lo, x
+    clc 
+    adc player_x
+    sta level_ptr
+
+    lda tile_update_table_hi, x 
+    adc level_ptr+1
+    sta level_ptr+1
+
+    ; same calculation for ppu address
+    lda tile_update_table_lo, x
+    clc 
+    adc player_x
+    sta temp
+
+    lda tile_update_table_hi, x 
+    adc temp+1
+    sta temp+1
+
+    lda $2002 ; read PPU status to reset the high/low latch
+    lda temp+1 ; write temp to ppu as start address
+    sta $2006
+    lda temp
+    sta $2006 ; set up ppu for tile transfer
+
+    lda sprite_data+1
+    sta $2007 ; store in ppu
+    ldy #$00 
+    sta (level_ptr), y 
+
+    ; restore level_ptr 
+    pla 
+    sta level_ptr+1
+    pla 
+    sta level_ptr
+
+    lda #$00
+    sta $2005 ; no horizontal scroll 
+    sta $2005 ; no vertical scroll
+
     rts 
 
 ; TODO

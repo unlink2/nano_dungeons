@@ -33,9 +33,9 @@ temp 4 ; 4 bytes of universal temporary storage
 ; sprite memory
 .enum $0200
 sprite_data 256 ; all sprite data
+level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
-level_data LEVEL_SIZE ; copy of uncompressed level in ram
 .end 
 
 ; start of prg ram
@@ -112,9 +112,9 @@ load_palette_loop:
 
     ; set up test level
     ; TODO REMOVE
-    lda #<test_decompress
+    lda #<save_1
     sta level_data_ptr
-    lda #>test_decompress
+    lda #>save_1
     sta level_data_ptr+1
 
     lda #<level_data 
@@ -130,7 +130,7 @@ load_palette_loop:
     lda #>save_1
     sta level_data_ptr+1
 
-    jsr compress_level
+    ;jsr compress_level
 
     lda #<test_attr
     sta attr_ptr
@@ -214,7 +214,7 @@ input_handler:
     lda $4016 ; p1 - A
     and #%00000001 
     beq @no_a
-    ; TODO A button press
+    jsr a_input
 @no_a:
 
     lda $4016 ; p1 - B
@@ -232,7 +232,7 @@ input_handler:
     lda $4016 ; p1 - start
     and #%00000001
     beq @no_start 
-    ; TODO start button press
+    jsr start_input
 @no_start:
 
     lda $4016 ; p1 - up
@@ -282,8 +282,25 @@ can_select:
     lda select_delay
     rts 
 
+; a input
+; places the player's current tile at the player's current
+; location. only works in EDITOR_MODE
+a_input:
+    jsr can_select
+    bne @done
+    lda game_mode
+    cmp #GAME_MODE_EDITOR 
+    bne @done
+
+    lda #MOVE_DELAY_FRAMES
+    sta select_delay
+    jsr update_tile
+@done: 
+    rts
 
 ; select button input
+; select changes the players sprite index 
+; this is only temporary
 select_input:
     jsr can_select
     bne @done
@@ -296,6 +313,44 @@ select_input:
     ; change sprite 0s sprite index
     inc sprite_data+1
 @done: 
+    rts 
+
+; start button input
+; start button saves the 
+; current level to save_1 for now
+; this is only temporary
+start_input:
+    jsr can_select
+    bne @done
+    lda game_mode
+    cmp #GAME_MODE_EDITOR 
+    bne @done
+
+    lda #MOVE_DELAY_FRAMES
+    sta select_delay
+
+    ;lda #<save_1
+    ;sta level_data_ptr
+    ;lda #>save_1
+    ;sta level_data_ptr+1
+
+    ;lda #<level_data 
+    ;sta level_ptr 
+    ;lda #>level_data 
+    ;sta level_ptr+1
+
+    ; disable NMI, don't change other flags
+    ; NMI needs to be disabled 
+    ; to prevent it being called again
+    ; while compression is ongoing
+    lda $2000 
+    and #%01111111
+    sta $2000
+    jsr compress_level
+    lda $2000
+    ora #%10000000
+    sta $2000 ; enable NMI again
+@done:
     rts 
 
 ; left input
@@ -360,6 +415,21 @@ test_decompress:
 tile_convert_table:
 .mrep $FF
 .db (.ri.*8)
+.endrep
+
+; lookup table of the low byte 
+; for ppu updates for all possible player positions
+; this is for every possible y position
+tile_update_table_lo:
+.mrep 32 
+.db <(.ri.)*32
+.endrep 
+
+; counts the amounts of carrys that occur 
+; when calculating the tile's address
+tile_update_table_hi:
+.mrep 32 
+.db >((.ri.)*32)
 .endrep
 
 .pad $FFFA
