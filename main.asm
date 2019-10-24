@@ -2,7 +2,7 @@
 .db $4E, $45, $53, $1A, ; NES + MS-DOS EOF
 .db $01 ; prg rom size in 16kb 
 .db $01 ; chr rom in 8k bits
-.db $02 ; mapper 0 contains sram at $6000-$7FFF
+.db $03 ; mapper 0 contains sram at $6000-$7FFF
 .db $00 ; mirroring
 .db $00 ; no prg ram 
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
@@ -11,6 +11,7 @@
 .define GAME_MODE_MENU 0
 .define GAME_MODE_PUZZLE 1
 .define GAME_MODE_EDITOR 2
+.define GAME_MODE_EDITOR_MENU 3
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
@@ -28,6 +29,7 @@ level_data_ptr 2 ; pointer to rom/sram of level
 attr_ptr 2 ; points to the attributes for the current level
 level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
 temp 4 ; 4 bytes of universal temporary storage
+nametable 1 ; either 0 or 1 depending on which nametable is active
 .end 
 
 ; sprite memory
@@ -142,6 +144,10 @@ load_palette_loop:
     jsr load_level
     jsr load_attr
 
+    ; set up game mode for editor testing
+    lda GAME_MODE_EDITOR
+    sta game_mode
+
     ; end of test code 
     ; TODO REMOVE
 
@@ -180,9 +186,16 @@ nmi:
     lda #$00
     sta $2005 ; no horizontal scroll 
     sta $2005 ; no vertical scroll
-
+    
     ; inputs
     jsr input_handler
+
+    lda #%10000000   ; enable NMI, sprites from Pattern Table 0
+    ora nametable
+    sta $2000
+
+    lda #%00011110   ; enable sprites
+    sta $2001
 
     rti 
 
@@ -194,6 +207,10 @@ convert_tile_location:
     lda tile_convert_table, x 
     sec 
     sbc #$01
+    cmp #$FF ; if y location is FF we set it to 0
+    bne @not_ff
+    lda #$00
+@not_ff:
     sta sprite_data
 
     ldx player_x
@@ -288,13 +305,40 @@ can_select:
 a_input:
     jsr can_select
     bne @done
-    lda game_mode
-    cmp #GAME_MODE_EDITOR 
-    bne @done
 
     lda #MOVE_DELAY_FRAMES
     sta select_delay
+
+    lda game_mode
+    cmp #GAME_MODE_EDITOR 
+    bne @not_editor
     jsr update_tile
+    rts 
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @done
+    ;lda #<save_1
+    ;sta level_data_ptr
+    ;lda #>save_1
+    ;sta level_data_ptr+1
+
+    ;lda #<level_data 
+    ;sta level_ptr 
+    ;lda #>level_data 
+    ;sta level_ptr+1
+
+    ; disable NMI, don't change other flags
+    ; NMI needs to be disabled 
+    ; to prevent it being called again
+    ; while compression is ongoing
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+    jsr compress_level
+    ;lda $2000
+    ;ora #%10000000
+    ;sta $2000 ; enable NMI again
 @done: 
     rts
 
@@ -322,34 +366,38 @@ select_input:
 start_input:
     jsr can_select
     bne @done
-    lda game_mode
-    cmp #GAME_MODE_EDITOR 
-    bne @done
 
     lda #MOVE_DELAY_FRAMES
     sta select_delay
 
-    ;lda #<save_1
-    ;sta level_data_ptr
-    ;lda #>save_1
-    ;sta level_data_ptr+1
-
-    ;lda #<level_data 
-    ;sta level_ptr 
-    ;lda #>level_data 
-    ;sta level_ptr+1
-
-    ; disable NMI, don't change other flags
-    ; NMI needs to be disabled 
-    ; to prevent it being called again
-    ; while compression is ongoing
-    lda $2000 
-    and #%01111111
-    sta $2000
-    jsr compress_level
-    lda $2000
-    ora #%10000000
-    sta $2000 ; enable NMI again
+    ; decide what action to take
+    lda game_mode
+    cmp #GAME_MODE_MENU
+    bne @not_menu
+    ; TODO start puzzle
+    rts 
+@not_menu:
+    cmp #GAME_MODE_EDITOR
+    bne @not_editor
+    ; swap to menu and nametable 1
+    lda #GAME_MODE_EDITOR_MENU
+    sta game_mode
+    lda #$01
+    sta nametable
+    rts 
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+    ; sawp to editor mode and nt 0
+    lda #GAME_MODE_EDITOR
+    sta game_mode
+    lda #$00 
+    sta nametable
+    rts 
+@not_editor_menu:
+    cmp GAME_MODE_PUZZLE
+    bne @not_puzzle
+@not_puzzle:
 @done:
     rts 
 
@@ -357,19 +405,47 @@ start_input:
 go_left:
     jsr can_move
     bne @done
-    dec player_x
+
     lda #MOVE_DELAY_FRAMES
     sta move_delay
+
+    ; check gamemode
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @not_editor
+
+    lda #$00
+    cmp player_x ; dont allow underflow 
+    beq @no_dec
+
+    dec player_x
+@no_dec:
+    rts 
+@not_editor:
 @done:
     rts 
 
 ; right input
 go_right:
     jsr can_move
-    bne @done 
-    inc player_x
+    bne @done
+
     lda #MOVE_DELAY_FRAMES
     sta move_delay
+
+    ; check gamemode
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @not_editor
+
+    lda #$1F
+    cmp player_x ; dont allow overflow 
+    beq @no_inc
+
+    inc player_x
+@no_inc:
+    rts 
+@not_editor:
 @done:
     rts 
 
@@ -377,9 +453,29 @@ go_right:
 go_up:
     jsr can_move
     bne @done 
-    dec player_y
+
     lda #MOVE_DELAY_FRAMES
     sta move_delay
+
+    ; check gamemode
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @not_editor
+
+    lda #$00
+    cmp player_y ; dont allow underflow 
+    beq @no_dec
+
+    dec player_y
+@no_dec:
+    rts 
+
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+    ; if in editor menu we increment tile id
+    inc sprite_data+1
+@not_editor_menu:
 @done:
     rts 
 
@@ -387,9 +483,28 @@ go_up:
 go_down:
     jsr can_move
     bne @done
-    inc player_y
+
     lda #MOVE_DELAY_FRAMES
     sta move_delay
+
+    ; check gamemode
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @not_editor
+
+    lda #$1D
+    cmp player_y ; dont allow overflow 
+    beq @no_inc 
+
+    inc player_y
+@no_inc:
+    rts 
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+    ; if in editor menu we decrement tile id
+    dec sprite_data+1
+@not_editor_menu:
 @done: 
     rts 
 
