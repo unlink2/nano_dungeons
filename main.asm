@@ -345,6 +345,9 @@ a_input:
     sta level_data_ptr+1
     jmp @slot_slected
 @not_slot2:
+    ; new slot should not save, but instead is a debug feature that loads a map based on the selected tile id
+    cmp #$03 
+    beq @load_debug_map
 
     ; always pick slot 1 as default option
     lda #<save_1
@@ -371,6 +374,46 @@ a_input:
     ;sta $2000 ; enable NMI again
 @done: 
     rts
+
+@load_debug_map:
+    ldx #$00
+    stx $2001 ; disable rendering
+
+    ; select the map to load
+    ldx sprite_data_1+1 ; based on tile
+    lda map_table_lo, x
+    sta level_data_ptr
+    lda map_table_hi, x
+    sta level_data_ptr+1
+
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
+
+    ; disable NMI until load is complete
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    jsr decompress_level
+
+    lda #<test_attr
+    sta attr_ptr
+    lda #>test_attr
+    sta attr_ptr+1
+
+    ldx $00 ; nametable 0
+    jsr load_level
+
+    lda #GAME_MODE_EDITOR
+    sta game_mode
+    jsr init_editor
+    lda #$00
+    sta nametable
+
+    rts 
 
 ; b button input 
 ; b loads a map in editor menu
@@ -722,14 +765,43 @@ palette_data_end:
 
 ; compressed menu gfx
 editor_menu_gfx:
-.db $FF, $41, $24, $0E, $0D, $12, $1D, $24, $16, $0E, $17, 
-.db $1E, $FF, $98, $24, $1D, $12, $15, $0E, $FF, $3C, $24, 
-.db $1C, $15, $18, $1D, $01, $FF, $1B, $24, $1C, $15, $18, 
-.db $1D, $02, $FF, $1B, $24, $1C, $15, $18, $1D, $03, $FF, 
-.db $3B, $24, $17, $0E, $20, $FF, $3D, $24, $0A, $24, $1D, 
-.db $18, $24, $1C, $0A, $1F, $0E, $FF, $17, $24, $0B, $24, 
-.db $1D, $18, $24, $15, $18, $0A, $0D, $FF, $FF, $24, $FF, 
-.db $B6, $24, $FF, $00
+.db $FF, $20, $24, $27, $FF, $0A, $26, $2B, 
+.db $FF, $12, $26, $28, $24, $25, $0E, $0D, 
+.db $12, $1D, $24, $16, $0E, $17, $1E, $24, 
+.db $25, $FF, $12, $24, $25, $24, $2E, $FF, 
+.db $0A, $26, $2F, $FF, $12, $24, $25, $24, 
+.db $25, $FF, $0A, $24, $25, $FF, $12, $24, 
+.db $25, $24, $25, $FF, $0A, $24, $25, $FF, 
+.db $12, $24, $25, $24, $25, $FF, $0A, $24, 
+.db $25, $FF, $12, $24, $25, $24, $25, $24, 
+.db $1D, $12, $15, $0E, $FF, $05, $24, $25, 
+.db $FF, $12, $24, $25, $24, $2E, $FF, $0A, 
+.db $26, $2F, $FF, $12, $24, $25, $24, $25, 
+.db $24, $1C, $15, $18, $1D, $01, $FF, $04, 
+.db $24, $25, $FF, $12, $24, $25, $24, $25, 
+.db $24, $1C, $15, $18, $1D, $02, $FF, $04, 
+.db $24, $25, $FF, $12, $24, $25, $24, $25, 
+.db $24, $1C, $15, $18, $1D, $03, $FF, $04, 
+.db $24, $25, $FF, $12, $24, $25, $24, $2E, 
+.db $FF, $0A, $26, $2F, $FF, $12, $24, $25, 
+.db $24, $25, $24, $17, $0E, $20, $FF, $06, 
+.db $24, $25, $FF, $12, $24, $25, $24, $2E, 
+.db $FF, $0A, $26, $2F, $FF, $12, $24, $25, 
+.db $24, $25, $24, $0A, $24, $1D, $18, $24, 
+.db $1C, $0A, $1F, $0E, $25, $FF, $12, $24, 
+.db $25, $24, $25, $24, $0B, $24, $1D, $18, 
+.db $24, $15, $18, $0A, $0D, $25, $FF, $12, 
+.db $24, $25, $24, $2E, $FF, $0A, $26, $2A, 
+.db $FF, $12, $24, $25, $24, $25, $FF, $1D, 
+.db $24, $25, $24, $25, $FF, $1D, $24, $25, 
+.db $24, $25, $FF, $1D, $24, $25, $24, $25, 
+.db $FF, $1D, $24, $25, $24, $25, $FF, $1D, 
+.db $24, $25, $24, $25, $FF, $1D, $24, $25, 
+.db $24, $25, $FF, $1D, $24, $25, $24, $25, 
+.db $FF, $1D, $24, $25, $24, $25, $FF, $1D, 
+.db $24, $25, $24, $25, $FF, $1D, $24, $25, 
+.db $24, $29, $FF, $1D, $26, $2A, $FF, $21, 
+.db $24, $FF, $00
 
 ; an empty map
 ; $24 being an empty tile (bg only)
@@ -769,6 +841,15 @@ tile_update_table_hi:
 .mrep 32 
 .db >((.ri.)*32)
 .endrep
+
+; table of pointers to map entries
+map_table_lo:
+.db #<empty_map
+.db #<editor_menu_gfx
+
+map_table_hi:
+.db #>empty_map
+.db #>editor_menu_gfx
 
 .pad $FFFA
 .dw nmi ; nmi
