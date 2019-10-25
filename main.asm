@@ -20,6 +20,7 @@
 .define EDITOR_MENU_MAX_SELECT 3
 
 .define ATTRIBUTES $1
+.define PALETTES $1
 
 .enum $00
 frame_count 1
@@ -527,20 +528,19 @@ select_input:
     ora nametable ; display the correct nametable to avoid flickering
     sta $2000
 
-    ldx attributes
+    ldx palette
     inx 
     txa 
-    and #ATTRIBUTES
-    sta attributes
+    and #PALETTES
+    sta palette
     tax 
 
-    lda attr_table_lo, x 
-    sta attr_ptr
-    lda attr_table_hi, x
-    sta attr_ptr+1
+    lda palette_table_lo, x 
+    sta palette_ptr
+    lda palette_table_hi, x
+    sta palette_ptr+1
 
-    ldx #$00
-    jsr load_attr
+    jsr load_palette
 @done: 
     rts 
 
