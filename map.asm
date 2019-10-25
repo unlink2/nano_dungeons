@@ -220,6 +220,42 @@ compress_level:
     sta level_data_ptr+1
     rts 
 
+; this sub routine saves attributes from ppu
+; memory to 
+; a location pointed to by attr_ptr
+; inputs:
+;   attr_ptr -> pointing to attribute destination
+;   x -> the nametable
+; side effects:
+;   registers and flags are modified
+write_attr:
+    lda #$00
+    sta $2002 ; read PPU status to reset the high/low latch
+    lda #$23 ; write $23C0 to ppu as start address
+
+    cpx #$01
+    bne @no_add 
+    ; if x is 0 do not add, if 1 nt1 is needed
+    clc 
+    adc #$04
+
+@no_add:
+    sta $2006
+    lda #$C0
+    sta $2006 ; set up ppu for attribute transfer
+
+    ldy #$00
+@attr_loop:
+    lda $2007 
+    sta (attr_ptr), y ; transfer
+    iny 
+    cpy #ATTR_SIZE
+    bne @attr_loop
+
+    rts 
+
+    rts 
+
 ; sub routine that writes compressed data to output pointer
 ; inputs:
 ;   level_ptr -> the output ptr, gets incremented

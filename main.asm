@@ -40,6 +40,9 @@ update_sub 2 ; ptr to sub routine called for updates, must jmp to update_done la
 attributes 1 ; colors used, index of address table
 palette 1 ; selected palette
 palette_ptr 2 ; pointer to current palette
+
+src_ptr 2 ; source pointer for various subs
+dest_ptr 2 ; destination pointer
 .end 
 
 ; sprite memory
@@ -63,8 +66,13 @@ player_y_bac 1 ; backup location
 ; compression will still be applied however.
 .enum $6000 
 save_1 SAVE_SIZE ; saveslot 1
+attr_1 ATTR_SIZE
+
 save_2 SAVE_SIZE ; saveslot 2
+attr_2 ATTR_SIZE
+
 save_3 SAVE_SIZE ; saveslot 3
+attr_3 ATTR_SIZE
 .end 
 
 .macro @vblank_wait
@@ -338,6 +346,12 @@ a_input:
     sta level_data_ptr
     lda #>save_3
     sta level_data_ptr+1
+
+    lda #<attr_3
+    sta attr_ptr
+    lda #>attr_3 
+    sta attr_ptr+1
+
     jmp @slot_slected
 @not_slot3:
 
@@ -348,6 +362,12 @@ a_input:
     sta level_data_ptr
     lda #>save_2
     sta level_data_ptr+1
+
+    lda #<attr_2
+    sta attr_ptr
+    lda #>attr_2 
+    sta attr_ptr+1
+
     jmp @slot_slected
 @not_slot2:
     ; new slot should not save, but instead is a debug feature that loads a map based on the selected tile id
@@ -359,7 +379,16 @@ a_input:
     sta level_data_ptr
     lda #>save_1
     sta level_data_ptr+1
+
+    lda #<attr_1
+    sta attr_ptr
+    lda #>attr_1 
+    sta attr_ptr+1
+
 @slot_slected:
+    lda #$00
+    sta $2001 ; disable rendering
+
     lda #<level_data 
     sta level_ptr 
     lda #>level_data 
@@ -374,6 +403,9 @@ a_input:
     ora nametable ; display the correct nametable to avoid flickering
     sta $2000
     jsr compress_level
+
+    ldx #$00
+    jsr write_attr
     ;lda $2000
     ;ora #%10000000
     ;sta $2000 ; enable NMI again
@@ -391,6 +423,11 @@ a_input:
     lda map_table_hi, x
     sta level_data_ptr+1
 
+    lda attr_table_lo
+    sta attr_ptr
+    lda attr_table_hi
+    sta attr_ptr+1
+
     lda #<level_data 
     sta level_ptr 
     lda #>level_data 
@@ -404,13 +441,9 @@ a_input:
 
     jsr decompress_level
 
-    lda #<test_attr
-    sta attr_ptr
-    lda #>test_attr
-    sta attr_ptr+1
-
     ldx $00 ; nametable 0
     jsr load_level
+    jsr load_attr
 
     lda #GAME_MODE_EDITOR
     sta game_mode
@@ -425,7 +458,9 @@ a_input:
 b_input:
     lda game_mode
     cmp #GAME_MODE_EDITOR_MENU
-    bne @not_editor_menu
+    beq @editor_menu
+    jmp @not_editor_menu ; branch was out of range qq
+@editor_menu:
 
     lda menu_select
     cmp #$03
@@ -436,6 +471,12 @@ b_input:
     sta level_data_ptr
     lda #>empty_map
     sta level_data_ptr+1
+
+    lda #<test_attr
+    sta attr_ptr
+    lda #>test_attr
+    sta attr_ptr+1
+
     jmp @slot_selected
 @not_new_map:    
 
@@ -446,6 +487,12 @@ b_input:
     sta level_data_ptr
     lda #>save_2
     sta level_data_ptr+1
+
+    lda #<attr_2
+    sta attr_ptr
+    lda #>attr_2 
+    sta attr_ptr+1
+
     jmp @slot_selected
 @not_slot2:
 
@@ -456,6 +503,12 @@ b_input:
     sta level_data_ptr
     lda #>save_3
     sta level_data_ptr+1
+
+    lda #<attr_3
+    sta attr_ptr
+    lda #>attr_3 
+    sta attr_ptr+1
+
     jmp @slot_selected
     ; set up for load
 @not_slot3:
@@ -464,6 +517,11 @@ b_input:
     sta level_data_ptr
     lda #>save_1
     sta level_data_ptr+1
+
+    lda #<attr_1
+    sta attr_ptr
+    lda #>attr_1 
+    sta attr_ptr+1
 @slot_selected:
     ldx #$00
     stx $2001 ; disable rendering
@@ -481,13 +539,9 @@ b_input:
 
     jsr decompress_level
 
-    lda #<test_attr
-    sta attr_ptr
-    lda #>test_attr
-    sta attr_ptr+1
-
     ldx $00 ; nametable 0
     jsr load_level
+    jsr load_attr
 
     lda #GAME_MODE_EDITOR
     sta game_mode
