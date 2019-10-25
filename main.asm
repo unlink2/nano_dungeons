@@ -17,6 +17,8 @@
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
 .define ATTR_SIZE 60 ; uncompressed attr size
 
+.define EDITOR_MENU_MAX_SELECT 3
+
 .enum $00
 frame_count 1
 rand8 1
@@ -30,14 +32,20 @@ attr_ptr 2 ; points to the attributes for the current level
 level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
 temp 4 ; 4 bytes of universal temporary storage
 nametable 1 ; either 0 or 1 depending on which nametable is active
+menu_select 1 ; cursor location in menu
+update_sub 2 ; ptr to sub routine called for updates, must jmp to update_done label when finished
 .end 
 
 ; sprite memory
 .enum $0200
-sprite_data 256 ; all sprite data
+sprite_data 4 ; all sprite data
+sprite_data_1 4 ; sprite 2
+sprite_data_pad 248 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
+player_x_bac 1 ; backup location 
+player_y_bac 1 ; backup location
 .end 
 
 ; start of prg ram
@@ -109,14 +117,22 @@ load_palette_loop:
     bne load_palette_loop 
 
     ; set up game mode for editor for now
-    lda #GAME_MODE_EDITOR 
+    lda #GAME_MODE_EDITOR_MENU 
     sta game_mode
 
-    ; set up test level
-    ; TODO REMOVE
-    lda #<save_1
+    lda #$01 
+    sta nametable
+
+    ; load editor menu
+    ldx #GAME_MODE_EDITOR_MENU
+    jsr load_menu
+
+    jsr init_editor_menu
+
+    ; set up empty
+    lda #<empty_map
     sta level_data_ptr
-    lda #>save_1
+    lda #>empty_map
     sta level_data_ptr+1
 
     lda #<level_data 
@@ -126,30 +142,19 @@ load_palette_loop:
 
     jsr decompress_level
 
-    ; test compression
-    lda #<save_1
-    sta level_data_ptr
-    lda #>save_1
-    sta level_data_ptr+1
-
-    ;jsr compress_level
 
     lda #<test_attr
     sta attr_ptr
     lda #>test_attr
     sta attr_ptr+1
 
-    ; jsr clear_level
-
+    ldx #$00 ; nametable 0
     jsr load_level
     jsr load_attr
 
     ; set up game mode for editor testing
     lda GAME_MODE_EDITOR
     sta game_mode
-
-    ; end of test code 
-    ; TODO REMOVE
 
 start:
     lda #%10000000   ; enable NMI, sprites from Pattern Table 0
@@ -197,7 +202,8 @@ nmi:
     lda #%00011110   ; enable sprites
     sta $2001
 
-    rti 
+    jmp (update_sub) ; jump to specific update sub routine
+update_done: rti 
 
 ; sub routine that converts the sprite's 
 ; tile position to an actual 
@@ -237,7 +243,7 @@ input_handler:
     lda $4016 ; p1 - B
     and #%00000001
     beq @no_b
-    ; TODO B button press
+    jsr b_input
 @no_b:
 
     lda $4016 ; p1 - select
@@ -317,15 +323,39 @@ a_input:
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @done
-    ;lda #<save_1
-    ;sta level_data_ptr
-    ;lda #>save_1
-    ;sta level_data_ptr+1
 
-    ;lda #<level_data 
-    ;sta level_ptr 
-    ;lda #>level_data 
-    ;sta level_ptr+1
+    ; set up the right pointers for data write
+    ; save slot is based on menu select
+    lda menu_select
+    cmp #$02 
+    bne @not_slot3
+    lda #<save_3
+    sta level_data_ptr
+    lda #>save_3
+    sta level_data_ptr+1
+    jmp @slot_slected
+@not_slot3:
+
+    cmp #$01 
+    bne @not_slot2
+
+    lda #<save_2
+    sta level_data_ptr
+    lda #>save_2
+    sta level_data_ptr+1
+    jmp @slot_slected
+@not_slot2:
+
+    ; always pick slot 1 as default option
+    lda #<save_1
+    sta level_data_ptr
+    lda #>save_1
+    sta level_data_ptr+1
+@slot_slected:
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
 
     ; disable NMI, don't change other flags
     ; NMI needs to be disabled 
@@ -341,6 +371,85 @@ a_input:
     ;sta $2000 ; enable NMI again
 @done: 
     rts
+
+; b button input 
+; b loads a map in editor menu
+b_input:
+    lda game_mode
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+
+    lda menu_select
+    cmp #$03
+    bne @not_new_map
+
+
+    lda #<empty_map
+    sta level_data_ptr
+    lda #>empty_map
+    sta level_data_ptr+1
+    jmp @slot_selected
+@not_new_map:    
+
+    cmp #$01
+    bne @not_slot2
+
+    lda #<save_2
+    sta level_data_ptr
+    lda #>save_2
+    sta level_data_ptr+1
+    jmp @slot_selected
+@not_slot2:
+
+    cmp #$02
+    bne @not_slot3
+
+    lda #<save_3
+    sta level_data_ptr
+    lda #>save_3
+    sta level_data_ptr+1
+    jmp @slot_selected
+    ; set up for load
+@not_slot3:
+    ; otherwise it is slot 1
+    lda #<save_1
+    sta level_data_ptr
+    lda #>save_1
+    sta level_data_ptr+1
+@slot_selected:
+    ldx #$00
+    stx $2001 ; disable rendering
+
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
+
+    ; disable NMI until load is complete
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    jsr decompress_level
+
+    lda #<test_attr
+    sta attr_ptr
+    lda #>test_attr
+    sta attr_ptr+1
+
+    ldx $00 ; nametable 0
+    jsr load_level
+
+    lda #GAME_MODE_EDITOR
+    sta game_mode
+    jsr init_editor
+    lda #$00
+    sta nametable
+
+@not_editor_menu:
+@done:
+    rts 
 
 ; select button input
 ; select changes the players sprite index 
@@ -384,6 +493,9 @@ start_input:
     sta game_mode
     lda #$01
     sta nametable
+
+    jsr init_editor_menu
+
     rts 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
@@ -393,6 +505,9 @@ start_input:
     sta game_mode
     lda #$00 
     sta nametable
+
+    jsr init_editor
+
     rts 
 @not_editor_menu:
     cmp GAME_MODE_PUZZLE
@@ -422,6 +537,11 @@ go_left:
 @no_dec:
     rts 
 @not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+    ; if in editor menu we decrement tile id
+    dec sprite_data_1+1
+@not_editor_menu
 @done:
     rts 
 
@@ -446,6 +566,11 @@ go_right:
 @no_inc:
     rts 
 @not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+    ; if in editor menu we increment tile id
+    inc sprite_data_1+1
+@not_editor_menu
 @done:
     rts 
 
@@ -473,8 +598,8 @@ go_up:
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
-    ; if in editor menu we increment tile id
-    inc sprite_data+1
+
+    dec menu_select
 @not_editor_menu:
 @done:
     rts 
@@ -502,12 +627,90 @@ go_down:
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
-    ; if in editor menu we decrement tile id
-    dec sprite_data+1
+
+    inc menu_select
 @not_editor_menu:
 @done: 
     rts 
 
+
+init_editor_menu:
+    ; backup player's location and
+    ; move to cursor position
+    lda player_x 
+    sta player_x_bac
+    lda player_y
+    sta player_y_bac
+
+    lda #$01 
+    sta player_x
+    lda #$09 
+    sta player_y
+
+    ; more sprite 1 to tile select location
+    lda #$37
+    sta sprite_data_1
+    lda #$38
+    sta sprite_data_1+3
+
+    ; set the tile select's tile index
+    lda sprite_data+1 
+    sta sprite_data_1+1
+
+    lda #<update_editor_menu
+    sta update_sub
+    lda #>update_editor_menu
+    sta update_sub+1
+
+    rts 
+
+init_editor:
+    ; restore player's location
+    lda player_x_bac
+    sta player_x
+    lda player_y_bac
+    sta player_y
+
+    ; set the tile select's tile index
+    lda sprite_data_1+1 
+    sta sprite_data+1
+
+    ; hide other sprite offscreen
+    lda #$00 
+    sta sprite_data_1
+    sta sprite_data_1+3
+
+    lda #<update_editor
+    sta update_sub
+    lda #>update_editor
+    sta update_sub+1
+
+    rts 
+
+; update sub routine for editor menu
+update_editor_menu:
+    lda menu_select
+    and #EDITOR_MENU_MAX_SELECT ; only 3 possible options
+    sta menu_select
+
+    ; set sprite at correct position 
+    lda #$09 
+    clc 
+    adc menu_select
+    sta player_y
+
+    ; if menu select is at 3 we inc once more to get the desired value
+    ; for the correct offset to display 'new'
+    lda menu_select
+    cmp #EDITOR_MENU_MAX_SELECT 
+    bne @done
+    inc player_y
+@done:
+    jmp update_done
+
+; update sub routne for editor
+update_editor:
+    jmp update_done
 
 
 .include "./map.asm"
@@ -516,6 +719,26 @@ palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
 .db $0F,$1C,$15,$14,$0F,$02,$38,$3C,$0F,$1C,$15,$14,$0F,$02,$38,$3C  ;sprite palette data
 palette_data_end:
+
+; compressed menu gfx
+editor_menu_gfx:
+.db $FF, $41, $24, $0E, $0D, $12, $1D, $24, $16, $0E, $17, 
+.db $1E, $FF, $98, $24, $1D, $12, $15, $0E, $FF, $3C, $24, 
+.db $1C, $15, $18, $1D, $01, $FF, $1B, $24, $1C, $15, $18, 
+.db $1D, $02, $FF, $1B, $24, $1C, $15, $18, $1D, $03, $FF, 
+.db $3B, $24, $17, $0E, $20, $FF, $3D, $24, $0A, $24, $1D, 
+.db $18, $24, $1C, $0A, $1F, $0E, $FF, $17, $24, $0B, $24, 
+.db $1D, $18, $24, $15, $18, $0A, $0D, $FF, $FF, $24, $FF, 
+.db $B6, $24, $FF, $00
+
+; an empty map
+; $24 being an empty tile (bg only)
+empty_map:
+.db $FF, $FF, $24
+.db $FF, $FF, $24
+.db $FF, $FF, $24
+.db $FF, $C3, $24
+.db $FF, $00
 
 test_attr:
 .mrep 60

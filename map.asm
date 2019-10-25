@@ -265,9 +265,18 @@ write_compressed_data:
 ; this sub routine loads all attributes for NT1
 ; inputs:
 ;   attr_ptr -> pointing to attributes
+;   x -> decides start address based on nametable 
 load_attr:
     lda $2002 ; read PPU status to reset the high/low latch
     lda #$23 ; write $23C0 to ppu as start address
+
+    cpx #$01
+    bne @no_add 
+    ; if x is 0 do not add, if 1 nt1 is needed
+    clc 
+    adc #$04
+
+@no_add:
     sta $2006
     lda #$C0
     sta $2006 ; set up ppu for attribute transfer
@@ -282,12 +291,21 @@ load_attr:
 
     rts 
 
+
 ; this sub routine loads a level into NT1
 ; inputs:
 ;   level_ptr -> pointing to level data
+;   x -> decides the start address based on nametable
 load_level:
     lda $2002 ; read PPU status to reset the high/low latch
-    lda #$20 ; write $2000 to ppu as start address
+
+    lda #$20  ; $2000 = start of ppu address
+    cpx #$01
+    bne @no_add
+    ; if nt is 0 we dont need to change the address
+    clc 
+    adc #$04 ; add 4 to get start address of nt1
+@no_add:
     sta $2006
     lda #$00
     sta $2006 ; set up ppu for level transfer
@@ -315,6 +333,38 @@ load_level:
     cpy #$C3
     bne @load_level_loop 
 
+    rts 
+
+; loads menu background into nametable 1
+; inputs:
+;   x -> menu type (same as game mode), sets up level_ptr
+; side effects:
+;   changes registers
+;   overwrites level_ptr with a menu
+;   changes level data to menu (since it decompresses the level itself)
+;       therefore it should always be called before loading an actual level!
+load_menu:
+    cpx #GAME_MODE_EDITOR_MENU
+    bne @invalid_menu
+
+    ; load editor menu compressed tiles
+    lda #<editor_menu_gfx
+    sta level_data_ptr
+    lda #>editor_menu_gfx
+    sta level_data_ptr+1
+
+    ; decompress location, same as level
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
+
+    jsr decompress_level
+
+    ldx #$01 ; load into nametable 1
+    jsr load_level
+
+@invalid_menu:
     rts 
 
 ; increments level ptr by FF
