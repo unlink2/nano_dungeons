@@ -15,9 +15,11 @@
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
-.define ATTR_SIZE 60 ; uncompressed attr size
+.define ATTR_SIZE 64 ; uncompressed attr size
 
 .define EDITOR_MENU_MAX_SELECT 3
+
+.define ATTRIBUTES $1
 
 .enum $00
 frame_count 1
@@ -34,6 +36,9 @@ temp 4 ; 4 bytes of universal temporary storage
 nametable 1 ; either 0 or 1 depending on which nametable is active
 menu_select 1 ; cursor location in menu
 update_sub 2 ; ptr to sub routine called for updates, must jmp to update_done label when finished
+attributes 1 ; colors used, index of address table
+palette 1 ; selected palette
+palette_ptr 2 ; pointer to current palette
 .end 
 
 ; sprite memory
@@ -100,21 +105,15 @@ clear_mem:
 
     @vblank_wait
 
-load_palette:
-    ; sets up ppu for palette transfer
-    lda $2002 ; read PPU status to reset the high/low latch to high
-    lda #$3F
-    sta $2006
-    lda #$10
-    sta $2006
+    ; set up palette pointer
+    ldx palette 
+    lda palette_table_lo, x 
+    sta palette_ptr 
+    lda palette_table_hi, x 
+    sta palette_ptr+1
 
-    ldx #$00 
-load_palette_loop:
-    lda palette_data, x 
-    sta $2007 ; write to PPU
-    inx 
-    cpx #palette_data_end-palette_data
-    bne load_palette_loop 
+    jsr load_palette
+
 
     ; set up game mode for editor for now
     lda #GAME_MODE_EDITOR_MENU 
@@ -147,10 +146,10 @@ load_palette_loop:
 
     jsr decompress_level
 
-
-    lda #<test_attr
+    ldx attributes
+    lda attr_table_lo, x 
     sta attr_ptr
-    lda #>test_attr
+    lda attr_table_hi, x
     sta attr_ptr+1
 
     ldx #$00 ; nametable 0
@@ -505,14 +504,43 @@ b_input:
 select_input:
     jsr can_select
     bne @done
-    lda game_mode
-    cmp #GAME_MODE_EDITOR 
-    bne @done
 
     lda #MOVE_DELAY_FRAMES
     sta select_delay
+
+    lda game_mode
+    cmp #GAME_MODE_EDITOR 
+    bne @not_editor
+
     ; change sprite 0s sprite index
     inc sprite_data+1
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @done
+
+    ldx #$00
+    stx $2001 ; disable rendering
+
+    ; disable NMI until load is complete
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    ldx attributes
+    inx 
+    txa 
+    and #ATTRIBUTES
+    sta attributes
+    tax 
+
+    lda attr_table_lo, x 
+    sta attr_ptr
+    lda attr_table_hi, x
+    sta attr_ptr+1
+
+    ldx #$00
+    jsr load_attr
 @done: 
     rts 
 
@@ -822,7 +850,7 @@ empty_map:
 .db $FF, $00
 
 test_attr:
-.mrep 60
+.mrep 64
 .db 0
 .endrep
 
@@ -859,6 +887,17 @@ map_table_lo:
 map_table_hi:
 .db #>empty_map
 .db #>editor_menu_gfx
+
+; color palette lookup table
+attr_table_lo:
+.db #<test_attr
+attr_table_hi:
+.db #>test_attr
+
+palette_table_lo:
+.db #<palette_data
+palette_table_hi:
+.db #>palette_data
 
 .pad $FFFA
 .dw nmi ; nmi

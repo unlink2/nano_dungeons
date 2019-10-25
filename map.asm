@@ -291,6 +291,29 @@ load_attr:
 
     rts 
 
+; this sub routine loads a color palette
+; inputs:
+;   palette_ptr -> ptr to palette
+; side effects:
+;   modifies registers and flags
+load_palette:
+    ; sets up ppu for palette transfer
+    lda $2002 ; read PPU status to reset the high/low latch to high
+    lda #$3F
+    sta $2006
+    lda #$10
+    sta $2006
+
+    ldy #$00 
+load_palette_loop:
+    lda (palette_ptr), y 
+    sta $2007 ; write to PPU
+    iny 
+    cpy #palette_data_end-palette_data
+    bne load_palette_loop 
+
+    rts 
+
 
 ; this sub routine loads a level into NT1
 ; inputs:
