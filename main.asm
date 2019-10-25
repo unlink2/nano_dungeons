@@ -127,6 +127,11 @@ load_palette_loop:
     ldx #GAME_MODE_EDITOR_MENU
     jsr load_menu
 
+    ; position editor sprite
+    lda #$04
+    sta player_x
+    sta player_y
+
     jsr init_editor_menu
 
     ; set up empty
@@ -690,11 +695,15 @@ init_editor_menu:
     lda #$09 
     sta player_y
 
-    ; more sprite 1 to tile select location
+    ; move sprite 1 to tile select location
     lda #$37
     sta sprite_data_1
     lda #$38
     sta sprite_data_1+3
+
+    lda #$00
+    sta sprite_data_1+1
+    sta sprite_data_1+2
 
     ; set the tile select's tile index
     lda sprite_data+1 
