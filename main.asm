@@ -17,10 +17,17 @@
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
 .define ATTR_SIZE 64 ; uncompressed attr size
 
-.define EDITOR_MENU_MAX_SELECT 3
+.define EDITOR_MENU_MAX_SELECT 7
 
 .define ATTRIBUTES $1
 .define PALETTES $1
+
+.define EDITOR_MENU_SAVE1 0
+.define EDITOR_MENU_SAVE2 1
+.define EDITOR_MENU_SAVE3 2
+.define EDITOR_MENU_NEW 3
+.define EDITOR_MENU_TILE 4
+.define EDITOR_MENU_ATTR 5
 
 .enum $00
 frame_count 1
@@ -383,7 +390,7 @@ a_input:
     ; set up the right pointers for data write
     ; save slot is based on menu select
     lda menu_select
-    cmp #$02 
+    cmp #EDITOR_MENU_SAVE3
     bne @not_slot3
     lda #<save_3
     sta level_data_ptr
@@ -398,7 +405,7 @@ a_input:
     jmp @slot_slected
 @not_slot3:
 
-    cmp #$01 
+    cmp #EDITOR_MENU_SAVE2
     bne @not_slot2
 
     lda #<save_2
@@ -414,9 +421,14 @@ a_input:
     jmp @slot_slected
 @not_slot2:
     ; new slot should not save, but instead is a debug feature that loads a map based on the selected tile id
-    cmp #$03 
+    cmp #EDITOR_MENU_NEW
     beq @load_debug_map
 
+    cmp #EDITOR_MENU_SAVE1
+    beq @slot_1 
+    rts 
+
+@slot_1:
     ; always pick slot 1 as default option
     lda #<save_1
     sta level_data_ptr
@@ -506,7 +518,7 @@ b_input:
 @editor_menu:
 
     lda menu_select
-    cmp #$03
+    cmp #EDITOR_MENU_NEW
     bne @not_new_map
 
 
@@ -523,7 +535,7 @@ b_input:
     jmp @slot_selected
 @not_new_map:    
 
-    cmp #$01
+    cmp #EDITOR_MENU_SAVE2
     bne @not_slot2
 
     lda #<save_2
@@ -539,7 +551,7 @@ b_input:
     jmp @slot_selected
 @not_slot2:
 
-    cmp #$02
+    cmp #EDITOR_MENU_SAVE3
     bne @not_slot3
 
     lda #<save_3
@@ -556,6 +568,10 @@ b_input:
     ; set up for load
 @not_slot3:
     ; otherwise it is slot 1
+    cmp #EDITOR_MENU_SAVE1
+    beq @slot_1
+    rts 
+@slot_1:    
     lda #<save_1
     sta level_data_ptr
     lda #>save_1
@@ -727,7 +743,23 @@ go_left:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
     ; if in editor menu we decrement tile id
-    dec sprite_data_1+1
+    lda menu_select
+    cmp #EDITOR_MENU_TILE
+    bne @not_tile_select
+
+    ldx sprite_data_1+1
+    dex 
+    ;check for invalid values
+    cpx #$FF 
+    bne @not_invalid
+    ldx #$FE 
+@not_invalid:
+    stx sprite_data_1+1
+    rts 
+    
+@not_tile_select:
+    cmp #EDITOR_MENU_ATTR
+    bne @done 
     dec attr_value
 @not_editor_menu
 @done:
@@ -757,7 +789,24 @@ go_right:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
     ; if in editor menu we increment tile id
-    inc sprite_data_1+1
+    ; check cursor positon
+    lda menu_select
+    cmp #EDITOR_MENU_TILE
+    bne @not_tile_select
+    ; increment sprite location
+    ldx sprite_data_1+1
+    inx 
+    ; check for invalid value
+    cpx #$FF 
+    bne @not_invalid
+    ldx #$00
+@not_invalid:
+    stx sprite_data_1+1
+    rts 
+@not_tile_select:
+    cmp #EDITOR_MENU_ATTR
+    bne @done
+    ; increment attr value
     inc attr_value
 @not_editor_menu
 @done:
@@ -837,7 +886,7 @@ init_editor_menu:
     sta player_y
 
     ; move sprite 1 to tile select location
-    lda #$37
+    lda #$77
     sta sprite_data_1
     lda #$38
     sta sprite_data_1+3
@@ -912,17 +961,12 @@ update_editor_menu:
     sta menu_select
 
     ; set sprite at correct position 
-    lda #$09 
-    clc 
-    adc menu_select
-    sta player_y
+    tax 
+    lda editor_menu_cursor_x, x 
+    sta player_x
 
-    ; if menu select is at 3 we inc once more to get the desired value
-    ; for the correct offset to display 'new'
-    lda menu_select
-    cmp #EDITOR_MENU_MAX_SELECT 
-    bne @done
-    inc player_y
+    lda editor_menu_cursor_y, x 
+    sta player_y
 @done:
     jmp update_done
 
@@ -940,43 +984,22 @@ palette_data_end:
 
 ; compressed menu gfx
 editor_menu_gfx:
-.db $FF, $20, $24, $27, $FF, $0A, $26, $2B, 
-.db $FF, $12, $26, $28, $24, $25, $0E, $0D, 
-.db $12, $1D, $24, $16, $0E, $17, $1E, $24, 
-.db $25, $FF, $12, $24, $25, $24, $2E, $FF, 
-.db $0A, $26, $2F, $FF, $12, $24, $25, $24, 
-.db $25, $FF, $0A, $24, $25, $FF, $12, $24, 
-.db $25, $24, $25, $FF, $0A, $24, $25, $FF, 
-.db $12, $24, $25, $24, $25, $FF, $0A, $24, 
-.db $25, $FF, $12, $24, $25, $24, $25, $24, 
-.db $1D, $12, $15, $0E, $FF, $05, $24, $25, 
-.db $FF, $12, $24, $25, $24, $2E, $FF, $0A, 
-.db $26, $2F, $FF, $12, $24, $25, $24, $25, 
-.db $24, $1C, $15, $18, $1D, $01, $FF, $04, 
-.db $24, $25, $FF, $12, $24, $25, $24, $25, 
-.db $24, $1C, $15, $18, $1D, $02, $FF, $04, 
-.db $24, $25, $FF, $12, $24, $25, $24, $25, 
-.db $24, $1C, $15, $18, $1D, $03, $FF, $04, 
-.db $24, $25, $FF, $12, $24, $25, $24, $2E, 
-.db $FF, $0A, $26, $2F, $FF, $12, $24, $25, 
-.db $24, $25, $24, $17, $0E, $20, $FF, $06, 
-.db $24, $25, $FF, $12, $24, $25, $24, $2E, 
-.db $FF, $0A, $26, $2F, $FF, $12, $24, $25, 
-.db $24, $25, $24, $0A, $24, $1D, $18, $24, 
-.db $1C, $0A, $1F, $0E, $25, $FF, $12, $24, 
-.db $25, $24, $25, $24, $0B, $24, $1D, $18, 
-.db $24, $15, $18, $0A, $0D, $25, $FF, $12, 
-.db $24, $25, $24, $2E, $FF, $0A, $26, $2A, 
-.db $FF, $12, $24, $25, $24, $25, $FF, $1D, 
-.db $24, $25, $24, $25, $FF, $1D, $24, $25, 
-.db $24, $25, $FF, $1D, $24, $25, $24, $25, 
-.db $FF, $1D, $24, $25, $24, $25, $FF, $1D, 
-.db $24, $25, $24, $25, $FF, $1D, $24, $25, 
-.db $24, $25, $FF, $1D, $24, $25, $24, $25, 
-.db $FF, $1D, $24, $25, $24, $25, $FF, $1D, 
-.db $24, $25, $24, $25, $FF, $1D, $24, $25, 
-.db $24, $29, $FF, $1D, $26, $2A, $FF, $21, 
-.db $24, $FF, $00
+.incbin "./editor.gfx"
+
+; x and y locations for cursor in editor menu
+editor_menu_cursor_x:
+.db #$01 ; location save 1
+.db #$01 ; save 2
+.db #$01 ; save 3
+.db #$01 ; new 
+.db #$01 ; tile select
+
+editor_menu_cursor_y:
+.db #$09
+.db #$0A
+.db #$0B
+.db #$0D
+.db #$0F
 
 ; an empty map
 ; $24 being an empty tile (bg only)
