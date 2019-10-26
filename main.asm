@@ -49,12 +49,16 @@ dest_ptr 2 ; destination pointer
 .enum $0200
 sprite_data 4 ; all sprite data
 sprite_data_1 4 ; sprite 2
-sprite_data_pad 248 ; remainder, unused as of now
+sprite_data_2 4 ; sprite 3
+sprite_data_3 4 ; sprite 4
+sprite_data_4 4 ; sprite 5
+sprite_data_pad 236 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
 player_x_bac 1 ; backup location 
 player_y_bac 1 ; backup location
+attr_value 1 ; value used for attribute painting
 .end 
 
 ; start of prg ram
@@ -237,6 +241,45 @@ convert_tile_location:
     clc 
     adc #$00
     sta sprite_data+3
+
+    ; check game mode
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @done
+
+    ; if editor mode also update sprites 1-5
+    ldx player_y
+    lda attr_convert_table, x
+    tax 
+    lda tile_convert_table, x
+    sec 
+    sbc #$01 
+    cmp #$FF 
+    bne @not_ff_editor
+    lda #$00
+@not_ff_editor:
+
+    sta sprite_data_1
+    sta sprite_data_2
+
+    clc 
+    adc #$8*3
+    sta sprite_data_3
+    sta sprite_data_4
+
+    ldx player_x
+    lda attr_convert_table, x
+    tax 
+    lda tile_convert_table, x
+    sta sprite_data_1+3
+    sta sprite_data_3+3
+
+    clc 
+    adc #$8*3
+    sta sprite_data_2+3 
+    sta sprite_data_4+3
+
+@done:
     rts 
 
 ; handles all inputs
@@ -550,6 +593,20 @@ b_input:
     sta nametable
 
 @not_editor_menu:
+    cmp #GAME_MODE_EDITOR   
+    bne @done
+
+    ldx #$00
+    stx $2001 ; disable rendering
+
+    ; disable NMI until paint is complete
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    ; editor mode
+    jsr update_attr
 @done:
     rts 
 
@@ -671,6 +728,7 @@ go_left:
     bne @not_editor_menu
     ; if in editor menu we decrement tile id
     dec sprite_data_1+1
+    dec attr_value
 @not_editor_menu
 @done:
     rts 
@@ -700,6 +758,7 @@ go_right:
     bne @not_editor_menu
     ; if in editor menu we increment tile id
     inc sprite_data_1+1
+    inc attr_value
 @not_editor_menu
 @done:
     rts 
@@ -787,6 +846,14 @@ init_editor_menu:
     sta sprite_data_1+1
     sta sprite_data_1+2
 
+    ; set other spirtes to 0/0
+    sta sprite_data_2
+    sta sprite_data_2+3 
+    sta sprite_data_3
+    sta sprite_data_3+3
+    sta sprite_data_4
+    sta sprite_data_4+3
+
     ; set the tile select's tile index
     lda sprite_data+1 
     sta sprite_data_1+1
@@ -818,6 +885,23 @@ init_editor:
     sta update_sub
     lda #>update_editor
     sta update_sub+1
+
+    ; set up other sprites used to attribute drawing
+    lda #$30 ; corner tile
+    sta sprite_data_1+1 
+    sta sprite_data_2+1
+    sta sprite_data_3+1 
+    sta sprite_data_4+1
+
+    ; set up rotation
+    lda #%01000000
+    sta sprite_data_2+2
+
+    lda #%10000000
+    sta sprite_data_3+2
+
+    lda #%11000000
+    sta sprite_data_4+2
 
     rts 
 
@@ -918,6 +1002,15 @@ tile_convert_table:
 .db (.ri.*8)
 .endrep
 
+; lokup table to convert a tile location to attribute location
+attr_convert_table:
+.mrep 16
+.db (.ri.*4)
+.db (.ri.*4)
+.db (.ri.*4)
+.db (.ri.*4)
+.endrep
+
 ; lookup table of the low byte 
 ; for ppu updates for all possible player positions
 ; this is for every possible y position
@@ -932,6 +1025,24 @@ tile_update_table_hi:
 .mrep 32 
 .db >((.ri.)*32)
 .endrep
+
+; lookup talbe for attribute updates
+; same as tile update table
+attr_update_table_y:
+.mrep 8
+.db (.ri.*8)
+.db (.ri.*8)
+.db (.ri.*8)
+.db (.ri.*8)
+.endrep 
+
+attr_update_table_x:
+.mrep 8
+.db (.ri.)
+.db (.ri.)
+.db (.ri.)
+.db (.ri.)
+.endrep 
 
 ; table of pointers to map entries
 map_table_lo:

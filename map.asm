@@ -516,6 +516,58 @@ update_tile:
 
     rts 
 
+; this sub routine updates an attribute at the 
+; player's x/y position
+; the chosen value is the player's tile index
+; inputs:
+;   player_x and player_y location
+;   player tile
+; side effects:
+;   updates ppu memory for nametable 0
+;   modfies registers and flags
+; TODO make a color select register
+; that counts from 0-3
+; based on that and player location we can AND
+; the correct value by reading ppu back and then writing again
+; can use lookup table for every possible combination of location, amount 
+; of shifts and where to write to
+update_attr:
+    ; temp holds pointer to ppu ram
+    lda #$C0 
+    sta temp 
+    lda #$23 
+    sta temp+1
+
+    ldx player_y 
+    lda attr_update_table_y, x
+    clc 
+    adc temp
+    sta temp
+
+    ldx player_x 
+    lda attr_update_table_x, x 
+    clc 
+    adc temp
+    sta temp
+
+    sta src_ptr
+
+    lda $2002 ; read PPU status to reset the high/low latch
+    lda temp+1 ; write temp to ppu as start address
+    sta $2006
+    lda temp
+    sta $2006 ; set up ppu for tile transfer
+
+    lda attr_value
+    sta $2007 ; store in ppu
+
+    ; no scrolling
+    ldx #$00 
+    sta $2005 
+    sta $2005
+
+    rts 
+
 ; TODO
 ; this sub routine clears all bytes 
 ; used by level_ptr
