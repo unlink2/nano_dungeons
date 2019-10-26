@@ -337,7 +337,7 @@ load_palette:
     lda $2002 ; read PPU status to reset the high/low latch to high
     lda #$3F
     sta $2006
-    lda #$10
+    lda #$00
     sta $2006
 
     ldy #$00 

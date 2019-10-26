@@ -117,23 +117,24 @@ clear_mem:
     sta $0500, x
     sta $0600, x
     sta $0700, x
-    lda #$FE
+    ; lda #$FE
     sta $0200, x    ;move all sprites off screen
-    inx
+    dex
     bne clear_mem
     
 
     @vblank_wait
 
     ; set up palette pointer
-    ldx palette 
+    ldx #$00 
+    stx palette
+    ; ldx palette 
     lda palette_table_lo, x 
     sta palette_ptr 
     lda palette_table_hi, x 
     sta palette_ptr+1
 
     jsr load_palette
-
 
     ; set up game mode for editor for now
     lda #GAME_MODE_EDITOR_MENU 
