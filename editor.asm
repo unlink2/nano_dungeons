@@ -8,6 +8,7 @@ init_editor_menu:
     lda player_y
     sta player_y_bac
 
+    ; set up initial location (redudant really)
     lda #$01 
     sta player_x
     lda #$09 
@@ -40,6 +41,10 @@ init_editor_menu:
     lda #>update_editor_menu
     sta update_sub+1
 
+    ; set up player tile to become a pointer
+    lda #$31
+    sta sprite_data+1
+
     rts 
 
 ; init editor
@@ -58,6 +63,9 @@ init_editor:
     lda #$00 
     sta sprite_data_1
     sta sprite_data_1+3
+
+    ; attributes 0 for player
+    sta sprite_data+2
 
     lda #<update_editor
     sta update_sub
@@ -87,6 +95,10 @@ init_editor:
 update_editor_menu:
     lda menu_select
     and #EDITOR_MENU_MAX_SELECT ; only 3 possible options
+    cmp #$09 ; if more than 8, overflow
+    bcc @no_overflow
+    lda #$00
+@no_overflow
     sta menu_select
 
     ; set sprite at correct position 
@@ -96,6 +108,9 @@ update_editor_menu:
 
     lda editor_menu_cursor_y, x 
     sta player_y
+
+    lda editor_menu_cursor_attr, x
+    sta sprite_data+2
 @done:
     jmp update_done
 

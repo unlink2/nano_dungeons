@@ -17,7 +17,7 @@
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
 .define ATTR_SIZE 64 ; uncompressed attr size
 
-.define EDITOR_MENU_MAX_SELECT 7
+.define EDITOR_MENU_MAX_SELECT 15
 
 .define ATTRIBUTES $1
 .define PALETTES $1
@@ -248,18 +248,37 @@ editor_menu_gfx:
 
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
-.db #$01 ; location save 1
-.db #$01 ; save 2
-.db #$01 ; save 3
-.db #$01 ; new 
-.db #$01 ; tile select
+.db $01 ; location save 1
+.db $01 ; save 2
+.db $01 ; save 3
+.db $01 ; new 
+.db $01 ; tile select
+.db $0C  ; color top left
+.db $0C  ; color bottom left
+.db $12  ; color top right
+.db $12  ; color bottom right
 
 editor_menu_cursor_y:
-.db #$09
-.db #$0A
-.db #$0B
-.db #$0D
-.db #$0F
+.db $09
+.db $0A
+.db $0B
+.db $0D
+.db $0F
+.db $05
+.db $07
+.db $05 
+.db $07
+
+editor_menu_cursor_attr:
+.db $00
+.db $00
+.db $00
+.db $00
+.db $00
+.db $00
+.db $00
+.db %01000000
+.db %01000000
 
 ; an empty map
 ; $24 being an empty tile (bg only)
