@@ -59,7 +59,8 @@ sprite_data_1 4 ; sprite 2
 sprite_data_2 4 ; sprite 3
 sprite_data_3 4 ; sprite 4
 sprite_data_4 4 ; sprite 5
-sprite_data_pad 236 ; remainder, unused as of now
+sprite_data_5 4 ; sprite 6
+sprite_data_pad 232 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player

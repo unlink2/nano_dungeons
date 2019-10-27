@@ -1,3 +1,14 @@
+; this sub routine 
+; calculates the visuals 
+; for the attribute memory display in the
+; editor pause menu
+; inputs:
+;   attr_value -> the value to be used
+; modifies:
+;   registers and sprite index for sprite_2 - 5
+update_attr_display:
+    rts 
+
 
 ; inits editor menu
 init_editor_menu:
@@ -44,6 +55,27 @@ init_editor_menu:
     ; set up player tile to become a pointer
     lda #$31
     sta sprite_data+1
+
+    ; move sprites indicating 
+    ; attr values to correct position
+    ; sprites_2, 3, 4, 5
+    lda #$70 ; x position
+    sta sprite_data_2+3 ; up left
+    sta sprite_data_3+3 ; bottom left
+
+    lda #$7F ; x position
+    sta sprite_data_4+3 ; up right 
+    sta sprite_data_5+3 ; bottom right
+
+    lda #$28 ; y positon
+    sta sprite_data_2 ; up left
+    sta sprite_data_4 ; up right
+
+    lda #$38 ; y position
+    sta sprite_data_3 ; bottom left
+    sta sprite_data_5 ; bottom right
+
+    jsr update_attr_display
 
     rts 
 
