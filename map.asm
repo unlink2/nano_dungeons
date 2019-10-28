@@ -562,7 +562,7 @@ update_attr:
     sta $2007 ; store in ppu
 
     ; no scrolling
-    ldx #$00 
+    lda #$00 
     sta $2005 
     sta $2005
 
