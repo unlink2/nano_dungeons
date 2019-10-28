@@ -27,7 +27,7 @@
 .define EDITOR_MENU_SAVE3 2
 .define EDITOR_MENU_NEW 3
 .define EDITOR_MENU_TILE 4
-.define EDITOR_MENU_ATTR 5
+.define EDITOR_MENU_ATTR_1 5
 
 .enum $00
 frame_count 1

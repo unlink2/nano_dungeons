@@ -467,9 +467,17 @@ go_left:
     rts 
     
 @not_tile_select:
-    cmp #EDITOR_MENU_ATTR
-    bne @done 
-    dec attr_value
+    cmp #EDITOR_MENU_ATTR_1
+    bcc @done
+    cmp #EDITOR_MENU_ATTR_1+4
+    bcs @done
+
+    sec 
+    sbc #EDITOR_MENU_ATTR_1
+    tay 
+    ldx #$00 ; dec
+    jsr inc_dec_attr
+    ; dec attr_value
 @not_editor_menu
 @done:
     rts 
@@ -513,10 +521,17 @@ go_right:
     stx sprite_data_1+1
     rts 
 @not_tile_select:
-    cmp #EDITOR_MENU_ATTR
-    bne @done
+    cmp #EDITOR_MENU_ATTR_1
+    bcc @done
+    cmp #EDITOR_MENU_ATTR_1+4
+    bcs @done
     ; increment attr value
-    inc attr_value
+    ; inc attr_value
+    sec 
+    sbc #EDITOR_MENU_ATTR_1
+    tay 
+    ldx #$01 ; inc
+    jsr inc_dec_attr
 @not_editor_menu
 @done:
     rts 
