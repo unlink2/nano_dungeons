@@ -67,6 +67,7 @@ player_y 1 ; tile location of player
 player_x_bac 1 ; backup location 
 player_y_bac 1 ; backup location
 attr_value 1 ; value used for attribute painting
+level_select 1 ; value used to select a level
 .end 
 
 ; start of prg ram

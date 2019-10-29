@@ -90,12 +90,19 @@ a_input:
     lda game_mode
     cmp #GAME_MODE_EDITOR 
     bne @not_editor
+
     jsr update_tile
+
     rts 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @done
+    jsr a_input_editor_menu
+@done:
+    rts 
 
+; editor menu code for a input
+a_input_editor_menu:
     ; set up the right pointers for data write
     ; save slot is based on menu select
     lda menu_select
@@ -214,8 +221,8 @@ a_input:
     jsr init_editor
     lda #$00
     sta nametable
-
     rts 
+
 
 ; b button input 
 ; b loads a map in editor menu
@@ -226,6 +233,19 @@ b_input:
     jmp @not_editor_menu ; branch was out of range qq
 @editor_menu:
 
+    jsr b_input_editor_menu
+
+@not_editor_menu:
+    cmp #GAME_MODE_EDITOR   
+    bne @done
+
+    ; editor mode
+    jsr update_attr
+@done:
+    rts 
+
+; b input for editor menu
+b_input_editor_menu:
     lda menu_select
     cmp #EDITOR_MENU_NEW
     bne @not_new_map
@@ -316,24 +336,7 @@ b_input:
     jsr init_editor
     lda #$00
     sta nametable
-
-@not_editor_menu:
-    cmp #GAME_MODE_EDITOR   
-    bne @done
-
-    ldx #$00
-    stx $2001 ; disable rendering
-
-    ; disable NMI until paint is complete
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
-
-    ; editor mode
-    jsr update_attr
-@done:
-    rts 
+    rts     
 
 ; select button input
 ; select changes the players sprite index 
@@ -354,7 +357,12 @@ select_input:
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @done
+    jsr select_input_editor_menu
+@done: 
+    rts 
 
+; select input editor menu
+select_input_editor_menu:
     ldx #$00
     stx $2001 ; disable rendering
 
@@ -377,7 +385,6 @@ select_input:
     sta palette_ptr+1
 
     jsr load_palette
-@done: 
     rts 
 
 ; start button input
@@ -400,25 +407,13 @@ start_input:
 @not_menu:
     cmp #GAME_MODE_EDITOR
     bne @not_editor
-    ; swap to menu and nametable 1
-    lda #GAME_MODE_EDITOR_MENU
-    sta game_mode
-    lda #$01
-    sta nametable
-
-    jsr init_editor_menu
+    jsr start_input_editor
 
     rts 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
-    ; sawp to editor mode and nt 0
-    lda #GAME_MODE_EDITOR
-    sta game_mode
-    lda #$00 
-    sta nametable
-
-    jsr init_editor
+    jsr start_input_editor_menu
 
     rts 
 @not_editor_menu:
@@ -426,6 +421,28 @@ start_input:
     bne @not_puzzle
 @not_puzzle:
 @done:
+    rts 
+
+; editor menu start input
+start_input_editor_menu:
+    ; sawp to editor mode and nt 0
+    lda #GAME_MODE_EDITOR
+    sta game_mode
+    lda #$00 
+    sta nametable
+
+    jsr init_editor
+    rts 
+
+; start input editor
+start_input_editor:
+    ; swap to menu and nametable 1
+    lda #GAME_MODE_EDITOR_MENU
+    sta game_mode
+    lda #$01
+    sta nametable
+
+    jsr init_editor_menu
     rts 
 
 ; left input
@@ -441,6 +458,20 @@ go_left:
     cmp #GAME_MODE_EDITOR
     bne @not_editor
 
+    jsr go_left_editor
+
+    rts 
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+
+    jsr go_left_editor_menu
+@not_editor_menu
+@done:
+    rts 
+
+; editor code
+go_left_editor:
     lda #$00
     cmp player_x ; dont allow underflow 
     beq @no_dec
@@ -448,9 +479,9 @@ go_left:
     dec player_x
 @no_dec:
     rts 
-@not_editor:
-    cmp #GAME_MODE_EDITOR_MENU
-    bne @not_editor_menu
+
+; ediotr menu code
+go_left_editor_menu:
     ; if in editor menu we decrement tile id
     lda menu_select
     cmp #EDITOR_MENU_TILE
@@ -478,7 +509,6 @@ go_left:
     ldx #$00 ; dec
     jsr inc_dec_attr
     ; dec attr_value
-@not_editor_menu
 @done:
     rts 
 
@@ -495,6 +525,19 @@ go_right:
     cmp #GAME_MODE_EDITOR
     bne @not_editor
 
+    jsr go_right_editor
+
+    rts 
+@not_editor:
+    cmp #GAME_MODE_EDITOR_MENU
+    bne @not_editor_menu
+    jsr go_right_editor_menu
+@not_editor_menu:
+@done:
+    rts 
+
+; editor code
+go_right_editor:
     lda #$1F
     cmp player_x ; dont allow overflow 
     beq @no_inc
@@ -502,9 +545,9 @@ go_right:
     inc player_x
 @no_inc:
     rts 
-@not_editor:
-    cmp #GAME_MODE_EDITOR_MENU
-    bne @not_editor_menu
+
+; editor menu code
+go_right_editor_menu:
     ; if in editor menu we increment tile id
     ; check cursor positon
     lda menu_select
@@ -532,7 +575,6 @@ go_right:
     tay 
     ldx #$01 ; inc
     jsr inc_dec_attr
-@not_editor_menu
 @done:
     rts 
 
@@ -549,12 +591,8 @@ go_up:
     cmp #GAME_MODE_EDITOR
     bne @not_editor
 
-    lda #$00
-    cmp player_y ; dont allow underflow 
-    beq @no_dec
+    jsr go_up_editor
 
-    dec player_y
-@no_dec:
     rts 
 
 @not_editor:
@@ -564,6 +602,16 @@ go_up:
     dec menu_select
 @not_editor_menu:
 @done:
+    rts 
+
+; editor code
+go_up_editor:
+    lda #$00
+    cmp player_y ; dont allow underflow 
+    beq @no_dec
+
+    dec player_y
+@no_dec:
     rts 
 
 ; down input
@@ -578,13 +626,7 @@ go_down:
     lda game_mode
     cmp #GAME_MODE_EDITOR
     bne @not_editor
-
-    lda #$1D
-    cmp player_y ; dont allow overflow 
-    beq @no_inc 
-
-    inc player_y
-@no_inc:
+    jsr go_down_editor
     rts 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
@@ -595,3 +637,12 @@ go_down:
 @done: 
     rts 
 
+; editor code
+go_down_editor:
+    lda #$1D
+    cmp player_y ; dont allow overflow 
+    beq @no_inc 
+
+    inc player_y
+@no_inc:
+    rts 
