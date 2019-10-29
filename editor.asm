@@ -240,7 +240,7 @@ init_editor:
 update_editor_menu:
     lda menu_select
     and #EDITOR_MENU_MAX_SELECT ; only 3 possible options
-    cmp #$09 ; if more than 8, overflow
+    cmp #$0A ; if more than 9, overflow
     bcc @no_overflow
     lda #$00
 @no_overflow

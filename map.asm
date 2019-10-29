@@ -404,12 +404,33 @@ load_level:
 ;       therefore it should always be called before loading an actual level!
 load_menu:
     cpx #GAME_MODE_EDITOR_MENU
-    bne @invalid_menu
+    bne @not_editor
 
     ; load editor menu compressed tiles
     lda #<editor_menu_gfx
     sta level_data_ptr
     lda #>editor_menu_gfx
+    sta level_data_ptr+1
+
+    ; decompress location, same as level
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
+
+    jsr decompress_level
+
+    ldx #$01 ; load into nametable 1
+    jsr load_level
+
+@not_editor:
+    cpx #GAME_MODE_MENU 
+    bne @invalid_menu
+
+    ; load editor menu compressed tiles
+    lda #<main_menu_gfx
+    sta level_data_ptr
+    lda #>main_menu_gfx
     sta level_data_ptr+1
 
     ; decompress location, same as level

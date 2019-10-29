@@ -96,8 +96,12 @@ a_input:
     rts 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
-    bne @done
+    bne @not_editor_menu
     jsr a_input_editor_menu
+@not_editor_menu:
+    cmp #GAME_MODE_MENU
+    bne @done 
+    jsr a_input_main_menu
 @done:
     rts 
 
@@ -142,7 +146,7 @@ a_input_editor_menu:
 
     cmp #EDITOR_MENU_SAVE1
     beq @slot_1 
-    rts 
+    jmp @no_slot: 
 
 @slot_1:
     ; always pick slot 1 as default option
@@ -179,8 +183,24 @@ a_input_editor_menu:
     jsr write_attr
     ;lda $2000
     ;ora #%10000000
-    ;sta $2000 ; enable NMI again
-@done: 
+    ;sta $2000 ; enable NMI again 
+@no_slot:
+    cmp #EDITOR_MENU_BACK
+    bne @done
+    ; load nametable
+    lda #$00
+    sta $2001 ; no rendering
+
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    ldx #$00
+    stx menu_select
+    jsr load_menu
+    jsr init_main_menu
+@done:
     rts
 
 @load_debug_map:
@@ -223,6 +243,33 @@ a_input_editor_menu:
     sta nametable
     rts 
 
+
+; main menu code for A
+a_input_main_menu:
+    ldx #$00
+    stx $2001 ; disable rendering
+    ; disable NMI until load is complete
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    lda menu_select
+    cmp #MAIN_MENU_EDITOR
+    bne @done 
+    ; init editor
+    lda #GAME_MODE_EDITOR_MENU
+    sta game_mode
+    tax 
+    jsr load_menu
+
+    lda #$00
+    sta menu_select
+    sta sprite_data+1
+
+    jsr init_editor_menu
+@done:
+    rts 
 
 ; b button input 
 ; b loads a map in editor menu
@@ -601,6 +648,10 @@ go_up:
 
     dec menu_select
 @not_editor_menu:
+    cmp #GAME_MODE_MENU
+    bne @not_main_menu
+    dec menu_select
+@not_main_menu:
 @done:
     rts 
 
@@ -634,6 +685,10 @@ go_down:
 
     inc menu_select
 @not_editor_menu:
+    cmp #GAME_MODE_MENU
+    bne @not_main_menu
+    inc menu_select
+@not_main_menu
 @done: 
     rts 
 

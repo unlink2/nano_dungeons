@@ -18,6 +18,7 @@
 .define ATTR_SIZE 64 ; uncompressed attr size
 
 .define EDITOR_MENU_MAX_SELECT 15
+.define MAIN_MENU_MAX_SELECT 1
 
 .define ATTRIBUTES $1
 .define PALETTES $1
@@ -27,7 +28,11 @@
 .define EDITOR_MENU_SAVE3 2
 .define EDITOR_MENU_NEW 3
 .define EDITOR_MENU_TILE 4
-.define EDITOR_MENU_ATTR_1 5
+.define EDITOR_MENU_BACK 5
+.define EDITOR_MENU_ATTR_1 6
+
+.define MAIN_MENU_LEVEL 0 
+.define MAIN_MENU_EDITOR 1
 
 .enum $00
 frame_count 1
@@ -139,14 +144,14 @@ clear_mem:
     jsr load_palette
 
     ; set up game mode for editor for now
-    lda #GAME_MODE_EDITOR_MENU 
+    lda #GAME_MODE_MENU 
     sta game_mode
 
     lda #$01 
     sta nametable
 
     ; load editor menu
-    ldx #GAME_MODE_EDITOR_MENU
+    ldx #GAME_MODE_MENU
     jsr load_menu
 
     ; position editor sprite
@@ -154,7 +159,7 @@ clear_mem:
     sta player_x
     sta player_y
 
-    jsr init_editor_menu
+    jsr init_main_menu
 
     ; set up empty
     lda #<empty_map
@@ -235,7 +240,7 @@ update_done: rti
 .include "./utility.asm"
 .include "./input.asm"
 .include "./editor.asm"
-
+.include "./mainmenu.asm"
 
 .include "./map.asm"
 
@@ -248,6 +253,9 @@ palette_data_end:
 editor_menu_gfx:
 .incbin "./editor.gfx"
 
+main_menu_gfx:
+.incbin "./mainmenu.gfx"
+
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
 .db $01 ; location save 1
@@ -255,6 +263,7 @@ editor_menu_cursor_x:
 .db $01 ; save 3
 .db $01 ; new 
 .db $01 ; tile select
+.db $01 ; back 
 .db $0C  ; color top left
 .db $0C  ; color bottom left
 .db $12  ; color top right
@@ -266,6 +275,7 @@ editor_menu_cursor_y:
 .db $0B
 .db $0D
 .db $0F
+.db $11
 .db $05
 .db $07
 .db $05 
@@ -279,8 +289,22 @@ editor_menu_cursor_attr:
 .db $00
 .db $00
 .db $00
+.db $00
 .db %01000000
 .db %01000000
+
+; same as editor menu tables
+main_menu_cursor_x:
+.db $01 
+.db $01
+
+main_menu_cursor_y:
+.db $08
+.db $0A
+
+main_menu_cursor_attr:
+.db $00
+.db $00
 
 ; an empty map
 ; $24 being an empty tile (bg only)
@@ -352,15 +376,22 @@ attr_update_table_x:
 map_table_lo:
 .db #<empty_map
 .db #<editor_menu_gfx
+.db #<main_menu_gfx
 
 map_table_hi:
 .db #>empty_map
 .db #>editor_menu_gfx
+.db #>main_menu_gfx
 
 ; color palette lookup table
 attr_table_lo:
 .db #<test_attr
+.db #<test_attr
+.db #<test_attr
+
 attr_table_hi:
+.db #>test_attr
+.db #>test_attr
 .db #>test_attr
 
 palette_table_lo:
