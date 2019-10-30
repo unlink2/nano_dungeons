@@ -19,7 +19,7 @@
 .define PALETTE_SIZE 32 ; uncompressed palette size
 
 .define EDITOR_MENU_MAX_SELECT 15
-.define MAIN_MENU_MAX_SELECT 1
+.define MAIN_MENU_MAX_SELECT 7
 
 .define ATTRIBUTES $1
 .define PALETTES $1
@@ -35,7 +35,10 @@
 .define EDITOR_MENU_VALUE 11
 
 .define MAIN_MENU_LEVEL 0 
-.define MAIN_MENU_EDITOR 1
+.define MAIN_MENU_SLOT_1 1
+.define MAIN_MENU_SLOT_2 2
+.define MAIN_MENU_SLOT_3 3
+.define MAIN_MENU_EDITOR 4
 
 .enum $00
 frame_count 1
@@ -317,15 +320,24 @@ editor_menu_cursor_attr:
 
 ; same as editor menu tables
 main_menu_cursor_x:
-.db $01 
-.db $01
+.db $01 ; level select
+.db $01 ; slot 1
+.db $01 ; slot 2
+.db $01 ; slot 3
+.db $01 ; edit menu
 
 main_menu_cursor_y:
 .db $08
 .db $0A
+.db $0B
+.db $0C
+.db $0E
 
 main_menu_cursor_attr:
 .db $00
+.db $00
+.db $00
+.db $00 
 .db $00
 
 ; an empty map
