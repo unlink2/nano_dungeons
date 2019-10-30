@@ -29,10 +29,26 @@ init_main_menu:
     sta sprite_data_4+3
     sta sprite_data_5 
     sta sprite_data_5+3
+    sta sprite_data_6 
+    sta sprite_data_6+3 
+    sta sprite_data_7 
+    sta sprite_data_7+3 
+    sta sprite_data_8
+    sta sprite_data_8+3
+    sta sprite_data_9 
+    sta sprite_data_9+3
+    sta sprite_data_A 
+    sta sprite_data_A+3
 
     ; cursor sprite
     lda #$31 
     sta sprite_data+1
+
+    ; load palette
+    lda #<palette_data 
+    sta palette_ptr 
+    lda #>palette_data
+    sta palette_ptr
 
     rts 
 

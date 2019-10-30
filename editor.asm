@@ -37,6 +37,47 @@ init_attr_display:
 
     rts 
 
+; this sub routine inits the color display
+; inputs:
+;   color_select
+; side effects:
+;   calls convert_hex
+;   overwrites sprites 6-7 tile index
+init_color_display:
+    lda color_select
+    and #31 ; max color
+    sta color_select
+
+    jsr convert_hex
+
+    lda hex_buffer
+    sta sprite_data_7+1 
+    lda hex_buffer+1
+    sta sprite_data_6+1
+
+    rts 
+
+; this sub routine inits the color value display
+; inputs:
+;   color_select
+; side effects:
+;   calls convert_hex
+;   overwrites sprites 8-9 tile index
+init_value_display:
+    ldy color_select
+    lda level_palette, y 
+    and #%00111111
+    sta level_palette, y
+
+    jsr convert_hex
+ 
+    lda hex_buffer
+    sta sprite_data_9+1 
+    lda hex_buffer+1
+    sta sprite_data_8+1   
+
+    rts 
+
 ; transfers attribute visual display back to the attr_value
 ; inputs:
 ;   sprite_data 2-5
@@ -143,6 +184,10 @@ init_editor_menu:
     sta sprite_data_3+2 
     sta sprite_data_4+2 
     sta sprite_data_5+2
+    sta sprite_data_6+2
+    sta sprite_data_7+2
+    sta sprite_data_8+2
+    sta sprite_data_9+2
 
     ; set other spirtes to 0/0
     sta sprite_data_2
@@ -184,7 +229,35 @@ init_editor_menu:
     sta sprite_data_3 ; bottom left
     sta sprite_data_5 ; bottom right
 
+    ; move sprites incating color palette value
+    ; 4 sprites one for color select
+    ; one for value select
+    ; sprites 6, 7, 8, 9
+    lda #19*8 ; x position
+    sta sprite_data_6+3
+    sta sprite_data_8+3 
+    lda #20*8
+    sta sprite_data_7+3 ; x position
+    sta sprite_data_9+3
+
+    lda #10*8 ; y position
+    sta sprite_data_6 
+    sta sprite_data_7 
+
+    lda #12*8 ; y position
+    sta sprite_data_8 
+    sta sprite_data_9
+
     jsr init_attr_display
+    jsr init_color_display 
+    jsr init_value_display
+
+    ; copy palette
+    lda #<palette_data 
+    sta palette_ptr 
+    lda #>palette_data
+    sta palette_ptr+1
+    jsr load_palette
 
     rts 
 
@@ -208,6 +281,16 @@ init_editor:
     sta sprite_data_1+3
     sta sprite_data_5
     sta sprite_data_5+3
+    sta sprite_data_6 
+    sta sprite_data_6+3 
+    sta sprite_data_7 
+    sta sprite_data_7+3 
+    sta sprite_data_8
+    sta sprite_data_8+3
+    sta sprite_data_9 
+    sta sprite_data_9+3
+    sta sprite_data_A 
+    sta sprite_data_A+3
 
     ; attributes 0 for player
     sta sprite_data+2
@@ -234,13 +317,20 @@ init_editor:
     lda #%11000000
     sta sprite_data_4+2
 
+    ; copy palette
+    lda #<level_palette 
+    sta palette_ptr 
+    lda #>level_palette
+    sta palette_ptr+1
+    jsr load_palette
+
     rts 
 
 ; update sub routine for editor menu
 update_editor_menu:
     lda menu_select
     and #EDITOR_MENU_MAX_SELECT ; only 3 possible options
-    cmp #$0A ; if more than 9, overflow
+    cmp #$0C ; if more than 9, overflow
     bcc @no_overflow
     lda #$00
 @no_overflow

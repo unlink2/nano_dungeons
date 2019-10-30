@@ -57,4 +57,45 @@ convert_tile_location:
     sta sprite_data_4+3
 
 @done:
+    rts
+
+; this sub routine copies memory from one 
+; location to another
+; inputs:
+;   y -> size
+;   src_ptr -> original data
+;   dest_ptr -> destination 
+; side effects:
+;   y is changed, data is written at dest_ptr
+memcpy:
+    dey 
+@loop:
+    lda (src_ptr), y 
+    sta (dest_ptr), y
+    dey
+    cpy #$FF ; if underflow stop
+    bne @loop
+    rts 
+
+; this sub routine converts a number to hex values
+; that are ready to be pritned to the screen
+; inputs:
+;   a -> the number
+; side effects:
+;   hex_buffer if overwritten
+;   a is changed
+convert_hex:
+    pha ; save value of a
+
+    and #$0F ; first nibble
+    sta hex_buffer
+
+    pla 
+    and #$F0 ; second nibble
+    lsr 
+    lsr 
+    lsr 
+    lsr ; shift to get right value
+    sta hex_buffer+1
+    
     rts 

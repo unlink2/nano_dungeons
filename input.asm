@@ -98,6 +98,7 @@ a_input:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
     jsr a_input_editor_menu
+    rts 
 @not_editor_menu:
     cmp #GAME_MODE_MENU
     bne @done 
@@ -107,6 +108,9 @@ a_input:
 
 ; editor menu code for a input
 a_input_editor_menu:
+    lda #MOVE_DELAY_FRAMES*2
+    sta select_delay
+
     ; set up the right pointers for data write
     ; save slot is based on menu select
     lda menu_select
@@ -121,6 +125,11 @@ a_input_editor_menu:
     sta attr_ptr
     lda #>attr_3 
     sta attr_ptr+1
+
+    lda #<palette_3 
+    sta dest_ptr
+    lda #>palette_3 
+    sta dest_ptr+1
 
     jmp @slot_slected
 @not_slot3:
@@ -137,6 +146,11 @@ a_input_editor_menu:
     sta attr_ptr
     lda #>attr_2 
     sta attr_ptr+1
+
+    lda #<palette_2 
+    sta dest_ptr
+    lda #>palette_2
+    sta dest_ptr+1 
 
     jmp @slot_slected
 @not_slot2:
@@ -159,6 +173,11 @@ a_input_editor_menu:
     sta attr_ptr
     lda #>attr_1 
     sta attr_ptr+1
+
+    lda #<palette_1 
+    sta dest_ptr
+    lda #>palette_1 
+    sta dest_ptr+1 
 
 @slot_slected:
     lda #$00
@@ -184,6 +203,15 @@ a_input_editor_menu:
     ;lda $2000
     ;ora #%10000000
     ;sta $2000 ; enable NMI again 
+    ; copy palette
+    lda #<level_palette 
+    sta src_ptr
+    lda #>level_palette
+    sta src_ptr+1
+    ldy #PALETTE_SIZE 
+    jsr memcpy
+
+    rts 
 @no_slot:
     cmp #EDITOR_MENU_BACK
     bne @done
@@ -214,10 +242,20 @@ a_input_editor_menu:
     lda map_table_hi, x
     sta level_data_ptr+1
 
-    lda attr_table_lo
+    lda attr_table_lo, x
     sta attr_ptr
-    lda attr_table_hi
+    lda attr_table_hi, x
     sta attr_ptr+1
+
+    ; for memcpy, copy palette
+    lda palette_table_lo, x 
+    sta src_ptr 
+    lda palette_table_hi, x 
+    sta src_ptr+1
+    lda #<level_palette 
+    sta dest_ptr 
+    lda #>level_palette
+    sta dest_ptr+1
 
     lda #<level_data 
     sta level_ptr 
@@ -232,9 +270,14 @@ a_input_editor_menu:
 
     jsr decompress_level
 
+    ; copy palette we set up earlier
+    ldy #PALETTE_SIZE ; size to copy
+    jsr memcpy
+
     ldx $00 ; nametable 0
     jsr load_level
     jsr load_attr
+    jsr load_palette
 
     lda #GAME_MODE_EDITOR
     sta game_mode
@@ -281,7 +324,7 @@ b_input:
 @editor_menu:
 
     jsr b_input_editor_menu
-
+    rts 
 @not_editor_menu:
     cmp #GAME_MODE_EDITOR   
     bne @done
@@ -293,6 +336,9 @@ b_input:
 
 ; b input for editor menu
 b_input_editor_menu:
+    lda #MOVE_DELAY_FRAMES*2
+    sta select_delay
+
     lda menu_select
     cmp #EDITOR_MENU_NEW
     bne @not_new_map
@@ -307,6 +353,11 @@ b_input_editor_menu:
     sta attr_ptr
     lda #>test_attr
     sta attr_ptr+1
+
+    lda #<palette_data 
+    sta src_ptr
+    lda #>palette_data 
+    sta src_ptr+1
 
     jmp @slot_selected
 @not_new_map:    
@@ -324,6 +375,11 @@ b_input_editor_menu:
     lda #>attr_2 
     sta attr_ptr+1
 
+    lda #<palette_2 
+    sta src_ptr
+    lda #>palette_2
+    sta src_ptr+1
+
     jmp @slot_selected
 @not_slot2:
 
@@ -339,6 +395,11 @@ b_input_editor_menu:
     sta attr_ptr
     lda #>attr_3 
     sta attr_ptr+1
+
+    lda #<palette_3 
+    sta src_ptr
+    lda #>palette_3
+    sta src_ptr+1
 
     jmp @slot_selected
     ; set up for load
@@ -357,6 +418,11 @@ b_input_editor_menu:
     sta attr_ptr
     lda #>attr_1 
     sta attr_ptr+1
+
+    lda #<palette_1 
+    sta src_ptr
+    lda #>palette_1 
+    sta src_ptr+1
 @slot_selected:
     ldx #$00
     stx $2001 ; disable rendering
@@ -374,9 +440,18 @@ b_input_editor_menu:
 
     jsr decompress_level
 
+
     ldx $00 ; nametable 0
     jsr load_level
     jsr load_attr
+
+    ; copy palette
+    lda #<level_palette
+    sta dest_ptr 
+    lda #>level_palette 
+    sta dest_ptr+1
+    ldy #PALETTE_SIZE
+    jsr memcpy
 
     lda #GAME_MODE_EDITOR
     sta game_mode
@@ -546,9 +621,9 @@ go_left_editor_menu:
     
 @not_tile_select:
     cmp #EDITOR_MENU_ATTR_1
-    bcc @done
+    bcc @not_attr
     cmp #EDITOR_MENU_ATTR_1+4
-    bcs @done
+    bcs @not_attr
 
     sec 
     sbc #EDITOR_MENU_ATTR_1
@@ -556,6 +631,24 @@ go_left_editor_menu:
     ldx #$00 ; dec
     jsr inc_dec_attr
     ; dec attr_value
+    rts 
+@not_attr
+    cmp #EDITOR_MENU_COLOR
+    bne @not_color
+    dec color_select
+    jsr init_color_display
+    jsr init_value_display
+    rts 
+@not_color
+    cmp #EDITOR_MENU_VALUE 
+    bne @done
+    ldy color_select 
+    lda level_palette, y
+    tax 
+    dex
+    txa  
+    sta level_palette, y
+    jsr init_value_display
 @done:
     rts 
 
@@ -612,9 +705,9 @@ go_right_editor_menu:
     rts 
 @not_tile_select:
     cmp #EDITOR_MENU_ATTR_1
-    bcc @done
+    bcc @not_attr
     cmp #EDITOR_MENU_ATTR_1+4
-    bcs @done
+    bcs @not_attr
     ; increment attr value
     ; inc attr_value
     sec 
@@ -622,6 +715,24 @@ go_right_editor_menu:
     tay 
     ldx #$01 ; inc
     jsr inc_dec_attr
+    rts 
+@not_attr
+    cmp #EDITOR_MENU_COLOR
+    bne @not_color
+    inc color_select
+    jsr init_color_display
+    jsr init_value_display
+    rts 
+@not_color
+    cmp #EDITOR_MENU_VALUE 
+    bne @done
+    ldy color_select 
+    lda level_palette, y 
+    tax 
+    inx 
+    txa
+    sta level_palette, y
+    jsr init_value_display
 @done:
     rts 
 

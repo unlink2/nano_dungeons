@@ -16,6 +16,7 @@
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
 .define ATTR_SIZE 64 ; uncompressed attr size
+.define PALETTE_SIZE 32 ; uncompressed palette size
 
 .define EDITOR_MENU_MAX_SELECT 15
 .define MAIN_MENU_MAX_SELECT 1
@@ -30,6 +31,8 @@
 .define EDITOR_MENU_TILE 4
 .define EDITOR_MENU_BACK 5
 .define EDITOR_MENU_ATTR_1 6
+.define EDITOR_MENU_COLOR 10
+.define EDITOR_MENU_VALUE 11
 
 .define MAIN_MENU_LEVEL 0 
 .define MAIN_MENU_EDITOR 1
@@ -65,14 +68,23 @@ sprite_data_2 4 ; sprite 3
 sprite_data_3 4 ; sprite 4
 sprite_data_4 4 ; sprite 5
 sprite_data_5 4 ; sprite 6
-sprite_data_pad 232 ; remainder, unused as of now
+
+sprite_data_6 4 ; sprite 7
+sprite_data_7 4 ; sprite 8
+sprite_data_8 4 ; sprite 9
+sprite_data_9 4 ; sprite 10
+sprite_data_A 4 ; sprite 11
+sprite_data_pad 212 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
+level_palette PALETTE_SIZE ; palette used by the currently loaded level, is copied whenever a level becomes active
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
 player_x_bac 1 ; backup location 
 player_y_bac 1 ; backup location
 attr_value 1 ; value used for attribute painting
 level_select 1 ; value used to select a level
+color_select 1 ; value for color to be edited
+hex_buffer 2 ; buffer to convert hex number to be output on screen
 .end 
 
 ; start of prg ram
@@ -91,6 +103,10 @@ attr_2 ATTR_SIZE
 
 save_3 SAVE_SIZE ; saveslot 3
 attr_3 ATTR_SIZE
+
+palette_1 PALETTE_SIZE ; palette 1
+palette_2 PALETTE_SIZE ; palette 2
+palette_3 PALETTE_SIZE ; palette 3
 .end 
 
 .macro @vblank_wait
@@ -268,6 +284,8 @@ editor_menu_cursor_x:
 .db $0C  ; color bottom left
 .db $12  ; color top right
 .db $12  ; color bottom right
+.db $0C ; color palette select
+.db $0C ; color select
 
 editor_menu_cursor_y:
 .db $09
@@ -280,6 +298,8 @@ editor_menu_cursor_y:
 .db $07
 .db $05 
 .db $07
+.db $0A
+.db $0C
 
 editor_menu_cursor_attr:
 .db $00
@@ -292,6 +312,8 @@ editor_menu_cursor_attr:
 .db $00
 .db %01000000
 .db %01000000
+.db $00 
+.db $00
 
 ; same as editor menu tables
 main_menu_cursor_x:
@@ -383,7 +405,7 @@ map_table_hi:
 .db #>editor_menu_gfx
 .db #>main_menu_gfx
 
-; color palette lookup table
+; color attribute lookup table
 attr_table_lo:
 .db #<test_attr
 .db #<test_attr
@@ -394,9 +416,14 @@ attr_table_hi:
 .db #>test_attr
 .db #>test_attr
 
+; color palette table
 palette_table_lo:
 .db #<palette_data
+.db #<palette_data
+.db #<palette_data
 palette_table_hi:
+.db #>palette_data
+.db #>palette_data 
 .db #>palette_data
 
 .pad $FFFA

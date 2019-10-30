@@ -244,6 +244,8 @@ write_attr:
     lda #$C0
     sta $2006 ; set up ppu for attribute transfer
 
+    lda $2007 ; do one invalid read before starting transfer
+
     ldy #$00
 @attr_loop:
     lda $2007 
@@ -347,6 +349,11 @@ load_palette_loop:
     iny 
     cpy #palette_data_end-palette_data
     bne load_palette_loop 
+
+    ; no scrolling
+    lda #$00 
+    sta $2005 
+    sta $2005
 
     rts 
 
