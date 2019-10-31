@@ -129,7 +129,7 @@ transfert_attr_display:
     and #%00000011
     sta sprite_data_addr
     rts  
-.end
+.endm
 
 ; this sub routine incs or decs
 ; the attribute value

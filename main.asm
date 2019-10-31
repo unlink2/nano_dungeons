@@ -61,7 +61,7 @@ palette_ptr 2 ; pointer to current palette
 
 src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
-.end 
+.ende
 
 ; sprite memory
 .enum $0200
@@ -88,7 +88,7 @@ attr_value 1 ; value used for attribute painting
 level_select 1 ; value used to select a level
 color_select 1 ; value for color to be edited
 hex_buffer 2 ; buffer to convert hex number to be output on screen
-.end 
+.ende
 
 ; start of prg ram
 ; which is used as sram in this case
@@ -110,13 +110,13 @@ attr_3 ATTR_SIZE
 palette_1 PALETTE_SIZE ; palette 1
 palette_2 PALETTE_SIZE ; palette 2
 palette_3 PALETTE_SIZE ; palette 3
-.end 
+.ende 
 
 .macro @vblank_wait
 @vblank:
     bit $2002
     bpl @vblank
-.end
+.endm
 
 .org $C000 ; start of program
 init:
