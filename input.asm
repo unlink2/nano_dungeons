@@ -252,6 +252,7 @@ a_input_editor_menu:
     sta src_ptr 
     lda palette_table_hi, x 
     sta src_ptr+1
+
     lda #<level_palette 
     sta dest_ptr 
     lda #>level_palette
@@ -299,7 +300,7 @@ a_input_main_menu:
 
     lda menu_select
     cmp #MAIN_MENU_EDITOR
-    bne @done 
+    bne @not_editor 
     ; init editor
     lda #GAME_MODE_EDITOR_MENU
     sta game_mode
@@ -311,6 +312,126 @@ a_input_main_menu:
     sta sprite_data+1
 
     jsr init_editor_menu
+    rts
+
+@not_editor:
+    cmp #MAIN_MENU_LEVEL
+    bne @not_level_select
+
+    ; select the map to load
+    ldx level_select ; based on tile
+    lda map_table_lo, x
+    sta level_data_ptr
+    lda map_table_hi, x
+    sta level_data_ptr+1
+
+    lda attr_table_lo, x
+    sta attr_ptr
+    lda attr_table_hi, x
+    sta attr_ptr+1
+
+    ; for memcpy, copy palette
+    lda palette_table_lo, x 
+    sta src_ptr 
+    lda palette_table_hi, x 
+    sta src_ptr+1
+    jmp @slot_selected
+@not_level_select:
+
+    ; check which slot is selected
+    cmp #MAIN_MENU_SLOT_1
+    bne @not_slot_1
+    ; slot 1 selected, set up pointers
+    lda #<save_1
+    sta level_data_ptr
+    lda #>save_1
+    sta level_data_ptr+1
+
+    lda #<attr_1
+    sta attr_ptr
+    lda #>attr_1 
+    sta attr_ptr+1
+
+    lda #<palette_1 
+    sta src_ptr
+    lda #>palette_1 
+    sta src_ptr+1
+
+    jmp @slot_selected
+@not_slot_1:
+
+    cmp #MAIN_MENU_SLOT_2 
+    bne @not_slot2
+
+    lda #<save_2
+    sta level_data_ptr
+    lda #>save_2
+    sta level_data_ptr+1
+
+    lda #<attr_2
+    sta attr_ptr
+    lda #>attr_2 
+    sta attr_ptr+1
+
+    lda #<palette_2
+    sta src_ptr
+    lda #>palette_2
+    sta src_ptr+1
+    jmp @slot_selected
+@not_slot2:
+
+    cmp #MAIN_MENU_SLOT_3
+    bne @no_slot
+
+    lda #<save_3
+    sta level_data_ptr
+    lda #>save_3
+    sta level_data_ptr+1
+
+    lda #<attr_3
+    sta attr_ptr
+    lda #>attr_3 
+    sta attr_ptr+1
+
+    lda #<palette_3
+    sta src_ptr
+    lda #>palette_3
+    sta src_ptr+1
+
+@slot_selected:
+    ldx #$00
+    stx $2001 ; disable rendering
+
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
+
+    ; disable NMI until load is complete
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    jsr decompress_level
+
+
+    ldx $00 ; nametable 0
+    jsr load_level
+    jsr load_attr
+
+    ; copy palette
+    lda #<level_palette
+    sta dest_ptr 
+    lda #>level_palette 
+    sta dest_ptr+1
+    ldy #PALETTE_SIZE
+    jsr memcpy
+
+    jsr init_game
+    lda #$00
+    sta nametable
+@no_slot:
 @done:
     rts 
 
@@ -539,8 +660,25 @@ start_input:
 
     rts 
 @not_editor_menu:
-    cmp GAME_MODE_PUZZLE
+    cmp #GAME_MODE_PUZZLE
     bne @not_puzzle
+    ; load nametable
+    lda #$00
+    sta $2001 ; no rendering
+
+    lda $2000
+    and #%01111111
+    ora nametable ; display the correct nametable to avoid flickering
+    sta $2000
+
+    lda #$01 
+    sta nametable
+
+    ldx #$00
+    stx menu_select
+    jsr load_menu
+    jsr init_main_menu
+
 @not_puzzle:
 @done:
     rts 
@@ -588,7 +726,16 @@ go_left:
     bne @not_editor_menu
 
     jsr go_left_editor_menu
-@not_editor_menu
+    rts 
+@not_editor_menu:
+    cmp #GAME_MODE_MENU
+    bne @not_main_menu
+    jsr go_left_main_menu
+    rts 
+@not_main_menu:
+    cmp #GAME_MODE_PUZZLE
+    bne @done
+    jsr go_left_editor
 @done:
     rts 
 
@@ -652,6 +799,15 @@ go_left_editor_menu:
 @done:
     rts 
 
+; main menu left input
+go_left_main_menu:
+    lda menu_select
+    cmp #MAIN_MENU_LEVEL 
+    bne @done:
+    dec level_select
+@done:
+    rts 
+
 ; right input
 go_right:
     jsr can_move
@@ -672,7 +828,16 @@ go_right:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
     jsr go_right_editor_menu
+    rts 
 @not_editor_menu:
+    cmp #GAME_MODE_MENU
+    bne @not_main_menu
+    jsr go_right_main_menu
+    rts
+@not_main_menu
+    cmp #GAME_MODE_PUZZLE
+    bne @done 
+    jsr go_right_editor
 @done:
     rts 
 
@@ -736,6 +901,15 @@ go_right_editor_menu:
 @done:
     rts 
 
+; main menu right input
+go_right_main_menu:
+    lda menu_select
+    cmp #MAIN_MENU_LEVEL
+    bne @done
+    inc level_select
+@done:
+    rts 
+
 ; up input
 go_up:
     jsr can_move
@@ -762,7 +936,11 @@ go_up:
     cmp #GAME_MODE_MENU
     bne @not_main_menu
     dec menu_select
+    rts 
 @not_main_menu:
+    cmp #GAME_MODE_PUZZLE
+    bne @done 
+    jsr go_up_editor
 @done:
     rts 
 
@@ -795,11 +973,16 @@ go_down:
     bne @not_editor_menu
 
     inc menu_select
+    rts 
 @not_editor_menu:
     cmp #GAME_MODE_MENU
     bne @not_main_menu
     inc menu_select
+    rts 
 @not_main_menu
+    cmp #GAME_MODE_PUZZLE
+    bne @done 
+    jsr go_down_editor
 @done: 
     rts 
 

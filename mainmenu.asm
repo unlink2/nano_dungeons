@@ -19,10 +19,6 @@ init_main_menu:
 
     ; move unsued sprites off-screen
     lda #$00
-    sta sprite_data_1
-    sta sprite_data_1+3
-    sta sprite_data_2
-    sta sprite_data_2+3
     sta sprite_data_3
     sta sprite_data_3+3
     sta sprite_data_4 
@@ -40,6 +36,16 @@ init_main_menu:
     sta sprite_data_A 
     sta sprite_data_A+3
 
+    ; level select display
+    lda #$09*08 ; x position
+    sta sprite_data_1+3
+    lda #$08*08 ; x positon
+    sta sprite_data_2+3
+
+    lda #$08*08 ; y position
+    sta sprite_data_1
+    sta sprite_data_2
+
     ; cursor sprite
     lda #$31 
     sta sprite_data+1
@@ -48,7 +54,8 @@ init_main_menu:
     lda #<palette_data 
     sta palette_ptr 
     lda #>palette_data
-    sta palette_ptr
+    sta palette_ptr+1
+    jsr load_palette
 
     rts 
 
@@ -76,5 +83,18 @@ update_main_menu:
 
     lda main_menu_cursor_attr, x
     sta sprite_data+2
+
+    ; use 2 sprites to display the currently selected level
+    lda level_select 
+    and #$0F 
+    sta sprite_data_1+1
+    lda level_select
+    and #$F0 
+    lsr 
+    lsr 
+    lsr 
+    lsr 
+    sta sprite_data_2+1
+
 @done:
     jmp update_done

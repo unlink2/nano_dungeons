@@ -260,6 +260,7 @@ update_done: rti
 .include "./input.asm"
 .include "./editor.asm"
 .include "./mainmenu.asm"
+.include "./game.asm"
 
 .include "./map.asm"
 
