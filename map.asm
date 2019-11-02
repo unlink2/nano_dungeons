@@ -480,11 +480,15 @@ load_level_iter:
 
 ; this sub routine updates a tile at
 ; the player's current x/y position (tile location)
-; with the player's currently active tile
+; with the player's currently active tile if the game is in editor mode
+; or sets it
+; to a passed over tile when game mode is in puzzle mode
+; a tile is considered 'passed' when the 7th bit is set, and not passed if it is not set
 ; inputs:
 ;   player_x -> x position
 ;   player_y -> y position
 ;   sprite_data+1 -> the tile to place
+;   game_mode -> decides the effect of the update
 ; side effects:
 ;   updates level_data and nametable
 ;   changes registers and flags
@@ -527,10 +531,20 @@ update_tile:
     lda temp
     sta $2006 ; set up ppu for tile transfer
 
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @not_editor
+
     lda sprite_data+1
+    jmp @update
+@not_editor:
+    ldy #$00 
+    lda (level_ptr), y 
+    eor #%10000000
+@update: 
     sta $2007 ; store in ppu
     ldy #$00 
-    sta (level_ptr), y 
+    sta (level_ptr), y ; store in level
 
     ; restore level_ptr 
     pla 
@@ -542,6 +556,45 @@ update_tile:
     sta $2005 ; no horizontal scroll 
     sta $2005 ; no vertical scroll
 
+    rts 
+
+; this sub routine returns the current
+; tile at the player's position
+; inputs:
+;   player_x
+;   player_y 
+; side effects:
+;   registers are modified
+; returns:
+;   a -> the tile index
+get_tile:
+    ; store all pointers
+    lda level_ptr
+    pha 
+    lda level_ptr+1
+    pha 
+
+    ldx player_y 
+    lda tile_update_table_lo, x
+    clc 
+    adc player_x
+    sta level_ptr
+
+    lda tile_update_table_hi, x 
+    adc level_ptr+1
+    sta level_ptr+1
+
+    ldy #$00 
+    lda (level_ptr), y
+    tax  
+
+    ; restore level_ptr 
+    pla 
+    sta level_ptr+1
+    pla 
+    sta level_ptr
+
+    txa 
     rts 
 
 ; this sub routine updates an attribute at the 
