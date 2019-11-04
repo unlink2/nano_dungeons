@@ -117,10 +117,10 @@ palette_2 PALETTE_SIZE ; palette 2
 palette_3 PALETTE_SIZE ; palette 3
 .ende 
 
-.macro @vblank_wait
-@vblank:
+.macro vblank_wait
+@.mi.vblank:
     bit $2002
-    bpl @vblank
+    bpl @.mi.vblank
 .endm
 
 .org $C000 ; start of program
@@ -136,7 +136,7 @@ init:
     stx $2001 ; disable rendering
     stx $4010 ; disable DMC IRQs
 
-    @vblank_wait
+    vblank_wait
 
     ldx #$FF
 clear_mem:
@@ -154,7 +154,7 @@ clear_mem:
     bne clear_mem
     
 
-    @vblank_wait
+    vblank_wait
 
     ; set up palette pointer
     ldx #$00 
