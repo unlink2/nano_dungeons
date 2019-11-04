@@ -59,6 +59,29 @@ convert_tile_location:
 @done:
     rts
 
+; this sub routine applies smooth scrolling
+; to sprite 0
+; inputs:
+;   smooth_up,_down,_left,_right
+; side effects:
+;   changes position of sprite 0
+;   overwirtes a and carry flag
+apply_smooth:
+    lda sprite_data  
+    sec 
+    sbc smooth_down
+    clc 
+    adc smooth_up
+    sta sprite_data
+
+    lda sprite_data+3
+    sec 
+    sbc smooth_right
+    clc 
+    adc smooth_left 
+    sta sprite_data+3
+    rts 
+
 ; this sub routine copies memory from one 
 ; location to another
 ; inputs:

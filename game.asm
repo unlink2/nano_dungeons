@@ -85,4 +85,26 @@ update_game:
     lda player_y 
     sta player_y_bac
 
+    ; dec smooht values
+    lda #$00 
+    cmp smooth_left 
+    beq @no_dec_left
+    dec smooth_left
+@no_dec_left
+
+    cmp smooth_right 
+    beq @no_dec_right 
+    dec smooth_right
+@no_dec_right:
+
+    cmp smooth_up 
+    beq @no_dec_up 
+    dec smooth_up
+@no_dec_up:
+
+    cmp smooth_down 
+    beq @no_dec_down
+    dec smooth_down
+@no_dec_down:
+
     jmp update_done

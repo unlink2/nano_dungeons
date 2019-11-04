@@ -36,6 +36,12 @@ init_main_menu:
     sta sprite_data_A 
     sta sprite_data_A+3
 
+    ; no smooth scrolling outside of in-game mode
+    sta smooth_left 
+    sta smooth_right 
+    sta smooth_up 
+    sta smooth_down
+
     ; level select display
     lda #$09*08 ; x position
     sta sprite_data_1+3

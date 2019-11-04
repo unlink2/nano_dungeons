@@ -736,6 +736,8 @@ go_left:
     cmp #GAME_MODE_PUZZLE
     bne @done
     jsr go_left_editor
+    lda #$08 
+    sta smooth_left
 @done:
     rts 
 
@@ -838,6 +840,8 @@ go_right:
     cmp #GAME_MODE_PUZZLE
     bne @done 
     jsr go_right_editor
+    lda #$08 
+    sta smooth_right
 @done:
     rts 
 
@@ -941,6 +945,8 @@ go_up:
     cmp #GAME_MODE_PUZZLE
     bne @done 
     jsr go_up_editor
+    lda #$08 
+    sta smooth_up
 @done:
     rts 
 
@@ -983,6 +989,8 @@ go_down:
     cmp #GAME_MODE_PUZZLE
     bne @done 
     jsr go_down_editor
+    lda #$08 
+    sta smooth_down
 @done: 
     rts 
 

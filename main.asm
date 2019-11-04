@@ -88,6 +88,11 @@ attr_value 1 ; value used for attribute painting
 level_select 1 ; value used to select a level
 color_select 1 ; value for color to be edited
 hex_buffer 2 ; buffer to convert hex number to be output on screen
+
+smooth_up 1 ; smooht movement up
+smooth_down 1 ; smooth movement down
+smooth_left 1 ; smooth movement left 
+smooth_right 1 ; smooth movement right
 .ende
 
 ; start of prg ram
@@ -219,6 +224,10 @@ main_loop:
 
 nmi: 
     jsr convert_tile_location
+
+    ; apply smooth scrolling offsets
+    jsr apply_smooth
+
 
     inc frame_count
     ldx move_delay
