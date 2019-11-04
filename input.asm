@@ -400,12 +400,6 @@ a_input_main_menu:
     ; disable NMI until load is complete
     set_nmi_flag
 
-    jsr decompress_level
-
-
-    ldx $00 ; nametable 0
-    jsr load_level
-    jsr load_attr
 
     ; copy palette
     lda #<level_palette
@@ -414,6 +408,13 @@ a_input_main_menu:
     sta dest_ptr+1
     ldy #PALETTE_SIZE
     jsr memcpy
+
+    jsr decompress_level
+
+
+    ldx $00 ; nametable 0
+    jsr load_level
+    jsr load_attr
 
     jsr init_game
     lda #$00
@@ -535,13 +536,14 @@ b_input_editor_menu:
     ldx #$00
     stx $2001 ; disable rendering
 
+
+    ; disable NMI until load is complete
+    set_nmi_flag
+
     lda #<level_data 
     sta level_ptr 
     lda #>level_data 
     sta level_ptr+1
-
-    ; disable NMI until load is complete
-    set_nmi_flag
 
     jsr decompress_level
 

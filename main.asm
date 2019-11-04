@@ -288,6 +288,11 @@ nmi:
     lda #%00011110   ; enable sprites
     sta $2001
 
+    ; if load nmi flag is set skip normal updates until next frame
+    lda nmi_flags
+    and #%00000001
+    bne update_done
+
     jsr adjust_smooth
 
     jmp (update_sub) ; jump to specific update sub routine
