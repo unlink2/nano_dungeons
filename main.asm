@@ -42,7 +42,7 @@
 
 .enum $00
 frame_count 1
-nmi_flags 1 ; 0th bit = 1 -> loading
+nmi_flags 1 ; 0th bit = 1 -> loading, 1st bit = 1 -> nmi active, clear at end of nmi
 rand8 1
 game_mode 1
 move_delay 1 ; delay between move inputs
@@ -246,8 +246,15 @@ nmi:
     pha 
 
     lda nmi_flags 
-    and #%00000001
+    and #%00000010
     bne nmi_flag_set
+
+    ; don't allow nmi until
+    ; this one finishes
+    ; nmi active flag
+    lda nmi_flags 
+    ora #%00000010
+    sta nmi_flags
 
     jsr convert_tile_location
 
@@ -300,6 +307,10 @@ update_done:
     ; always clear the nmi flag when 
     ; a normal nmi finishes
     unset_nmi_flag
+    ; unset nmi active flag
+    lda nmi_flags
+    and #%11111101
+    sta nmi_flags
 nmi_flag_set:
     pla 
     tay 
@@ -308,7 +319,6 @@ nmi_flag_set:
     pla
     rti
 
-    rti 
 
 .include "./utility.asm"
 .include "./input.asm"
@@ -325,10 +335,10 @@ palette_data_end:
 
 ; compressed menu gfx
 editor_menu_gfx:
-.incbin "./editor.gfx"
+.incbin "./graphics/editor.gfx"
 
 main_menu_gfx:
-.incbin "./mainmenu.gfx"
+.incbin "./graphics/mainmenu.gfx"
 
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
@@ -500,4 +510,4 @@ palette_table_hi:
 
 ; chr bank 8k
 .base $0000
-.incbin "./gfx.chr" ; exported memory dump from mesen
+.incbin "./graphics/gfx.chr" ; exported memory dump from mesen
