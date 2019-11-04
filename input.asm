@@ -719,6 +719,8 @@ go_left:
     bne @not_editor
 
     jsr go_left_editor
+    lda #$08 
+    sta smooth_left
 
     rts 
 @not_editor:
@@ -824,6 +826,8 @@ go_right:
     bne @not_editor
 
     jsr go_right_editor
+    lda #$08 
+    sta smooth_right
 
     rts 
 @not_editor:
@@ -928,6 +932,8 @@ go_up:
     bne @not_editor
 
     jsr go_up_editor
+    lda #$08 
+    sta smooth_up
 
     rts 
 
@@ -973,6 +979,9 @@ go_down:
     cmp #GAME_MODE_EDITOR
     bne @not_editor
     jsr go_down_editor
+    lda #$08 
+    sta smooth_down
+
     rts 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU

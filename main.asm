@@ -262,6 +262,8 @@ nmi:
     lda #%00011110   ; enable sprites
     sta $2001
 
+    jsr adjust_smooth
+
     jmp (update_sub) ; jump to specific update sub routine
 update_done: rti 
 

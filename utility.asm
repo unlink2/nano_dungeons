@@ -82,6 +82,37 @@ apply_smooth:
     sta sprite_data+3
     rts 
 
+; this sub routine decrements all
+; smooth movement values if they are greater than 0
+; inputs:
+;   smooth up, down, left, right
+; side effects:
+;   a register and carry flag are modified
+;   smooth_x values may be decremented
+adjust_smooth:
+    ; dec smooht values
+    lda #$00 
+    cmp smooth_left 
+    beq @no_dec_left
+    dec smooth_left
+@no_dec_left
+
+    cmp smooth_right 
+    beq @no_dec_right 
+    dec smooth_right
+@no_dec_right:
+
+    cmp smooth_up 
+    beq @no_dec_up 
+    dec smooth_up
+@no_dec_up:
+
+    cmp smooth_down 
+    beq @no_dec_down
+    dec smooth_down
+@no_dec_down:
+    rts 
+
 ; this sub routine copies memory from one 
 ; location to another
 ; inputs:
