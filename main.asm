@@ -306,6 +306,7 @@ nmi_flag_set:
     pla 
     txa 
     pla
+    rti
 
     rti 
 

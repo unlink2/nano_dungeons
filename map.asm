@@ -254,7 +254,9 @@ write_attr:
     cpy #ATTR_SIZE
     bne @attr_loop
 
-    rts 
+    lda #$00
+    sta $2005 
+    sta $2005 
 
     rts 
 

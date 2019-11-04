@@ -21,8 +21,9 @@ init_game:
     sta palette_ptr+1
     jsr load_palette
 
-    lda #$00 
+    lda player_x 
     sta player_x_bac
+    lda player_y 
     sta player_y_bac
 
     rts 

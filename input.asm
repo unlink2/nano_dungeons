@@ -196,6 +196,7 @@ a_input_editor_menu:
 
     jsr compress_level
 
+    vblank_wait
     ldx #$00
     jsr write_attr
     ;lda $2000
@@ -222,6 +223,8 @@ a_input_editor_menu:
     ldx #$00
     stx menu_select
     jsr load_menu
+
+    vblank_wait
     jsr init_main_menu
 @done:
     rts
@@ -274,6 +277,8 @@ a_input_editor_menu:
 
     lda #GAME_MODE_EDITOR
     sta game_mode
+
+    vblank_wait
     jsr init_editor
     lda #$00
     sta nametable
@@ -301,6 +306,7 @@ a_input_main_menu:
     sta menu_select
     sta sprite_data+1
 
+    vblank_wait
     jsr init_editor_menu
     rts
 
@@ -400,6 +406,13 @@ a_input_main_menu:
     ; disable NMI until load is complete
     set_nmi_flag
 
+    jsr decompress_level
+
+
+    ldx $00 ; nametable 0
+    jsr load_level
+    jsr load_attr
+
 
     ; copy palette
     lda #<level_palette
@@ -409,13 +422,7 @@ a_input_main_menu:
     ldy #PALETTE_SIZE
     jsr memcpy
 
-    jsr decompress_level
-
-
-    ldx $00 ; nametable 0
-    jsr load_level
-    jsr load_attr
-
+    vblank_wait
     jsr init_game
     lda #$00
     sta nametable
@@ -562,6 +569,8 @@ b_input_editor_menu:
 
     lda #GAME_MODE_EDITOR
     sta game_mode
+
+    vblank_wait
     jsr init_editor
     lda #$00
     sta nametable
@@ -657,6 +666,8 @@ start_input:
     ldx #$00
     stx menu_select
     jsr load_menu
+
+    vblank_wait
     jsr init_main_menu
 
 @not_puzzle:
