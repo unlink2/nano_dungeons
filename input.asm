@@ -192,10 +192,8 @@ a_input_editor_menu:
     ; NMI needs to be disabled 
     ; to prevent it being called again
     ; while compression is ongoing
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag 
+
     jsr compress_level
 
     ldx #$00
@@ -219,10 +217,7 @@ a_input_editor_menu:
     lda #$00
     sta $2001 ; no rendering
 
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     ldx #$00
     stx menu_select
@@ -264,10 +259,7 @@ a_input_editor_menu:
     sta level_ptr+1
 
     ; disable NMI until load is complete
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     jsr decompress_level
 
@@ -285,6 +277,7 @@ a_input_editor_menu:
     jsr init_editor
     lda #$00
     sta nametable
+
     rts 
 
 
@@ -293,10 +286,7 @@ a_input_main_menu:
     ldx #$00
     stx $2001 ; disable rendering
     ; disable NMI until load is complete
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     lda menu_select
     cmp #MAIN_MENU_EDITOR
@@ -408,10 +398,7 @@ a_input_main_menu:
     sta level_ptr+1
 
     ; disable NMI until load is complete
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     jsr decompress_level
 
@@ -554,10 +541,7 @@ b_input_editor_menu:
     sta level_ptr+1
 
     ; disable NMI until load is complete
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     jsr decompress_level
 
@@ -610,10 +594,7 @@ select_input_editor_menu:
     stx $2001 ; disable rendering
 
     ; disable NMI until load is complete
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     ldx palette
     inx 
@@ -666,10 +647,7 @@ start_input:
     lda #$00
     sta $2001 ; no rendering
 
-    lda $2000
-    and #%01111111
-    ora nametable ; display the correct nametable to avoid flickering
-    sta $2000
+    set_nmi_flag
 
     lda #$01 
     sta nametable

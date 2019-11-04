@@ -42,6 +42,7 @@
 
 .enum $00
 frame_count 1
+nmi_flags 1 ; 0th bit = 1 -> loading
 rand8 1
 game_mode 1
 move_delay 1 ; delay between move inputs
@@ -122,6 +123,20 @@ palette_3 PALETTE_SIZE ; palette 3
     bit $2002
     bpl @.mi.vblank
 .endm
+
+; this macro toggles the nmi enable flag
+.macro set_nmi_flag 
+    lda nmi_flags
+    ora #%0000001
+    sta nmi_flags
+.endm 
+
+.macro unset_nmi_flag
+    lda nmi_flags
+    and #%11111110
+    sta nmi_flags
+.endm 
+
 
 .org $C000 ; start of program
 init:
@@ -222,7 +237,18 @@ start:
 main_loop:
     jmp main_loop
 
-nmi: 
+nmi:
+    ; store registers
+    pha 
+    txa 
+    pha 
+    tya 
+    pha 
+
+    lda nmi_flags 
+    and #%00000001
+    bne nmi_flag_set
+
     jsr convert_tile_location
 
     ; apply smooth scrolling offsets
@@ -265,7 +291,18 @@ nmi:
     jsr adjust_smooth
 
     jmp (update_sub) ; jump to specific update sub routine
-update_done: rti 
+update_done: 
+    ; always clear the nmi flag when 
+    ; a normal nmi finishes
+    unset_nmi_flag
+nmi_flag_set:
+    pla 
+    tay 
+    pla 
+    txa 
+    pla
+
+    rti 
 
 .include "./utility.asm"
 .include "./input.asm"
