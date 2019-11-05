@@ -26,6 +26,10 @@ init_game:
     lda player_y 
     sta player_y_bac
 
+    ; player sprite
+    lda #$32 
+    sta sprite_data+1
+
     rts 
 
 ; this routine is called every frame
@@ -80,6 +84,8 @@ update_game:
     sta player_x
 @skip_tile_update:
 @player_not_moved:
+    jsr update_player_animation
+
     ; store previous position
     lda player_x 
     sta player_x_bac 
@@ -87,3 +93,52 @@ update_game:
     sta player_y_bac
 
     jmp update_done
+
+; this sub routine updates the player's animation based on 
+; the movement offset
+; inputs:
+;   smooth up, down, left, right
+; side effects:
+;   modifies registers, flags
+;   modifies player sprite and attributes
+update_player_animation:
+    ldx smooth_up
+    beq @not_up
+
+    lda player_animation_up, x 
+    sta sprite_data+1
+    lda player_attr_up, x 
+    sta sprite_data+2
+    rts 
+@not_up:
+
+    ldx smooth_down
+    beq @not_down
+
+    lda player_animation_down, x 
+    sta sprite_data+1
+    lda player_attr_down, x 
+    sta sprite_data+2
+    rts 
+@not_down:
+
+    ldx smooth_left
+    beq @not_left
+
+    lda player_animation_left, x 
+    sta sprite_data+1
+    lda player_attr_left, x 
+    sta sprite_data+2
+    rts 
+@not_left:
+
+    ldx smooth_right 
+    beq @not_right
+
+    lda player_animation_right, x 
+    sta sprite_data+1
+    lda player_attr_right, x 
+    sta sprite_data+2
+
+@not_right:
+    rts 

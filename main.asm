@@ -503,6 +503,96 @@ palette_table_hi:
 .db #>palette_data 
 .db #>palette_data
 
+; player animation frames for each direction
+player_animation_right:
+.db $32 ; idle 
+.db $32 ; idle 
+.db $35 
+.db $34 
+.db $33 
+.db $33 
+.db $34
+.db $35
+.db $35 ; rotation start again
+
+player_attr_right:
+.db %00000000 
+.db %00000000
+.db %00000000
+.db %00000000
+.db %01000000
+.db %01000000
+.db %01000000
+.db %01000000
+.db %01000000
+
+player_animation_left:
+.db $32 ; idle 
+.db $32 ; idle 
+.db $35 
+.db $34 
+.db $33 
+.db $33 
+.db $34
+.db $35
+.db $35 ; rotation start again
+
+player_attr_left:
+.db %01000000 
+.db %01000000
+.db %01000000
+.db %01000000
+.db %00000000
+.db %00000000
+.db %00000000
+.db %00000000
+.db %00000000
+
+player_animation_up:
+.db $32 ; idle 
+.db $32 ; idle 
+.db $35 
+.db $34 
+.db $33 
+.db $33 
+.db $34
+.db $35
+.db $35 ; rotation start again
+
+player_attr_up:
+.db %00000000 
+.db %00000000
+.db %00000000
+.db %00000000
+.db %01000000
+.db %01000000
+.db %01000000
+.db %01000000
+.db %01000000
+
+player_animation_down:
+.db $32 ; idle 
+.db $32 ; idle 
+.db $35 
+.db $34 
+.db $33 
+.db $33 
+.db $34
+.db $35
+.db $35 ; rotation start again
+
+player_attr_down:
+.db %00000000 
+.db %00000000
+.db %00000000
+.db %00000000
+.db %01000000
+.db %01000000
+.db %01000000
+.db %01000000
+.db %01000000
+
+
 .pad $FFFA
 .dw nmi ; nmi
 .dw init ; reset 
