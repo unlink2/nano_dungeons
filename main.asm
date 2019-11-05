@@ -62,6 +62,8 @@ palette_ptr 2 ; pointer to current palette
 
 src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
+
+last_inputs 1 ; inputs of controller 1
 .ende
 
 ; sprite memory
@@ -507,13 +509,13 @@ palette_table_hi:
 player_animation_right:
 .db $32 ; idle 
 .db $32 ; idle 
+.db $35 
 .db $36 
-.db $36 
-.db $36 
-.db $36 
+.db $34 
+.db $33 
+.db $34
 .db $36
-.db $36
-.db $36 ; rotation start again
+.db $35 ; rotation start again
 
 player_attr_right:
 .db %00000000 

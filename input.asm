@@ -1,5 +1,8 @@
 ; handles all inputs
 input_handler:
+    lda #$00 
+    sta last_inputs
+
     ; reset latch
     lda #$01 
     sta $4016
@@ -10,48 +13,89 @@ input_handler:
     and #%00000001 
     beq @no_a
     jsr a_input
+
+    ; was pressed
+    lda last_inputs
+    ora #%00000001
+    sta last_inputs
+
 @no_a:
 
     lda $4016 ; p1 - B
     and #%00000001
     beq @no_b
     jsr b_input
+
+    ; was pressed
+    lda last_inputs
+    ora #%00000010
+    sta last_inputs
 @no_b:
 
     lda $4016 ; p1 - select
     and #%00000001
     beq @no_select
     jsr select_input
+
+    ; was pressed
+    lda last_inputs
+    ora #%00000100
+    sta last_inputs
 @no_select:
 
     lda $4016 ; p1 - start
     and #%00000001
     beq @no_start 
     jsr start_input
+
+    ; was pressed
+    lda last_inputs
+    ora #%00001000
+    sta last_inputs
 @no_start:
 
     lda $4016 ; p1 - up
     and #%0000001
     beq @no_up
     jsr go_up
+
+    ; was pressed
+    lda last_inputs
+    ora #%00010000
+    sta last_inputs
 @no_up:
 
     lda $4016 ; p1 - down
     and #%00000001
     beq @no_down 
     jsr go_down
+
+    ; was pressed
+    lda last_inputs
+    ora #%00100000
+    sta last_inputs
 @no_down:
 
     lda $4016 ; p1 - left
     and #%00000001
     beq @no_left 
     jsr go_left
+
+    ; was pressed
+    lda last_inputs
+    ora #%01000000
+    sta last_inputs
 @no_left:
 
     lda $4016 ; p1 - right 
     and #%00000001
     beq @no_right 
     jsr go_right
+
+    ; was pressed
+    lda last_inputs
+    ora #%10000000
+    sta last_inputs
 @no_right:
     rts     
 

@@ -102,43 +102,16 @@ update_game:
 ;   modifies registers, flags
 ;   modifies player sprite and attributes
 update_player_animation:
-    ldx smooth_up
-    beq @not_up
+    lda last_inputs
+    and #%11110000
+    beq @idle
 
-    lda player_animation_up, x 
+    ; TODO check for specific keys
+
+@idle 
+    lda #$32
     sta sprite_data+1
-    lda player_attr_up, x 
-    sta sprite_data+2
-    rts 
-@not_up:
-
-    ldx smooth_down
-    beq @not_down
-
-    lda player_animation_down, x 
-    sta sprite_data+1
-    lda player_attr_down, x 
-    sta sprite_data+2
-    rts 
-@not_down:
-
-    ldx smooth_left
-    beq @not_left
-
-    lda player_animation_left, x 
-    sta sprite_data+1
-    lda player_attr_left, x 
-    sta sprite_data+2
-    rts 
-@not_left:
-
-    ldx smooth_right 
-    beq @not_right
-
-    lda player_animation_right, x 
-    sta sprite_data+1
-    lda player_attr_right, x 
+    lda #$00 
     sta sprite_data+2
 
-@not_right:
     rts 
