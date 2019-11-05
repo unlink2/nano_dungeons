@@ -507,13 +507,13 @@ palette_table_hi:
 player_animation_right:
 .db $32 ; idle 
 .db $32 ; idle 
-.db $35 
-.db $34 
-.db $33 
-.db $33 
-.db $34
-.db $35
-.db $35 ; rotation start again
+.db $36 
+.db $36 
+.db $36 
+.db $36 
+.db $36
+.db $36
+.db $36 ; rotation start again
 
 player_attr_right:
 .db %00000000 
