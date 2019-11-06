@@ -153,3 +153,13 @@ convert_hex:
     sta hex_buffer+1
     
     rts 
+
+; this sub routine 
+; makes an indirect jsr 
+; based on src_ptr
+; inputs
+;   src_ptr -> the rotuine to jump to
+; side effects:
+;   depends on indirect routine called
+jsr_indirect:
+    jmp (src_ptr)

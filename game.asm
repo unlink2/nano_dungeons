@@ -51,6 +51,12 @@ update_game:
     cmp #$01 
     bne @player_not_moved
 
+    ; test collision
+    jsr collision_check
+    ; if a = 1 collision occured
+    cmp #$01
+    beq @player_not_moved 
+
     ; test if the current tile
     ; is already marked if so, do not update the previous tile but rather unmark the current
     jsr get_tile 
@@ -114,4 +120,45 @@ update_player_animation:
     lda #$00 
     sta sprite_data+2
 
+    rts
+
+; checks for player collision based on the currently occupied tile
+; inputs:
+;   player_x, y and respective _bac 
+; side effects:
+;   if tile does collide, player position is restored 
+;   to values in _bac
+;   overwrites src_ptr
+; returns:
+;   a = 0 -> if collision did not occur
+;   a = 1 -> if collision occured
+collision_check:
+    jsr get_tile
+    tax 
+    ; get routine for current tile 
+    lda tile_sub_lo, x 
+    sta src_ptr 
+    lda tile_sub_hi, x 
+    sta src_ptr+1
+
+    jsr jsr_indirect
+    cmp #$01 
+    bne @no_collision
+
+    ; if collision, restore previous location
+    ; and remove smooth movement
+    ldx #$00 
+    stx smooth_left 
+    stx smooth_right 
+    stx smooth_up 
+    stx smooth_down
+
+    ldx player_x_bac 
+    stx player_x
+    ldx player_y_bac
+    stx player_y
+
+    jsr convert_tile_location
+
+@no_collision:
     rts 

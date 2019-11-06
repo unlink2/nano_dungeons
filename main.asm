@@ -329,6 +329,7 @@ nmi_flag_set:
 .include "./game.asm"
 
 .include "./map.asm"
+.include "./tiles.asm"
 
 palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
@@ -594,6 +595,16 @@ player_attr_down:
 .db %01000000
 .db %01000000
 
+; sub routine for tiles, based on tile index
+tile_sub_lo:
+.mrep $FF 
+.db #<no_collision
+.endrep
+
+tile_sub_hi:
+.mrep $FF 
+.db #>no_collision
+.endrep
 
 .pad $FFFA
 .dw nmi ; nmi
