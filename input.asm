@@ -698,6 +698,20 @@ start_input:
 @not_editor_menu:
     cmp #GAME_MODE_PUZZLE
     bne @not_puzzle
+
+    jsr start_input_win
+
+    rts 
+@not_puzzle:
+    cmp #GAME_MODE_WIN
+    bne @not_win 
+    jsr start_input_win
+@not_win:
+@done:
+    rts
+
+; start input for win
+start_input_win:
     ; load nametable
     lda #$00
     sta $2001 ; no rendering
@@ -713,9 +727,6 @@ start_input:
 
     vblank_wait
     jsr init_main_menu
-
-@not_puzzle:
-@done:
     rts 
 
 ; editor menu start input

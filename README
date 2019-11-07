@@ -58,5 +58,4 @@ Blocks:
 - Space blocks (can be walked on)
 - One way blocks in all directions
 - Switch blocks that make blocks (im)passible. Switch blocks will be blocked off with sprites
-- Start block 
-- End block 
+- Start block (TODO handle error when no start is present) 

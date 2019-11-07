@@ -360,6 +360,13 @@ editor_menu_gfx:
 main_menu_gfx:
 .incbin "./graphics/mainmenu.gfx"
 
+win_gfx:
+.incbin "./graphics/win.gfx"
+win_attr:
+.incbin "./graphics/win.attr"
+win_pal:
+.incbin "./graphics/win.pal"
+
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
 .db $01 ; location save 1
@@ -496,32 +503,38 @@ map_table_lo:
 .db #<empty_map
 .db #<editor_menu_gfx
 .db #<main_menu_gfx
+.db #<win_gfx
 
 map_table_hi:
 .db #>empty_map
 .db #>editor_menu_gfx
 .db #>main_menu_gfx
+.db #>win_gfx
 
 ; color attribute lookup table
 attr_table_lo:
 .db #<test_attr
 .db #<test_attr
 .db #<test_attr
+.db #<win_attr
 
 attr_table_hi:
 .db #>test_attr
 .db #>test_attr
 .db #>test_attr
+.db #>win_attr
 
 ; color palette table
 palette_table_lo:
 .db #<palette_data
 .db #<palette_data
 .db #<palette_data
+.db #<win_pal
 palette_table_hi:
 .db #>palette_data
 .db #>palette_data 
 .db #>palette_data
+.db #>win_pal
 
 ; player animation frames for each direction
 player_animation_right:

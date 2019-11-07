@@ -32,6 +32,13 @@ init_game:
     lda #$32 
     sta sprite_data+1
 
+    ; move other sprites offscreen
+    lda #$00 
+    sta sprite_data_1 
+    sta sprite_data_1+3
+    sta sprite_data_2 
+    sta sprite_data_2+3
+
     rts 
 
 ; this routine is called every frame
@@ -100,6 +107,28 @@ update_game:
     lda player_y 
     sta player_y_bac
 
+    ; test victory condition
+    ; if only one tile is left to clear the player must be on it
+    lda tiles_to_clear+1
+    cmp #$00 
+    bne @done
+    lda tiles_to_clear 
+    cmp #$01
+    bne @done
+
+    lda #$00
+    sta $2001 ; no rendering
+
+    lda #$01 
+    sta nametable
+
+    set_nmi_flag
+
+    ldx #GAME_MODE_WIN 
+    stx game_mode
+    jsr load_menu
+    jsr init_win
+@done:
     jmp update_done
 
 ; this sub routine updates the player's animation based on 
@@ -198,4 +227,23 @@ update_tiles_to_clear:
     sta tiles_to_clear+1
 @done:
     pla 
+    rts 
+
+; this sub routine loads the win screen
+; inputs:
+;   none
+; side effects:
+;   inits a new game mode
+init_win:
+    lda #$00 ; move player offscreen
+    sta sprite_data
+    sta sprite_data+3
+    sta player_x 
+    sta player_y
+    sta player_x_bac
+    sta player_y_bac
+    rts 
+
+; update routine for the win screen
+update_win:
     rts 
