@@ -46,10 +46,13 @@
 .define CLEARABLE_TILES_START $60
 .define CLEARABLE_TILES_END $7f
 
+.define ERROR_NO_START_TILE 1
+
 .enum $00
 frame_count 1
 nmi_flags 1 ; 0th bit = 1 -> loading; 1st bit = 1 -> nmi active, clear at end of nmi
 game_flags 1 ; 0th bit = 1 -> switch disabled, barries can be passed
+errno 1 ; error number, nonzero values are errors
 
 rand8 1
 game_mode 1
@@ -304,6 +307,20 @@ nmi:
     sta $2005 ; no horizontal scroll 
     sta $2005 ; no vertical scroll
     
+    ; error handler
+    ldx errno
+    beq @no_error
+    lda error_lo, x 
+    sta src_ptr
+    lda error_hi, x 
+    sta src_ptr+1
+    jsr jsr_indirect
+
+    lda #$00 
+    sta errno
+    jmp update_done
+@no_error:
+
     ; inputs
     jsr input_handler
 
@@ -650,6 +667,15 @@ tile_sub_hi:
 .mrep $FF-CLEARABLE_TILES_START
 .db #>no_collision
 .endrep 
+
+; error handlers
+error_lo:
+.db $00 
+.db #<load_map_start_error
+
+error_hi:
+.db $00
+.db #>load_map_start_error
 
 .pad $FFFA
 .dw nmi ; nmi

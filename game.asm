@@ -26,8 +26,8 @@ init_game:
     cmp #$01 
     beq @no_error 
     ; error state
-    jsr load_map_start_error 
-    rts 
+    lda #ERROR_NO_START_TILE
+    sta errno
 @no_error:
 
     lda player_x 

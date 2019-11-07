@@ -524,8 +524,8 @@ load_menu:
 ;   overwrites nt1
 ;   registers/flags changed
 load_map_start_error:
-    ; lda #$00
-    ; sta $2001 ; no rendering
+    lda #$00
+    sta $2001 ; no rendering
 
     set_nmi_flag
 
