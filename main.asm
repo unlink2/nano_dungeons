@@ -507,12 +507,14 @@ map_table_lo:
 .db #<editor_menu_gfx
 .db #<main_menu_gfx
 .db #<win_gfx
+.db #<no_start_msg_gfx
 
 map_table_hi:
 .db #>empty_map
 .db #>editor_menu_gfx
 .db #>main_menu_gfx
 .db #>win_gfx
+.db #>no_start_msg_gfx
 
 ; color attribute lookup table
 attr_table_lo:
@@ -520,12 +522,14 @@ attr_table_lo:
 .db #<test_attr
 .db #<test_attr
 .db #<win_attr
+.db #<test_attr
 
 attr_table_hi:
 .db #>test_attr
 .db #>test_attr
 .db #>test_attr
 .db #>win_attr
+.db #>test_attr
 
 ; color palette table
 palette_table_lo:
@@ -533,11 +537,13 @@ palette_table_lo:
 .db #<palette_data
 .db #<palette_data
 .db #<win_pal
+.db #<palette_data
 palette_table_hi:
 .db #>palette_data
 .db #>palette_data 
 .db #>palette_data
 .db #>win_pal
+.db #>palette_data
 
 ; player animation frames for each direction
 player_animation_right:
