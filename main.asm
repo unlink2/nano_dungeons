@@ -12,6 +12,7 @@
 .define GAME_MODE_PUZZLE 1
 .define GAME_MODE_EDITOR 2
 .define GAME_MODE_EDITOR_MENU 3
+.define GAME_MODE_WIN 4
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
@@ -40,9 +41,16 @@
 .define MAIN_MENU_SLOT_3 3
 .define MAIN_MENU_EDITOR 4
 
+; start and end of non-collision tiles
+.define START_TILE $60
+.define CLEARABLE_TILES_START $60
+.define CLEARABLE_TILES_END $7f
+
 .enum $00
 frame_count 1
-nmi_flags 1 ; 0th bit = 1 -> loading, 1st bit = 1 -> nmi active, clear at end of nmi
+nmi_flags 1 ; 0th bit = 1 -> loading; 1st bit = 1 -> nmi active, clear at end of nmi
+game_flags 1 ; 0th bit = 1 -> switch disabled, barries can be passed
+
 rand8 1
 game_mode 1
 move_delay 1 ; delay between move inputs
@@ -64,6 +72,10 @@ src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
 
 last_inputs 1 ; inputs of controller 1
+
+; 16 bit count of tiles that have to be cleared, when both are $00 map is won
+; this is populated during decompression of a map
+tiles_to_clear 2 
 .ende
 
 ; sprite memory
@@ -83,10 +95,15 @@ sprite_data_A 4 ; sprite 11
 sprite_data_pad 212 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 level_palette PALETTE_SIZE ; palette used by the currently loaded level, is copied whenever a level becomes active
+
 player_x 1 ; tile location of player 
 player_y 1 ; tile location of player
 player_x_bac 1 ; backup location 
 player_y_bac 1 ; backup location
+
+start_x 1 ; x and y value of start location 
+start_y 1 ; values are populated during decompression
+
 attr_value 1 ; value used for attribute painting
 level_select 1 ; value used to select a level
 color_select 1 ; value for color to be edited
@@ -597,14 +614,20 @@ player_attr_down:
 
 ; sub routine for tiles, based on tile index
 tile_sub_lo:
-.mrep $FF 
-.db #<no_collision
+.mrep CLEARABLE_TILES_START 
+.db #<collision
 .endrep
+.mrep $FF-CLEARABLE_TILES_START
+.db #<no_collision
+.endrep 
 
 tile_sub_hi:
-.mrep $FF 
-.db #>no_collision
+.mrep CLEARABLE_TILES_START
+.db #>collision
 .endrep
+.mrep $FF-CLEARABLE_TILES_START
+.db #>no_collision
+.endrep 
 
 .pad $FFFA
 .dw nmi ; nmi

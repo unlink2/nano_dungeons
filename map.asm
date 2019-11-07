@@ -12,6 +12,11 @@
 ;   all registers and flags may be changed
 ;   temp is written to
 decompress_level:
+    ; clear tile position
+    lda #$00 
+    sta tiles_to_clear
+    sta tiles_to_clear
+
     ; save level data ptr
     lda level_data_ptr 
     pha 
@@ -87,11 +92,30 @@ inc_level_data_ptr:
 ; side effects:
 ;   increments level_ptr_temp for each iteration
 ;   y is set to 0
+;   start_x and y may be set
+;   tiles_to_clear may be incremented
 write_decompressed_byte:
     ldy #$00 
 
     sta (level_ptr_temp), y
+
     pha ; store current value
+
+    ; check tile id, between START and END value
+    cmp #CLEARABLE_TILES_START
+    bcc @not_clearable
+
+    cmp #CLEARABLE_TILES_END
+    bcs @not_clearable
+
+    lda tiles_to_clear
+    clc 
+    adc #$01 
+    sta tiles_to_clear
+    lda tiles_to_clear+1
+    adc #$00
+    sta tiles_to_clear+1
+@not_clearable:
 
     ; 16 bit add
     lda level_ptr_temp
@@ -494,6 +518,7 @@ load_level_iter:
 ; side effects:
 ;   updates level_data and nametable
 ;   changes registers and flags
+;   increments or decrements tiles_to_clear if in puzzle mode
 update_tile:
     ; store all pointers
     lda level_ptr
@@ -543,6 +568,7 @@ update_tile:
     ldy #$00 
     lda (level_ptr), y 
     eor #%10000000
+    jsr update_tiles_to_clear
 @update: 
     sta $2007 ; store in ppu
     ldy #$00 

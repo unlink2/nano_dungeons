@@ -162,3 +162,38 @@ collision_check:
 
 @no_collision:
     rts 
+
+; this sub routine updates the tiles to clear counter
+; it does this based on the negative flag
+; inputs:
+;   N flag = 0 -> dec
+;   N flag = 1 -> inc
+; side effects:
+;   tiles_to_clear is changed
+;   flags may be changed
+;   registers are preserved
+update_tiles_to_clear:
+    pha 
+    ; eor sets the negative flag when bit 7 is set
+    ; since that is exactly the bit we set we can use it to
+    ; decide wheter to inc or dec
+    bmi @negative_flag
+    lda tiles_to_clear
+    clc    
+    adc #$01 
+    sta tiles_to_clear
+    lda tiles_to_clear+1
+    adc #$00 
+    sta tiles_to_clear+1
+    jmp @done
+@negative_flag:
+    lda tiles_to_clear
+    sec 
+    sbc #$01 
+    sta tiles_to_clear
+    lda tiles_to_clear+1
+    sbc #$00 
+    sta tiles_to_clear+1
+@done:
+    pla 
+    rts 
