@@ -677,6 +677,58 @@ update_attr:
 
     rts 
 
+; this sub routine finds the start location 
+; of the currently loaded level
+; it loops until start is found, or
+; 960 bytes are reached
+; inputs:
+;   level_ptr pointing to level
+; side effects:
+;   sets start_x and y
+;   player_x and player_y are set to start location
+;   a and x are used
+; returns:
+;   a = 1 if location found
+;   a = 0 if no location found = ERROR state
+find_start:
+    lda #$00 
+    sta start_x 
+    sta start_y 
+    sta player_x 
+    sta player_y
+@x_loop:
+    jsr get_tile
+    cmp #START_TILE ; if current tile is start tile we found it
+    beq @found 
+
+    ldx player_x
+    inx 
+    txa   
+    and #%00011111 ; cannot be greater than 32
+    sta player_x
+    bne @x_loop
+    ; if zero increemnt y 
+    ldx player_y 
+    inx 
+    cpx #30 ; cant be more than 29 y
+    beq @done 
+    stx player_y
+    bne @x_loop
+@done:
+    lda #$01 ; not found!
+    sta player_x 
+    sta player_y 
+    sta start_x 
+    sta start_y 
+    rts 
+@found:
+    lda player_x 
+    sta start_x 
+    lda player_y 
+    sta start_y
+    lda #$00 ; found
+    rts 
+
 ; TODO
 ; this sub routine clears all bytes 
 ; used by level_ptr
