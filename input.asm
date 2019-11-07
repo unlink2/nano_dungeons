@@ -466,10 +466,11 @@ a_input_main_menu:
     ldy #PALETTE_SIZE
     jsr memcpy
 
-    vblank_wait
-    jsr init_game
     lda #$00
     sta nametable
+
+    vblank_wait
+    jsr init_game
 @no_slot:
 @done:
     rts 
@@ -591,7 +592,7 @@ b_input_editor_menu:
     ; disable NMI until load is complete
     set_nmi_flag
 
-    lda #<level_data 
+    lda #<level_data
     sta level_ptr 
     lda #>level_data 
     sta level_ptr+1
@@ -699,19 +700,19 @@ start_input:
     cmp #GAME_MODE_PUZZLE
     bne @not_puzzle
 
-    jsr start_input_win
+    jsr start_input_message
 
     rts 
 @not_puzzle:
-    cmp #GAME_MODE_WIN
+    cmp #GAME_MODE_MESSAGE
     bne @not_win 
-    jsr start_input_win
+    jsr start_input_message
 @not_win:
 @done:
     rts
 
 ; start input for win
-start_input_win:
+start_input_message:
     ; load nametable
     lda #$00
     sta $2001 ; no rendering

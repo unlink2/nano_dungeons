@@ -479,7 +479,7 @@ load_menu:
     rts 
 
 @not_main:
-    cpx #GAME_MODE_WIN
+    cpx #GAME_MODE_MESSAGE
     bne @invalid_menu
 
     ; load win menu compressed tiles
@@ -513,6 +513,50 @@ load_menu:
     jsr load_level
 
 @invalid_menu:
+    rts 
+
+; this sub routine displays
+; a map load error
+; inputs:
+;   none
+; side effects:
+;   decompresses a map, 
+;   overwrites nt1
+;   registers/flags changed
+load_map_start_error:
+    ; lda #$00
+    ; sta $2001 ; no rendering
+
+    set_nmi_flag
+
+    lda #GAME_MODE_MESSAGE 
+    sta game_mode
+    
+    lda #$01 
+    sta nametable
+
+    lda #<update_none 
+    sta update_sub
+    lda #>update_none
+    sta update_sub+1
+
+    ; load editor menu compressed tiles
+    lda #<no_start_msg_gfx
+    sta level_data_ptr
+    lda #>no_start_msg_gfx
+    sta level_data_ptr+1
+
+    ; decompress location, same as level
+    lda #<level_data 
+    sta level_ptr 
+    lda #>level_data 
+    sta level_ptr+1
+
+    jsr decompress_level
+
+    ldx #$01 ; load into nametable 1
+    jsr load_level
+
     rts 
 
 ; increments level ptr by FF
@@ -750,7 +794,7 @@ find_start:
     stx player_y
     bne @x_loop
 @done:
-    lda #$01 ; not found!
+    lda #$00 ; not found!
     sta player_x 
     sta player_y 
     sta start_x 
@@ -761,7 +805,7 @@ find_start:
     sta start_x 
     lda player_y 
     sta start_y
-    lda #$00 ; found
+    lda #$01 ; found
     rts 
 
 ; TODO

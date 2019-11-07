@@ -163,3 +163,7 @@ convert_hex:
 ;   depends on indirect routine called
 jsr_indirect:
     jmp (src_ptr)
+
+; this sub routine is a no-op update routine
+update_none:
+    jmp update_done

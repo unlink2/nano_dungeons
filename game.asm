@@ -22,6 +22,13 @@ init_game:
     jsr load_palette
 
     jsr find_start
+    ; check if start was found
+    cmp #$01 
+    beq @no_error 
+    ; error state
+    jsr load_map_start_error 
+    rts 
+@no_error:
 
     lda player_x 
     sta player_x_bac
@@ -116,6 +123,13 @@ update_game:
     cmp #$01
     bne @done
 
+    ; only finish if movment finished as well
+    lda smooth_up
+    ora smooth_down
+    ora smooth_left
+    ora smooth_right
+    bne @done
+
     lda #$00
     sta $2001 ; no rendering
 
@@ -124,10 +138,10 @@ update_game:
 
     set_nmi_flag
 
-    ldx #GAME_MODE_WIN 
+    ldx #GAME_MODE_MESSAGE 
     stx game_mode
     jsr load_menu
-    jsr init_win
+    jsr init_message
 @done:
     jmp update_done
 
@@ -234,7 +248,7 @@ update_tiles_to_clear:
 ;   none
 ; side effects:
 ;   inits a new game mode
-init_win:
+init_message:
     lda #$00 ; move player offscreen
     sta sprite_data
     sta sprite_data+3
@@ -242,8 +256,14 @@ init_win:
     sta player_y
     sta player_x_bac
     sta player_y_bac
+
+    lda #<update_message 
+    sta update_sub
+    lda #>update_message
+    sta update_sub+1
+
     rts 
 
 ; update routine for the win screen
-update_win:
-    rts 
+update_message:
+    jmp update_done

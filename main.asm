@@ -12,7 +12,7 @@
 .define GAME_MODE_PUZZLE 1
 .define GAME_MODE_EDITOR 2
 .define GAME_MODE_EDITOR_MENU 3
-.define GAME_MODE_WIN 4
+.define GAME_MODE_MESSAGE 4
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
@@ -366,6 +366,9 @@ win_attr:
 .incbin "./graphics/win.attr"
 win_pal:
 .incbin "./graphics/win.pal"
+
+no_start_msg_gfx:
+.incbind "./graphics/no_start_msg.gfx"
 
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:

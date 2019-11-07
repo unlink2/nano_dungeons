@@ -59,3 +59,4 @@ Blocks:
 - One way blocks in all directions
 - Switch blocks that make blocks (im)passible. Switch blocks will be blocked off with sprites
 - Start block (TODO handle error when no start is present) 
+- Teleport blocks/Jump blocks
