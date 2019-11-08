@@ -655,9 +655,14 @@ player_attr_down:
 
 ; sub routine for tiles, based on tile index
 tile_sub_lo:
-.mrep CLEARABLE_TILES_START 
+.mrep CLEARABLE_TILES_START-4
 .db #<collision
 .endrep
+
+.db #<jump_left ; left jump tile
+.db #<jump_up ; up jump tile 
+.db #<jump_down ; down jump tile 
+.db #<jump_right ; right jump tile
 
 .db #<no_collision ; start tile 
 .db #<no_collision ; end tile
@@ -667,6 +672,7 @@ tile_sub_lo:
 .db #<one_way_up ; up one way
 .db #<one_way_down ; down one way
 .db #<one_way_left ; left one way
+
 
 ; remainder of clearable tiles
 .mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+8
@@ -684,9 +690,14 @@ tile_sub_lo:
 .db #<one_way_right ; left one way
 
 tile_sub_hi:
-.mrep CLEARABLE_TILES_START
+.mrep CLEARABLE_TILES_START-4
 .db #>collision
 .endrep
+
+.db #>jump_left ; left jump tile
+.db #>jump_up ; up jump tile 
+.db #>jump_down ; down jump tile 
+.db #>jump_right ; right jump tile
 
 .db #>no_collision ; start tile 
 .db #>no_collision ; end tile

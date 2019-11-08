@@ -46,3 +46,79 @@ one_way_up:
 
 one_way_down:
     one_way_n smooth_down
+
+; this routine handles jumping, jumps over 1 tile
+; does not go out of bounds
+; returns
+;   a = 0 when jump tile is hit
+; side effects:
+;   removes smooth scrolling
+;   sets registers 
+;   changes player location
+jump_left:
+    lda player_x 
+    clc 
+    adc #$02
+    bcc @no_carry 
+    lda #$00 ; if carry is set we go to 0
+@no_carry:
+
+    sta player_x 
+
+    lda #$00 
+    sta smooth_down
+    sta smooth_left
+    sta smooth_right
+    sta smooth_up
+    rts 
+
+jump_right:
+    lda player_x
+    sec
+    sbc #$02
+    bcs @no_carry 
+    lda #31 ; if carry is set we go to 29
+@no_carry:
+
+    sta player_x
+
+    lda #$00
+    sta smooth_down
+    sta smooth_left
+    sta smooth_right
+    sta smooth_up
+    rts 
+
+jump_up:
+    lda player_y
+    sec
+    sbc #$02
+    bcs @no_carry 
+    lda #$00 ; if carry is set we go to 0
+@no_carry:
+
+    sta player_y 
+
+    lda #$00 
+    sta smooth_down
+    sta smooth_left
+    sta smooth_right
+    sta smooth_up
+    rts 
+
+jump_down:
+    lda player_y
+    clc  
+    adc #$02
+    bcc @no_carry 
+    lda #29 ; if carry is set we go to 29
+@no_carry:
+
+    sta player_y 
+
+    lda #$00
+    sta smooth_down
+    sta smooth_left
+    sta smooth_right
+    sta smooth_up
+    rts 
