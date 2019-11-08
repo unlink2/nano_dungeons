@@ -124,8 +124,8 @@ update_game:
     bne @done
 
     ; if animation timer is already going do not prceed
-    lda animation_timer
-    ora animation_timer+1
+    lda delay_timer
+    ora delay_timer+1
     bne @done 
 
     ; only finish if movment finished as well
@@ -136,13 +136,13 @@ update_game:
     ; bne @done
 
     ; set up win condition pointers
-    sta animation_timer
+    sta delay_timer
     lda #$00 
-    sta animation_timer+1 ; second byte, we only need first byte
+    sta delay_timer+1 ; second byte, we only need first byte
     lda #<empty_sub 
-    sta animation_update 
+    sta delay_update 
     lda #>empty_sub
-    sta animation_update+1
+    sta delay_update+1
 
     lda #<update_none 
     sta update_sub
@@ -150,9 +150,9 @@ update_game:
     sta update_sub+1
 
     lda #<init_win_condition
-    sta animation_done 
+    sta delay_done 
     lda #>init_win_condition
-    sta animation_done+1
+    sta delay_done+1
 @done:
     jmp update_done
 

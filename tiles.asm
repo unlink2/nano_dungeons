@@ -52,21 +52,21 @@ one_way_down:
 ; inputs:
 ;   none
 ; side effects:
-;   changed animation_update, timer, and done
+;   changed delay_update, timer, and done
 init_jump_animation:
     lda smooth_down
     ora smooth_left
     ora smooth_right
     ora smooth_up
-    sta animation_timer
+    sta delay_timer
 
     lda #$00 
-    sta animation_timer+1 ; second byte
+    sta delay_timer+1 ; second byte
 
     lda #<empty_sub 
-    sta animation_update 
+    sta delay_update 
     lda #>empty_sub
-    sta animation_update+1
+    sta delay_update+1
 
     rts 
 
@@ -82,9 +82,9 @@ jump_left:
     ; set up animation pointers
     jsr init_jump_animation
     lda #<@left  
-    sta animation_done 
+    sta delay_done 
     lda #>@left
-    sta animation_done+1
+    sta delay_done+1
     lda #$00 ; allow animation
     rts
 @left:
@@ -110,9 +110,9 @@ jump_right:
     ; set up animation pointers
     jsr init_jump_animation
     lda #<@right  
-    sta animation_done 
+    sta delay_done 
     lda #>@right
-    sta animation_done+1
+    sta delay_done+1
     lda #$00 ; allow animation
     rts 
 @right:
@@ -138,9 +138,9 @@ jump_up:
     ; set up animation pointers
     jsr init_jump_animation
     lda #<@up 
-    sta animation_done 
+    sta delay_done 
     lda #>@up 
-    sta animation_done+1
+    sta delay_done+1
     lda #$00 ; allow animation
     rts 
 @up:
@@ -166,9 +166,9 @@ jump_down:
     ; set up animation pointers
     jsr init_jump_animation
     lda #<@down 
-    sta animation_done 
+    sta delay_done 
     lda #>@down 
-    sta animation_done+1
+    sta delay_done+1
     lda #$00 ; allow animation
     rts 
 @down:
