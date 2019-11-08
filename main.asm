@@ -670,10 +670,10 @@ tile_sub_lo:
 .db #<collision
 .endrep
 
-.db #<jump_left ; left jump tile
+.db #<jump_right ; left jump tile
 .db #<jump_up ; up jump tile 
 .db #<jump_down ; down jump tile 
-.db #<jump_right ; right jump tile
+.db #<jump_left ; right jump tile
 
 .db #<no_collision ; start tile 
 .db #<no_collision ; end tile

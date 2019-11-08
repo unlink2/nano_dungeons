@@ -184,6 +184,9 @@ init_win_condition:
 ;   modifies registers, flags
 ;   modifies player sprite and attributes
 update_player_animation:
+    lda delay_timer ; do not update during delay timer
+    bne @done
+
     lda last_inputs
     and #%11110000
     beq @idle
@@ -195,7 +198,7 @@ update_player_animation:
     sta sprite_data+1
     lda #$00 
     sta sprite_data+2
-
+@done:
     rts
 
 ; checks for player collision based on the currently occupied tile

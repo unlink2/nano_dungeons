@@ -68,6 +68,44 @@ init_jump_animation:
     lda #>empty_sub
     sta delay_update+1
 
+    lda #$37
+    sta sprite_data+1
+
+    rts 
+
+; this sub routine inits the pre-jump state
+; of the jump animation
+; inputs:
+;   none
+; side effects:
+;   changes delay_update, timer and done
+;   changes player tile index
+init_pre_jump:
+    lda smooth_down
+    ora smooth_left
+    ora smooth_right
+    ora smooth_up
+    sta delay_timer
+
+    lda #$00 
+    sta delay_timer+1 ; second byte
+
+    lda #<empty_sub 
+    sta delay_update 
+    lda #>empty_sub
+    sta delay_update+1
+
+    rts 
+
+; this sub routine restore
+; the original player tile at the end of a jump
+; inputs:
+;   none
+; side effects:
+;   changes player tile index
+finish_jump:
+    lda #$32
+    sta sprite_data+1
     rts 
 
 ; this routine handles jumping, jumps over 1 tile
@@ -80,18 +118,29 @@ init_jump_animation:
 ;   changes player location
 jump_left:
     ; set up animation pointers
-    jsr init_jump_animation
-    lda #<@left  
+    jsr init_pre_jump
+    lda #<@animation  
     sta delay_done 
-    lda #>@left
+    lda #>@animation
     sta delay_done+1
     lda #$00 ; allow animation
     rts
-@left:
+@animation:
+    ; set up correct smooth value
+    lda #$10 
+    sta smooth_left 
+
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<finish_jump 
+    sta delay_done 
+    lda #>finish_jump
+    sta delay_done+1
+
     lda player_x 
-    clc 
-    adc #$02
-    bcc @no_carry 
+    sec 
+    sbc #$02
+    bcs @no_carry 
     lda #$00 ; if carry is set we go to 0
 @no_carry:
 
@@ -104,22 +153,34 @@ jump_left:
     sta player_y_bac
 
     lda #$00 
+@left:
     rts 
 
 jump_right:
     ; set up animation pointers
-    jsr init_jump_animation
-    lda #<@right  
+    jsr init_pre_jump
+    lda #<@animation  
     sta delay_done 
-    lda #>@right
+    lda #>@animation
     sta delay_done+1
     lda #$00 ; allow animation
-    rts 
-@right:
+    rts
+@animation:
+    ; set up correct smooth value
+    lda #$10 
+    sta smooth_right
+
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<finish_jump 
+    sta delay_done 
+    lda #>finish_jump
+    sta delay_done+1
+
     lda player_x
-    sec
-    sbc #$02
-    bcs @no_carry 
+    clc 
+    adc #$02
+    bcc @no_carry 
     lda #31 ; if carry is set we go to 29
 @no_carry:
 
@@ -136,14 +197,25 @@ jump_right:
 
 jump_up:
     ; set up animation pointers
-    jsr init_jump_animation
-    lda #<@up 
+    jsr init_pre_jump
+    lda #<@animation  
     sta delay_done 
-    lda #>@up 
+    lda #>@animation
     sta delay_done+1
     lda #$00 ; allow animation
-    rts 
-@up:
+    rts
+@animation:
+    ; set up correct smooth value
+    lda #$10 
+    sta smooth_up
+
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<finish_jump 
+    sta delay_done 
+    lda #>finish_jump
+    sta delay_done+1
+
     lda player_y
     sec
     sbc #$02
@@ -164,14 +236,25 @@ jump_up:
 
 jump_down:
     ; set up animation pointers
-    jsr init_jump_animation
-    lda #<@down 
+    jsr init_pre_jump
+    lda #<@animation  
     sta delay_done 
-    lda #>@down 
+    lda #>@animation
     sta delay_done+1
     lda #$00 ; allow animation
-    rts 
-@down:
+    rts
+@animation:
+    ; set up correct smooth value
+    lda #$10 
+    sta smooth_down
+
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<finish_jump 
+    sta delay_done 
+    lda #>finish_jump
+    sta delay_done+1
+
     lda player_y
     clc  
     adc #$02
