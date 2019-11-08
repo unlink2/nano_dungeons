@@ -47,6 +47,26 @@ one_way_up:
 one_way_down:
     one_way_n smooth_down
 
+; this sub routine sets up common
+; animation pointers to be used before a jump
+; inputs:
+;   none
+; side effects:
+;   changed animation_update, timer, and done
+init_jump_animation:
+    lda smooth_down
+    ora smooth_left
+    ora smooth_right
+    ora smooth_up
+    sta animation_timer
+
+    lda #<empty_sub 
+    sta animation_update 
+    lda #>empty_sub
+    sta animation_update+1
+
+    rts 
+
 ; this routine handles jumping, jumps over 1 tile
 ; does not go out of bounds
 ; returns
@@ -56,6 +76,15 @@ one_way_down:
 ;   sets registers 
 ;   changes player location
 jump_left:
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<@left  
+    sta animation_done 
+    lda #>@left
+    sta animation_done+1
+    lda #$00 ; allow animation
+    rts
+@left:
     lda player_x 
     clc 
     adc #$02
@@ -65,14 +94,25 @@ jump_left:
 
     sta player_x 
 
+    ; do not flag the jump tile as passed
+    lda player_x 
+    sta player_x_bac 
+    lda player_y
+    sta player_y_bac
+
     lda #$00 
-    sta smooth_down
-    sta smooth_left
-    sta smooth_right
-    sta smooth_up
     rts 
 
 jump_right:
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<@right  
+    sta animation_done 
+    lda #>@right
+    sta animation_done+1
+    lda #$00 ; allow animation
+    rts 
+@right:
     lda player_x
     sec
     sbc #$02
@@ -82,14 +122,25 @@ jump_right:
 
     sta player_x
 
-    lda #$00
-    sta smooth_down
-    sta smooth_left
-    sta smooth_right
-    sta smooth_up
+    ; do not flag the jump tile as passed
+    lda player_x 
+    sta player_x_bac 
+    lda player_y
+    sta player_y_bac
+
+    lda #$00 
     rts 
 
 jump_up:
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<@up 
+    sta animation_done 
+    lda #>@up 
+    sta animation_done+1
+    lda #$00 ; allow animation
+    rts 
+@up:
     lda player_y
     sec
     sbc #$02
@@ -99,14 +150,25 @@ jump_up:
 
     sta player_y 
 
+    ; do not flag the jump tile as passed
+    lda player_x 
+    sta player_x_bac 
+    lda player_y
+    sta player_y_bac
+
     lda #$00 
-    sta smooth_down
-    sta smooth_left
-    sta smooth_right
-    sta smooth_up
     rts 
 
 jump_down:
+    ; set up animation pointers
+    jsr init_jump_animation
+    lda #<@down 
+    sta animation_done 
+    lda #>@down 
+    sta animation_done+1
+    lda #$00 ; allow animation
+    rts 
+@down:
     lda player_y
     clc  
     adc #$02
@@ -116,9 +178,11 @@ jump_down:
 
     sta player_y 
 
-    lda #$00
-    sta smooth_down
-    sta smooth_left
-    sta smooth_right
-    sta smooth_up
+    ; do not flag the jump tile as passed
+    lda player_x 
+    sta player_x_bac 
+    lda player_y
+    sta player_y_bac
+
+    lda #$00 ; do not skip update this frame
     rts 

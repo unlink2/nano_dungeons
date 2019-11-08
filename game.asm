@@ -81,7 +81,7 @@ update_game:
     jsr update_tile
     jmp @skip_tile_update
 @tile_update_not_marked:
-    ; update current tile is player did move
+    ; update current tile if player did move
     ; game mode is puzzle
     ; therefore a tile update will update the tile to become
     ; a passed over tile by setting bit 7 to 1
@@ -123,13 +123,39 @@ update_game:
     cmp #$01
     bne @done
 
+    ; if animation timer is already going do not prceed
+    lda animation_timer
+    bne @done 
+
     ; only finish if movment finished as well
     lda smooth_up
     ora smooth_down
     ora smooth_left
     ora smooth_right
-    bne @done
+    ; bne @done
 
+    ; set up win condition pointers
+    sta animation_timer
+    lda #<empty_sub 
+    sta animation_update 
+    lda #>empty_sub
+    sta animation_update+1
+
+    lda #<update_none 
+    sta update_sub
+    lda #>update_none 
+    sta update_sub+1
+
+    lda #<init_win_condition
+    sta animation_done 
+    lda #>init_win_condition
+    sta animation_done+1
+@done:
+    jmp update_done
+
+; this sub routine is called when win condition 
+; animation finishes
+init_win_condition:
     lda #$00
     sta $2001 ; no rendering
 
@@ -142,8 +168,10 @@ update_game:
     stx game_mode
     jsr load_menu
     jsr init_message
-@done:
-    jmp update_done
+
+    lda #$01 ; set flag to skip update
+    rts 
+
 
 ; this sub routine updates the player's animation based on 
 ; the movement offset

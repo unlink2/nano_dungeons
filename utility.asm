@@ -167,3 +167,9 @@ jsr_indirect:
 ; this sub routine is a no-op update routine
 update_none:
     jmp update_done
+
+; this is an empty sub routine 
+; useful for function pointers that
+; require an input
+empty_sub:
+    rts 

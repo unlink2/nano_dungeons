@@ -76,6 +76,9 @@ palette_ptr 2 ; pointer to current palette
 src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
 
+animation_update 2 ; function pointer for update animation, set to 00, 00 to disable
+animation_done 2 ; function pointer to be called when animation finishes, set to 00, 00 to disable
+
 last_inputs 1 ; inputs of controller 1
 
 ; 16 bit count of tiles that have to be cleared, when both are $00 map is won
@@ -118,6 +121,7 @@ smooth_up 1 ; smooht movement up
 smooth_down 1 ; smooth movement down
 smooth_left 1 ; smooth movement left 
 smooth_right 1 ; smooth movement right
+animation_timer 1 ; frames of animation
 .ende
 
 ; start of prg ram
@@ -323,6 +327,12 @@ nmi:
     jmp update_done
 @no_error:
 
+    jsr update_animation
+    cmp #$01 
+    bne @animation_not_finished
+    jmp update_done
+@animation_not_finished:
+
     ; inputs
     jsr input_handler
 
@@ -366,6 +376,7 @@ nmi_flag_set:
 
 .include "./map.asm"
 .include "./tiles.asm"
+.include "./animation.asm"
 
 palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
