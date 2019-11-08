@@ -121,7 +121,7 @@ smooth_up 1 ; smooht movement up
 smooth_down 1 ; smooth movement down
 smooth_left 1 ; smooth movement left 
 smooth_right 1 ; smooth movement right
-animation_timer 1 ; frames of animation
+animation_timer 2 ; frames of animation, 16 bit integer
 .ende
 
 ; start of prg ram

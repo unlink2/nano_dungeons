@@ -60,6 +60,9 @@ init_jump_animation:
     ora smooth_up
     sta animation_timer
 
+    lda #$00 
+    sta animation_timer+1 ; second byte
+
     lda #<empty_sub 
     sta animation_update 
     lda #>empty_sub

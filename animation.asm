@@ -7,14 +7,21 @@
 ;   a = 1 if animation just finished AND update should be skipped
 ;       note that this has to be set by the update done handler
 update_animation:
-    ldx animation_timer
+    lda animation_timer
+    ora animation_timer+1
     beq @done ; if animation timer is 0 we are done
 
-    dex ; -1
-    stx animation_timer
+    ; -1 16 bit sub
+    sec 
+    sbc #$01 
+    sta animation_timer
+    lda animation_timer+1 
+    sbc #$00 
+    sta animation_timer+1
 
     ; if it is 0 now we call done function
-    cpx #$00
+    lda animation_timer
+    ora animation_timer+1
     bne @not_done
 
     lda animation_done
