@@ -19,3 +19,30 @@ no_collision:
 collision:
     lda #$01 
     rts 
+
+
+; this routine only returns 
+; 0 when the direction value is nonzero
+; returns:
+;   a = 0 when direction is nonzero
+.macro one_way_n direction
+    lda direction 
+    beq @.mi.collision
+    lda #$00 
+    rts 
+@.mi.collision 
+    lda #$01 
+    rts 
+.endm
+
+one_way_left:
+    one_way_n smooth_left
+
+one_way_right:
+    one_way_n smooth_right 
+
+one_way_up:
+    one_way_n smooth_up 
+
+one_way_down:
+    one_way_n smooth_down

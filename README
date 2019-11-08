@@ -53,6 +53,8 @@ This simple example saved 3 bytes in total.
 Part 4: Notes (To be removed):
 ===============================
 
+TODO init save data (magic number?)
+
 Blocks:
 - Wall blocks (cannot be walked on)
 - Space blocks (can be walked on)

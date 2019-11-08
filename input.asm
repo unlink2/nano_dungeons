@@ -921,7 +921,9 @@ go_right_editor_menu:
     bne @not_invalid
     ldx #$00
 @not_invalid:
-    stx sprite_data_1+1
+    txa 
+    and #$7F ; only first 128 tiles are valid
+    sta sprite_data_1+1
     rts 
 @not_tile_select:
     cmp #EDITOR_MENU_ATTR_1

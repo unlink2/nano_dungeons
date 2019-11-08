@@ -45,6 +45,8 @@
 .define START_TILE $60
 .define CLEARABLE_TILES_START $60
 .define CLEARABLE_TILES_END $7f
+.define CLEARABLE_MIRROR_START $E0 
+.define CLEARABLE_MIRROR_END $FF
 
 .define ERROR_NO_START_TILE 1
 
@@ -656,17 +658,59 @@ tile_sub_lo:
 .mrep CLEARABLE_TILES_START 
 .db #<collision
 .endrep
-.mrep $FF-CLEARABLE_TILES_START
+
+.db #<no_collision ; start tile 
+.db #<no_collision ; end tile
+.db #<no_collision ; floor tile 1
+.db #<no_collision ; floor tile 2
+.db #<one_way_right ; right one way
+.db #<one_way_up ; up one way
+.db #<one_way_down ; down one way
+.db #<one_way_left ; left one way
+
+; remainder of clearable tiles
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+8
 .db #<no_collision
-.endrep 
+.endrep
+
+; mirror tiles 
+.db #<no_collision ; start tile 
+.db #<no_collision ; end tile
+.db #<no_collision ; floor tile 1
+.db #<no_collision ; floor tile 2
+.db #<one_way_left ; right one way
+.db #<one_way_down ; up one way
+.db #<one_way_up ; down one way
+.db #<one_way_right ; left one way
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START
 .db #>collision
 .endrep
-.mrep $FF-CLEARABLE_TILES_START
+
+.db #>no_collision ; start tile 
+.db #>no_collision ; end tile
+.db #>no_collision ; floor tile 1
+.db #>no_collision ; floor tile 2
+.db #>one_way_right ; right one way
+.db #>one_way_up ; up one way
+.db #>one_way_down ; down one way
+.db #>one_way_left ; left one way
+
+; remainder of clearable tiles
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+8
 .db #>no_collision
-.endrep 
+.endrep
+
+; mirror tiles 
+.db #>no_collision ; start tile 
+.db #>no_collision ; end tile
+.db #>no_collision ; floor tile 1
+.db #>no_collision ; floor tile 2
+.db #>one_way_left ; right one way
+.db #>one_way_down ; up one way
+.db #>one_way_up ; down one way
+.db #>one_way_right ; left one way
 
 ; error handlers
 error_lo:
