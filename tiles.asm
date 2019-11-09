@@ -150,8 +150,6 @@ jump_update:
     sta sprite_data
     sta sprite_data_2 
 
-.rep 20 nop
-
     rts 
 
 ; this sub routine restore
