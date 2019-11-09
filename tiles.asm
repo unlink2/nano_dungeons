@@ -63,13 +63,26 @@ init_jump_animation:
     lda #$00 
     sta delay_timer+1 ; second byte
 
-    lda #<empty_sub 
+    lda #<jump_update
     sta delay_update 
-    lda #>empty_sub
+    lda #>jump_update
     sta delay_update+1
 
-    lda #$37
+    lda #$38
     sta sprite_data+1
+    sta sprite_data_1+1
+    sta sprite_data_2+1 
+    sta sprite_data_3+1
+
+    ; set up attributes
+    lda #$00 
+    sta sprite_data+21
+    lda #%10000000
+    sta sprite_data_1+2
+    lda #%01000000
+    sta sprite_data_2+2
+    lda #%11000000
+    sta sprite_data_3+2
 
     rts 
 
@@ -80,6 +93,7 @@ init_jump_animation:
 ; side effects:
 ;   changes delay_update, timer and done
 ;   changes player tile index
+;   changes sprite_1-4
 init_pre_jump:
     lda smooth_down
     ora smooth_left
@@ -97,14 +111,69 @@ init_pre_jump:
 
     rts 
 
+; this sub routine updates the jump routines
+; inputs:
+;   none
+; side effects:
+;   moves sprites_1-3 relative to player
+;   x and a registers are used
+;   uses temp to store original location
+jump_update:
+    lda sprite_data+3 
+    sta temp 
+    lda sprite_data
+    sta temp+1
+
+    ; first move x positions
+    lda temp
+    clc 
+    adc #$04
+    sta sprite_data_2+3
+    sta sprite_data_3+3
+
+    lda temp
+    sec 
+    sbc #$04
+    sta sprite_data+3
+    sta sprite_data_1+3
+
+    ; y position
+    lda  temp+1
+    clc 
+    adc #$04
+    sta sprite_data_1 
+    sta sprite_data_3
+
+    lda temp+1
+    sec 
+    sbc #$04
+    sta sprite_data
+    sta sprite_data_2 
+
+    rts 
+
 ; this sub routine restore
 ; the original player tile at the end of a jump
 ; inputs:
 ;   none
 ; side effects:
 ;   changes player tile index
+;   changes sprite_1-3
 finish_jump:
-    lda #$32
+    lda #$00
+    sta sprite_data+2
+    sta sprite_data_1+2 
+    sta sprite_data_2+2 
+    sta sprite_data_3+2
+
+    sta sprite_data_1 
+    sta sprite_data_1+3 
+    sta sprite_data_2
+    sta sprite_data_2+3 
+    sta sprite_data_3
+    sta sprite_data_3+3
+
+    lda #$31 
     sta sprite_data+1
     rts 
 

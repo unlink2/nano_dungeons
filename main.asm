@@ -303,6 +303,13 @@ nmi:
 
     bit $2002 ; read ppu status to reset latch
 
+    ; update animation just before dma
+    jsr update_delay
+    cmp #$01 
+    bne @delay_not_finished
+    jmp update_done
+@delay_not_finished:
+
     ; sprite DMA
     lda #<sprite_data
     sta $2003  ; set the low byte (00) of the RAM address
@@ -327,11 +334,6 @@ nmi:
     jmp update_done
 @no_error:
 
-    jsr update_delay
-    cmp #$01 
-    bne @animation_not_finished
-    jmp update_done
-@animation_not_finished:
 
     ; inputs
     jsr input_handler
