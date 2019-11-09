@@ -52,7 +52,7 @@
 
 .enum $00
 frame_count 1
-nmi_flags 1 ; 0th bit = 1 -> loading; 1st bit = 1 -> nmi active, clear at end of nmi
+nmi_flags 1 ; 0th bit = 1 -> loading; 1st bit = 1 -> nmi active, clear at end of nmi, 2nd bit = 1 -> disable inputs
 game_flags 1 ; 0th bit = 1 -> switch disabled, barries can be passed
 errno 1 ; error number, nonzero values are errors
 

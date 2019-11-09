@@ -53,6 +53,7 @@ one_way_down:
 ;   none
 ; side effects:
 ;   changed delay_update, timer, and done
+;   disables inputs
 init_jump_animation:
     lda smooth_down
     ora smooth_left
@@ -109,6 +110,11 @@ init_pre_jump:
     lda #>empty_sub
     sta delay_update+1
 
+    ; disable inputs
+    lda nmi_flags 
+    ora #%00100000
+    sta nmi_flags
+
     rts 
 
 ; this sub routine updates the jump routines
@@ -159,6 +165,7 @@ jump_update:
 ; side effects:
 ;   changes player tile index
 ;   changes sprite_1-3
+;   enables inputs
 finish_jump:
     lda #$00
     sta sprite_data+2
@@ -175,6 +182,12 @@ finish_jump:
 
     lda #$31 
     sta sprite_data+1
+
+    ; enable inputs
+    lda nmi_flags 
+    and #%11011111
+    sta nmi_flags
+
     rts 
 
 ; this routine handles jumping, jumps over 1 tile

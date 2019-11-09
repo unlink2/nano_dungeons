@@ -1,5 +1,11 @@
 ; handles all inputs
 input_handler:
+    lda nmi_flags 
+    and #%00100000 ; check disable input flag
+    beq @not_disabled
+    rts 
+@not_disabled:
+
     lda #$00 
     sta last_inputs
 
