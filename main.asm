@@ -301,14 +301,14 @@ nmi:
     dec select_delay
 @skip_select_delay:
 
-    bit $2002 ; read ppu status to reset latch
-
     ; update animation just before dma
     jsr update_delay
     cmp #$01 
     bne @delay_not_finished
     jmp update_done
 @delay_not_finished:
+
+    bit $2002 ; read ppu status to reset latch
 
     ; sprite DMA
     lda #<sprite_data
@@ -707,10 +707,10 @@ tile_sub_hi:
 .db #>collision
 .endrep
 
-.db #>jump_left ; left jump tile
+.db #>jump_right ; left jump tile
 .db #>jump_up ; up jump tile 
 .db #>jump_down ; down jump tile 
-.db #>jump_right ; right jump tile
+.db #>jump_left ; right jump tile
 
 .db #>no_collision ; start tile 
 .db #>no_collision ; end tile
