@@ -19,7 +19,7 @@ decompress_level:
     sta tiles_to_clear
 
     lda game_flags 
-    and #%10000000
+    and #%10111111
     sta game_flags ; disable sprite updating
 
     lda #$FF 
@@ -599,6 +599,7 @@ load_level_iter:
 ; or sets it
 ; to a passed over tile when game mode is in puzzle mode
 ; a tile is considered 'passed' when the 7th bit is set, and not passed if it is not set
+; it will not allow placing AI tiles if max AI tiles is reached
 ; inputs:
 ;   player_x -> x position
 ;   player_y -> y position
@@ -608,7 +609,31 @@ load_level_iter:
 ;   updates level_data and nametable
 ;   changes registers and flags
 ;   increments or decrements tiles_to_clear if in puzzle mode
+;   inc/dec sprite_tile_size
 update_tile:
+    lda sprite_data+1
+    ; check if it is an AI tile
+    cmp #SPRITE_TILES_START
+    bcc @not_sprite
+    cmp #SPRITE_TILES_END
+    bcs @not_sprite 
+    lda sprite_tile_size
+    cmp #SPRITE_TILES-1
+    bne @not_max_ai
+    rts ; if max ai is reached return
+@not_max_ai:
+    inc sprite_tile_size
+@not_sprite
+
+    ; check if previous tile was AI tile
+    jsr get_tile
+    cmp #SPRITE_TILES_START
+    bcc @not_replacing_sprite
+    cmp #SPRITE_TILES_END
+    bcs @not_replacing_sprite 
+    dec sprite_tile_size
+@not_replacing_sprite:
+
     ; store all pointers
     lda level_ptr
     pha 
@@ -818,6 +843,11 @@ find_start:
     lda #$01 ; found
     rts 
 
+; this sub routine inits all ai tiles
+; inputs:
+;   game_flags -> if sprites are disabled init is not called
+; side effects:
+;   registers affected, sprite oam changed
 init_ai_tiles:
     lda #$00 
     sta start_x 
@@ -856,6 +886,10 @@ init_ai_tiles:
     lda sprite_tile_ai, y 
     tay 
 
+    lda game_flags 
+    and #%01000000
+    beq @no_init ; no init if sprites are disabled
+
     ; save src_ptr
     lda src_ptr
     pha 
@@ -874,6 +908,8 @@ init_ai_tiles:
     sta src_ptr+1 
     pla 
     sta src_ptr
+
+@no_init:
 @not_sprite 
 
 

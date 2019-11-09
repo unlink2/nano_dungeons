@@ -173,3 +173,17 @@ update_none:
 ; require an input
 empty_sub:
     rts 
+
+; this sub routine hides objects
+; at 0/0
+; side effects:
+;   moves obejcts
+hide_objs:
+    lda #$00
+    ldx #$00
+@loop:
+    sta sprite_data, x 
+    inx
+    cpx #$FF
+    bne @loop 
+    rts 

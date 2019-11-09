@@ -248,6 +248,12 @@ init_editor_menu:
     sta sprite_data_8 
     sta sprite_data_9
 
+    ; sprite counter location
+    lda #21*8
+    sta sprite_data_A+3 
+    lda #14*8 
+    sta sprite_data_A
+
     jsr init_attr_display
     jsr init_color_display 
     jsr init_value_display
@@ -328,6 +334,11 @@ init_editor:
 
 ; update sub routine for editor menu
 update_editor_menu:
+    ; sprite counter
+    lda sprite_tile_size
+    and #$0F 
+    sta sprite_data_A+1
+
     lda menu_select
     and #EDITOR_MENU_MAX_SELECT ; only 3 possible options
     cmp #$0C ; if more than 9, overflow

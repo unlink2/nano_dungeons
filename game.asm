@@ -7,6 +7,8 @@
 ;   palette_ptr -> pointing to palette
 ;   enables sprite updating
 init_game:
+    jsr hide_objs
+
     lda #GAME_MODE_PUZZLE
     sta game_mode
 
@@ -21,6 +23,10 @@ init_game:
     lda #>level_palette
     sta palette_ptr+1
     jsr load_palette
+
+    lda game_flags 
+    ora #%01000000
+    sta game_flags ; enable sprite updating
 
     jsr init_ai_tiles
     jsr find_start
@@ -47,10 +53,6 @@ init_game:
     sta sprite_data_1+3
     sta sprite_data_2 
     sta sprite_data_2+3
-
-    lda game_flags 
-    ora #%01000000
-    sta game_flags ; enable sprite updating
 
     rts 
 
