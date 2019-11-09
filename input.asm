@@ -333,6 +333,8 @@ a_input_editor_menu:
     lda #$00
     sta nametable
 
+    jsr find_start
+
     rts 
 
 
@@ -625,6 +627,9 @@ b_input_editor_menu:
     jsr init_editor
     lda #$00
     sta nametable
+
+    jsr find_start
+
     rts     
 
 ; select button input

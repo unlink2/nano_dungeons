@@ -50,10 +50,13 @@
 
 .define ERROR_NO_START_TILE 1
 
+.define SPRITE_TILES 8 
+
 .enum $00
 frame_count 1
 nmi_flags 1 ; 0th bit = 1 -> loading; 1st bit = 1 -> nmi active, clear at end of nmi, 2nd bit = 1 -> disable inputs
-game_flags 1 ; 0th bit = 1 -> switch disabled, barries can be passed
+; 0th bit = 1 -> switch disabled, barries can be passed, 1st bit = 1 -> sprite update enabled
+game_flags 1 
 errno 1 ; error number, nonzero values are errors
 
 rand8 1
@@ -122,6 +125,13 @@ smooth_down 1 ; smooth movement down
 smooth_left 1 ; smooth movement left 
 smooth_right 1 ; smooth movement right
 delay_timer 2 ; frames of animation, 16 bit integer
+
+sprite_tile_pos_x SPRITE_TILES ; 32 slots for sprite tiles, x and y position in one
+sprite_tile_pos_y  SPRITE_TILES ; y position
+sprite_tile_ai SPRITE_TILES ; ai type
+sprite_tile_data SPRITE_TILES ; data for sprite may be used by AI as needed
+sprite_tile_obj SPRITE_TILES ; object to be used for this sprite, may be set up as needed
+sprite_tile_size 1 ; amount of tiles currently used
 .ende
 
 ; start of prg ram
@@ -286,6 +296,8 @@ nmi:
 
     jsr convert_tile_location
 
+    jsr update_sprites
+
     ; apply smooth scrolling offsets
     jsr apply_smooth
 
@@ -379,6 +391,7 @@ nmi_flag_set:
 .include "./map.asm"
 .include "./tiles.asm"
 .include "./delay.asm"
+.include "./sprites.asm"
 
 palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
@@ -744,6 +757,14 @@ error_lo:
 error_hi:
 .db $00
 .db #>load_map_start_error
+
+sprite_init_lo:
+
+sprite_init_hi:
+
+sprite_ai_lo:
+
+sprite_ai_hi:
 
 .pad $FFFA
 .dw nmi ; nmi
