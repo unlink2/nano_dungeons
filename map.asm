@@ -11,11 +11,19 @@
 ; side effects:
 ;   all registers and flags may be changed
 ;   temp is written to
+;   disables sprite updating in game flags
 decompress_level:
     ; clear tile position
     lda #$00 
     sta tiles_to_clear
     sta tiles_to_clear
+
+    lda game_flags 
+    and #%10000000
+    sta game_flags ; disable sprite updating
+
+    lda #$FF 
+    sta sprite_tile_size ; set invalid size
 
     ; save level data ptr
     lda level_data_ptr 
@@ -94,6 +102,7 @@ inc_level_data_ptr:
 ;   y is set to 0
 ;   start_x and y may be set
 ;   tiles_to_clear may be incremented
+;   if tile is a sprite tile it may set up the ai for the map
 write_decompressed_byte:
     ldy #$00 
 
@@ -116,6 +125,7 @@ write_decompressed_byte:
     adc #$00
     sta tiles_to_clear+1
 @not_clearable:
+
 
     ; 16 bit add
     lda level_ptr_temp
@@ -806,6 +816,86 @@ find_start:
     lda player_y 
     sta start_y
     lda #$01 ; found
+    rts 
+
+init_ai_tiles:
+    lda #$00 
+    sta start_x 
+    sta start_y 
+    sta player_x 
+    sta player_y
+@x_loop:
+    jsr get_tile
+
+    ; check if it is an AI tile
+    cmp #SPRITE_TILES_START
+    bcc @not_sprite
+    cmp #SPRITE_TILES_END
+    bcs @not_sprite
+
+    sec 
+    sbc #SPRITE_TILES_START ; get offset for ai/init
+    
+    inc sprite_tile_size ; increment amount of sprites in use
+
+    ldy sprite_tile_size
+    sta sprite_tile_ai, y ; store AI offset
+
+    clc 
+    adc #AI_SPRITES_START
+    adc sprite_tile_size ; sprite to be used
+    sta sprite_tile_obj, y ; object to be used
+    
+    ; store source tile's x and y position
+    lda player_x 
+    sta sprite_tile_x, y 
+    lda player_y 
+    sta sprite_tile_y, y
+
+    ; call init 
+    lda sprite_tile_ai, y 
+    tay 
+
+    ; save src_ptr
+    lda src_ptr
+    pha 
+    lda src_ptr+1 
+    pha 
+
+    lda sprite_init_lo, y 
+    sta src_ptr 
+    lda sprite_init_hi, y 
+    sta src_ptr+1
+    ldy sprite_tile_size ; load offset into y
+    jsr jsr_indirect
+
+    ; restore src ptr
+    pla 
+    sta src_ptr+1 
+    pla 
+    sta src_ptr
+@not_sprite 
+
+
+    ldx player_x
+    inx 
+    txa   
+    and #%00011111 ; cannot be greater than 32
+    sta player_x
+    bne @x_loop
+    ; if zero increemnt y 
+    ldx player_y 
+    inx 
+    cpx #30 ; cant be more than 29 y
+    beq @done 
+    stx player_y
+    bne @x_loop
+@done:
+    lda #$00 ; not found!
+    sta player_x 
+    sta player_y 
+    sta start_x 
+    sta start_y 
     rts 
 
 ; TODO

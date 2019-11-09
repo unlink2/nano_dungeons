@@ -1,7 +1,3 @@
-; all sprite routines need 
-; an input of x pointing to the sprite to use
-
-
 ; this sub routine calls all sprite 
 ; routines that are needed
 ; if sprtie_disable flag is set no updates will occur
@@ -15,6 +11,8 @@ update_sprites:
     beq @done
 
     ldy sprite_tile_size
+    cpy #$FF 
+    beq @done
 @loop:
     ldx sprite_tile_ai, y
     lda sprite_ai_lo, x 
@@ -25,7 +23,53 @@ update_sprites:
     jsr jsr_indirect
 
     dey 
-    cmp #$FF
+    cpy #$FF
     bne @loop
 @done:
+    rts 
+
+; default sprite init, no special stuff
+; this routine should not destroy any registers
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_init_default:
+    pha 
+    tya 
+    pha
+    txa 
+    pha 
+
+    ; test code
+    lda sprite_tile_obj, y
+    tax 
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    lda #$32
+    ldy #$00 
+    sta (sprite_ptr), y
+    ldy #$03  
+    sta (sprite_ptr), y
+
+    pla 
+    tax 
+    pla 
+    tay 
+    pla
+    rts 
+
+; default sprite update routine
+; this routine should not destry any registers
+sprite_update_default:
+    pha 
+    tya 
+    pha
+    txa 
+    pha 
+
+    pla 
+    tax 
+    pla 
+    tay 
+    pla 
     rts 

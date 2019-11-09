@@ -333,6 +333,7 @@ a_input_editor_menu:
     lda #$00
     sta nametable
 
+    jsr init_ai_tiles
     jsr find_start
 
     rts 
@@ -628,7 +629,9 @@ b_input_editor_menu:
     lda #$00
     sta nametable
 
+    jsr init_ai_tiles
     jsr find_start
+
 
     rts     
 

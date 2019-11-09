@@ -5,6 +5,7 @@
 ;   level_data_ptr -> pointing to compressed level
 ;   attr_ptr -> pointing to attributes
 ;   palette_ptr -> pointing to palette
+;   enables sprite updating
 init_game:
     lda #GAME_MODE_PUZZLE
     sta game_mode
@@ -21,6 +22,7 @@ init_game:
     sta palette_ptr+1
     jsr load_palette
 
+    jsr init_ai_tiles
     jsr find_start
     ; check if start was found
     cmp #$01 
@@ -45,6 +47,10 @@ init_game:
     sta sprite_data_1+3
     sta sprite_data_2 
     sta sprite_data_2+3
+
+    lda game_flags 
+    ora #%01000000
+    sta game_flags ; enable sprite updating
 
     rts 
 

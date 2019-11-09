@@ -51,6 +51,9 @@
 .define ERROR_NO_START_TILE 1
 
 .define SPRITE_TILES 8 
+.define SPRITE_TILES_START $50
+.define SPRITE_TILES_END $51
+.define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 .enum $00
 frame_count 1
@@ -78,6 +81,8 @@ palette_ptr 2 ; pointer to current palette
 
 src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
+
+sprite_ptr 2 ; may be used as a pointer to sprite oam
 
 delay_update 2 ; function pointer for update animation, set to 00, 00 to disable
 delay_done 2 ; function pointer to be called when animation finishes, set to 00, 00 to disable
@@ -126,8 +131,8 @@ smooth_left 1 ; smooth movement left
 smooth_right 1 ; smooth movement right
 delay_timer 2 ; frames of animation, 16 bit integer
 
-sprite_tile_pos_x SPRITE_TILES ; 32 slots for sprite tiles, x and y position in one
-sprite_tile_pos_y  SPRITE_TILES ; y position
+sprite_tile_x SPRITE_TILES ; 32 slots for sprite tiles, x and y position in one
+sprite_tile_y  SPRITE_TILES ; y position
 sprite_tile_ai SPRITE_TILES ; ai type
 sprite_tile_data SPRITE_TILES ; data for sprite may be used by AI as needed
 sprite_tile_obj SPRITE_TILES ; object to be used for this sprite, may be set up as needed
@@ -208,6 +213,10 @@ clear_mem:
     
 
     vblank_wait
+
+    ; set up hi byte sprite_ptr
+    lda #$02 
+    sta sprite_ptr+1
 
     ; set up palette pointer
     ldx #$00 
@@ -759,12 +768,26 @@ error_hi:
 .db #>load_map_start_error
 
 sprite_init_lo:
+.db #<sprite_init_default
+.db #<sprite_init_default
 
 sprite_init_hi:
+.db #>sprite_init_default
+.db #>sprite_init_default
 
 sprite_ai_lo:
+.db #<sprite_update_default
+.db #<sprite_update_default
 
 sprite_ai_hi:
+.db #>sprite_update_default
+.db #>sprite_update_default
+
+; converts object index to an address, only the lo byte is given, hi is always $02
+obj_index_to_addr:
+.mrep 64
+.db .ri.*4
+.endrep
 
 .pad $FFFA
 .dw nmi ; nmi
