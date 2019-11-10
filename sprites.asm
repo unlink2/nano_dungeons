@@ -45,10 +45,15 @@ sprite_init_default:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
-    lda #$32
-    ldy #$00 
+    tya
+    tax ; need y value, but need y for indirect,y 
+
+    lda #32
+    ldy #$00 ; for indirect, y 
     sta (sprite_ptr), y
-    ldy #$03  
+
+    lda #32
+    ldy #$03 
     sta (sprite_ptr), y
 
     pla 

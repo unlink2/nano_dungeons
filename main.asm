@@ -329,6 +329,9 @@ nmi:
     jmp update_done
 @delay_not_finished:
 
+    ; inputs
+    jsr input_handler
+
     bit $2002 ; read ppu status to reset latch
 
     ; sprite DMA
@@ -354,10 +357,6 @@ nmi:
     sta errno
     jmp update_done
 @no_error:
-
-
-    ; inputs
-    jsr input_handler
 
     lda #%10000000   ; enable NMI, sprites from Pattern Table 0
     ora nametable
