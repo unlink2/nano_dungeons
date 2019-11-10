@@ -323,6 +323,7 @@ a_input_editor_menu:
     ldx $00 ; nametable 0
     jsr load_level
     jsr load_attr
+    vblank_wait
     jsr load_palette
 
     lda #GAME_MODE_EDITOR

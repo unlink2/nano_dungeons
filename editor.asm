@@ -149,7 +149,7 @@ inc_dec_attr:
     ldy sprite_data_4+1
     inc_dec_attr_macro sprite_data_4+1
 @not_tr:
-    cpy #$01 
+    cpy #$01
     bne @not_bl
     inc_dec_attr_macro sprite_data_3+1
 @not_bl:
@@ -159,15 +159,22 @@ inc_dec_attr:
 init_editor_menu:
     ; backup player's location and
     ; move to cursor position
-    lda player_x 
+    lda player_x
     sta player_x_bac
     lda player_y
     sta player_y_bac
 
+    ; copy palette
+    lda #<palette_data
+    sta palette_ptr
+    lda #>palette_data
+    sta palette_ptr+1
+    jsr load_palette
+
     ; set up initial location (redudant really)
-    lda #$01 
+    lda #$01
     sta player_x
-    lda #$09 
+    lda #$09
     sta player_y
 
     ; move sprite 1 to tile select location
@@ -181,8 +188,8 @@ init_editor_menu:
     sta sprite_data_1+2
     ; attributes 0
     sta sprite_data_2+2
-    sta sprite_data_3+2 
-    sta sprite_data_4+2 
+    sta sprite_data_3+2
+    sta sprite_data_4+2
     sta sprite_data_5+2
     sta sprite_data_6+2
     sta sprite_data_7+2
@@ -191,14 +198,14 @@ init_editor_menu:
 
     ; set other spirtes to 0/0
     sta sprite_data_2
-    sta sprite_data_2+3 
+    sta sprite_data_2+3
     sta sprite_data_3
     sta sprite_data_3+3
     sta sprite_data_4
     sta sprite_data_4+3
 
     ; set the tile select's tile index
-    lda sprite_data+1 
+    lda sprite_data+1
     sta sprite_data_1+1
 
     lda #<update_editor_menu
@@ -210,7 +217,7 @@ init_editor_menu:
     lda #$31
     sta sprite_data+1
 
-    ; move sprites indicating 
+    ; move sprites indicating
     ; attr values to correct position
     ; sprites_2, 3, 4, 5
     lda #$70 ; x position
@@ -218,7 +225,7 @@ init_editor_menu:
     sta sprite_data_3+3 ; bottom left
 
     lda #$7F ; x position
-    sta sprite_data_4+3 ; up right 
+    sta sprite_data_4+3 ; up right
     sta sprite_data_5+3 ; bottom right
 
     lda #$28 ; y positon
@@ -235,35 +242,28 @@ init_editor_menu:
     ; sprites 6, 7, 8, 9
     lda #19*8 ; x position
     sta sprite_data_6+3
-    sta sprite_data_8+3 
+    sta sprite_data_8+3
     lda #20*8
     sta sprite_data_7+3 ; x position
     sta sprite_data_9+3
 
     lda #10*8 ; y position
-    sta sprite_data_6 
-    sta sprite_data_7 
+    sta sprite_data_6
+    sta sprite_data_7
 
     lda #12*8 ; y position
-    sta sprite_data_8 
+    sta sprite_data_8
     sta sprite_data_9
 
     ; sprite counter location
     lda #21*8
-    sta sprite_data_A+3 
-    lda #14*8 
+    sta sprite_data_A+3
+    lda #14*8
     sta sprite_data_A
 
     jsr init_attr_display
-    jsr init_color_display 
+    jsr init_color_display
     jsr init_value_display
-
-    ; copy palette
-    lda #<palette_data 
-    sta palette_ptr 
-    lda #>palette_data
-    sta palette_ptr+1
-    jsr load_palette
 
     rts 
 
@@ -276,6 +276,14 @@ init_editor:
     sta player_x
     lda player_y_bac
     sta player_y
+
+    ; copy palette
+    lda #<level_palette
+    sta palette_ptr
+    lda #>level_palette
+    sta palette_ptr+1
+    jsr load_palette
+
 
     ; set the tile select's tile index
     lda sprite_data_1+1 
@@ -323,14 +331,7 @@ init_editor:
     lda #%11000000
     sta sprite_data_4+2
 
-    ; copy palette
-    lda #<level_palette 
-    sta palette_ptr 
-    lda #>level_palette
-    sta palette_ptr+1
-    jsr load_palette
-
-    rts 
+    rts
 
 ; update sub routine for editor menu
 update_editor_menu:

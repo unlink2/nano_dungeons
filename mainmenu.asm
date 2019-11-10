@@ -9,39 +9,46 @@
 ;   nametables are updated, sprites changed
 ;   registers changed
 init_main_menu:
-    jsr hide_objs
-
     lda #<update_main_menu
     sta update_sub
     lda #>update_main_menu
     sta update_sub+1
 
+    ; load palette
+    lda #<palette_data
+    sta palette_ptr
+    lda #>palette_data
+    sta palette_ptr+1
+    jsr load_palette
+
     lda #GAME_MODE_MENU
     sta game_mode
+
+    jsr hide_objs
 
     ; move unsued sprites off-screen
     lda #$00
     sta sprite_data_3
     sta sprite_data_3+3
-    sta sprite_data_4 
+    sta sprite_data_4
     sta sprite_data_4+3
-    sta sprite_data_5 
+    sta sprite_data_5
     sta sprite_data_5+3
-    sta sprite_data_6 
-    sta sprite_data_6+3 
-    sta sprite_data_7 
-    sta sprite_data_7+3 
+    sta sprite_data_6
+    sta sprite_data_6+3
+    sta sprite_data_7
+    sta sprite_data_7+3
     sta sprite_data_8
     sta sprite_data_8+3
-    sta sprite_data_9 
+    sta sprite_data_9
     sta sprite_data_9+3
-    sta sprite_data_A 
+    sta sprite_data_A
     sta sprite_data_A+3
 
     ; no smooth scrolling outside of in-game mode
-    sta smooth_left 
-    sta smooth_right 
-    sta smooth_up 
+    sta smooth_left
+    sta smooth_right
+    sta smooth_up
     sta smooth_down
 
     ; level select display
@@ -55,17 +62,10 @@ init_main_menu:
     sta sprite_data_2
 
     ; cursor sprite
-    lda #$31 
+    lda #$31
     sta sprite_data+1
 
-    ; load palette
-    lda #<palette_data 
-    sta palette_ptr 
-    lda #>palette_data
-    sta palette_ptr+1
-    jsr load_palette
-
-    rts 
+    rts
 
 ; update sub routine for main menu
 ; inputs:

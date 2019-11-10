@@ -7,8 +7,6 @@
 ;   palette_ptr -> pointing to palette
 ;   enables sprite updating
 init_game:
-    jsr hide_objs
-
     lda #GAME_MODE_PUZZLE
     sta game_mode
 
@@ -18,11 +16,13 @@ init_game:
     sta update_sub+1
 
     ; copy palette
-    lda #<level_palette 
-    sta palette_ptr 
+    lda #<level_palette
+    sta palette_ptr
     lda #>level_palette
     sta palette_ptr+1
     jsr load_palette
+
+    jsr hide_objs
 
     lda game_flags 
     ora #%01000000
