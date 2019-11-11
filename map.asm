@@ -264,7 +264,10 @@ compress_level:
 ;   registers and flags are modified
 write_attr:
     lda #$00
-    sta $2002 ; read PPU status to reset the high/low latch
+    bit $2002 ; read PPU status to reset the high/low latch
+    sta $2005
+    sta $2005 ; no scrolling
+
     lda #$23 ; write $23C0 to ppu as start address
 
     cpx #$01
@@ -341,7 +344,11 @@ write_compressed_data:
 ;   attr_ptr -> pointing to attributes
 ;   x -> decides start address based on nametable 
 load_attr:
-    lda $2002 ; read PPU status to reset the high/low latch
+    bit $2002 ; read PPU status to reset the high/low latch
+    lda #$00
+    sta $2005
+    sta $2005 ; no scrolling
+
     lda #$23 ; write $23C0 to ppu as start address
 
     cpx #$01
@@ -372,13 +379,17 @@ load_attr:
 ;   modifies registers and flags
 load_palette:
     ; sets up ppu for palette transfer
-    lda $2002 ; read PPU status to reset the high/low latch to high
+    bit $2002 ; read PPU status to reset the high/low latch to high
+    lda #$00
+    sta $2005
+    sta $2005 ; no scrolling
+
     lda #$3F
     sta $2006
     lda #$00
     sta $2006
 
-    ldy #$00 
+    ldy #$00
 load_palette_loop:
     lda (palette_ptr), y 
     sta $2007 ; write to PPU
@@ -400,6 +411,14 @@ load_palette_loop:
 ;   x -> decides the start address based on nametable
 load_level:
     lda $2002 ; read PPU status to reset the high/low latch
+    lda #$00
+    sta $2005
+    sta $2005 ; no scrolling
+
+    ; reset scroll
+    lda #$00
+    sta $2005
+    sta $2005
 
     lda #$20  ; $2000 = start of ppu address
     cpx #$01
@@ -667,6 +686,10 @@ update_tile:
     sta temp+1
 
     lda $2002 ; read PPU status to reset the high/low latch
+    lda #$00
+    sta $2005
+    sta $2005 ; no scrolling
+
     lda temp+1 ; write temp to ppu as start address
     sta $2006
     lda temp
@@ -776,6 +799,10 @@ update_attr:
     sta src_ptr
 
     lda $2002 ; read PPU status to reset the high/low latch
+    lda #$00
+    sta $2005
+    sta $2005 ; no scrolling
+
     lda temp+1 ; write temp to ppu as start address
     sta $2006
     lda temp
