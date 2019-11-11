@@ -18,6 +18,11 @@ init_game:
     lda #>update_game
     sta update_sub+1
 
+    lda #<update_game_crit
+    sta update_sub_crit
+    lda #>update_game_crit
+    sta update_sub_crit+1
+
     ; copy palette
     lda #<level_palette
     sta palette_ptr
@@ -43,51 +48,52 @@ init_game:
 
     lda player_x 
     sta player_x_bac
-    lda player_y 
+    lda player_y
     sta player_y_bac
 
     ; player sprite
-    lda #$32 
+    lda #$32
     sta sprite_data+1
 
     ; move other sprites offscreen
-    lda #$00 
-    sta sprite_data_1 
+    lda #$00
+    sta sprite_data_1
     sta sprite_data_1+3
-    sta sprite_data_2 
+    sta sprite_data_2
     sta sprite_data_2+3
 
-    rts 
+    rts
 
 ; this routine is called every frame
 ; it updates the game state
-update_game:
+; critical game update
+update_game_crit:
     ; check if player moved
     lda #$00 ; move flag
-    ldx player_x 
-    cpx player_x_bac 
-    beq @player_not_moved_x 
+    ldx player_x
+    cpx player_x_bac
+    beq @player_not_moved_x
 
     lda #$01 ; did move
 @player_not_moved_x:
-    ldx player_y 
-    cpx player_y_bac 
-    beq @player_not_moved_y 
+    ldx player_y
+    cpx player_y_bac
+    beq @player_not_moved_y
     lda #$01 ; did move
 @player_not_moved_y:
-    cmp #$01 
+    cmp #$01
     bne @player_not_moved
 
     ; test collision
     jsr collision_check
     ; if a = 1 collision occured
     cmp #$01
-    beq @player_not_moved 
+    beq @player_not_moved
 
     ; test if the current tile
     ; is already marked if so, do not update the previous tile but rather unmark the current
-    jsr get_tile 
-    and #%10000000 
+    jsr get_tile
+    and #%10000000
     beq @tile_update_not_marked
     jsr update_tile
     jmp @skip_tile_update
@@ -98,10 +104,10 @@ update_game:
     ; a passed over tile by setting bit 7 to 1
     ; for that however we use the previous location rather than the current one
     ; to update the tile behind the player
-    lda player_x 
-    pha 
-    lda player_y 
-    pha 
+    lda player_x
+    pha
+    lda player_y
+    pha
 
     lda player_x_bac
     sta player_x
@@ -110,21 +116,24 @@ update_game:
 
     jsr update_tile
 
-    ; restore position 
-    pla 
+    ; restore position
+    pla
     sta player_y
-    pla 
+    pla
     sta player_x
 @skip_tile_update:
 @player_not_moved:
     jsr update_player_animation
 
     ; store previous position
-    lda player_x 
-    sta player_x_bac 
-    lda player_y 
+    lda player_x
+    sta player_x_bac
+    lda player_y
     sta player_y_bac
+    jmp update_crit_done
 
+; non-critical game updates 
+update_game:
     ; test victory condition
     ; if only one tile is left to clear the player must be on it
     lda tiles_to_clear+1
@@ -159,6 +168,11 @@ update_game:
     sta update_sub
     lda #>update_none 
     sta update_sub+1
+
+    lda #<update_crit_none
+    sta update_sub_crit
+    lda #>update_crit_none
+    sta update_sub_crit+1
 
     lda #<init_win_condition
     sta delay_done 
@@ -309,6 +323,11 @@ init_message:
     sta update_sub
     lda #>update_message
     sta update_sub+1
+
+    lda #<update_crit_none
+    sta update_sub_crit
+    lda #>update_crit_none
+    sta update_sub_crit+1
 
     rts 
 

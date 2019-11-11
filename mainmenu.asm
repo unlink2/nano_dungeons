@@ -14,6 +14,11 @@ init_main_menu:
     lda #>update_main_menu
     sta update_sub+1
 
+    lda #<update_crit_none
+    sta update_sub_crit
+    lda #>update_crit_none
+    sta update_sub_crit+1
+
     ; load palette
     lda #<palette_data
     sta palette_ptr

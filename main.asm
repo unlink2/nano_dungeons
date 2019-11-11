@@ -78,6 +78,11 @@ level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
 temp 4 ; 4 bytes of universal temporary storage
 nametable 1 ; either 0 or 1 depending on which nametable is active
 menu_select 1 ; cursor location in menu
+
+; ptr to sub routine called for timing critical updates such as ppu updates, is called right at start of nmi
+; must be short.
+; must jump to update_crti_done when finished
+update_sub_crit 2
 update_sub 2 ; ptr to sub routine called for updates, must jmp to update_done label when finished
 attributes 1 ; colors used, index of address table
 palette 1 ; selected palette
@@ -298,8 +303,9 @@ nmi:
 
     lda nmi_flags 
     and #%00000010
-    bne nmi_flag_set
-
+    beq nmi_flag_not_set
+    jmp nmi_flag_set
+nmi_flag_not_set:
     ; don't allow nmi until
     ; this one finishes
     ; nmi active flag
@@ -333,6 +339,15 @@ nmi:
 
     ; inputs
     jsr input_handler
+
+    ; if load nmi flag is set skip normal updates until next frame
+    lda nmi_flags
+    and #%00000001
+    bne update_crit_done
+
+    jmp (update_sub_crit)
+
+update_crit_done:
 
     bit $2002 ; read ppu status to reset latch
 
@@ -377,6 +392,9 @@ nmi:
     jsr update_sprites
 
     jmp (update_sub) ; jump to specific update sub routine
+
+    ; all updates after this should not require ppu access
+    ; since by now vblank time is likely over
 update_done:
     ; always clear the nmi flag when
     ; a normal nmi finishes

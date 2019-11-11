@@ -566,6 +566,11 @@ load_map_start_error:
     lda #>update_none
     sta update_sub+1
 
+    lda #<update_crit_none
+    sta update_sub_crit
+    lda #>update_crit_none
+    sta update_sub_crit+1
+
     ; load editor menu compressed tiles
     lda #<no_start_msg_gfx
     sta level_data_ptr

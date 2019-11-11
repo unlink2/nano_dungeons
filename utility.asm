@@ -168,6 +168,10 @@ jsr_indirect:
 update_none:
     jmp update_done
 
+; no critical update
+update_crit_none:
+    jmp update_crit_done
+
 ; this is an empty sub routine 
 ; useful for function pointers that
 ; require an input

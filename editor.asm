@@ -213,6 +213,11 @@ init_editor_menu:
     lda #>update_editor_menu
     sta update_sub+1
 
+    lda #<update_crit_none
+    sta update_sub_crit
+    lda #>update_crit_none
+    sta update_sub_crit+1
+
     ; set up player tile to become a pointer
     lda #$31
     sta sprite_data+1
@@ -313,6 +318,11 @@ init_editor:
     sta update_sub
     lda #>update_editor
     sta update_sub+1
+
+    lda #<update_crit_none
+    sta update_sub_crit
+    lda #>update_crit_none
+    sta update_sub_crit+1
 
     ; set up other sprites used to attribute drawing
     lda #$30 ; corner tile
