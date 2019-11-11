@@ -265,15 +265,15 @@ compress_level:
 write_attr:
     lda #$00
     bit $2002 ; read PPU status to reset the high/low latch
-    sta $2005
-    sta $2005 ; no scrolling
+    ; sta $2005
+    ; sta $2005 ; no scrolling
 
     lda #$23 ; write $23C0 to ppu as start address
 
     cpx #$01
-    bne @no_add 
+    bne @no_add
     ; if x is 0 do not add, if 1 nt1 is needed
-    clc 
+    clc
     adc #$04
 
 @no_add:
@@ -285,17 +285,17 @@ write_attr:
 
     ldy #$00
 @attr_loop:
-    lda $2007 
+    lda $2007
     sta (attr_ptr), y ; transfer
-    iny 
+    iny
     cpy #ATTR_SIZE
     bne @attr_loop
 
     lda #$00
-    sta $2005 
-    sta $2005 
+    sta $2005
+    sta $2005
 
-    rts 
+    rts
 
 ; sub routine that writes compressed data to output pointer
 ; inputs:
@@ -313,14 +313,14 @@ write_compressed_data:
 
 @compress:
     ; add an ff first
-    lda #$FF 
+    lda #$FF
     sta (level_data_ptr), y
     jsr inc_level_data_ptr
     txa ; write amount
     sta (level_data_ptr), y
     jsr inc_level_data_ptr
 
-    pla ; get tile 
+    pla ; get tile
     sta (level_data_ptr), y ; store tile id
     pha ; push it back since inc will destroy the value
     jsr inc_level_data_ptr
@@ -332,29 +332,29 @@ write_compressed_data:
     sta (level_data_ptr), y
     pha ; save a's state
     jsr inc_level_data_ptr
-    pla 
-    dex 
+    pla
+    dex
     bne @single_values
 @done:
     pla ; restore tile state
-    rts 
+    rts
 
 ; this sub routine loads all attributes for NT1
 ; inputs:
 ;   attr_ptr -> pointing to attributes
-;   x -> decides start address based on nametable 
+;   x -> decides start address based on nametable
 load_attr:
     bit $2002 ; read PPU status to reset the high/low latch
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
 
     lda #$23 ; write $23C0 to ppu as start address
 
     cpx #$01
-    bne @no_add 
+    bne @no_add
     ; if x is 0 do not add, if 1 nt1 is needed
-    clc 
+    clc
     adc #$04
 
 @no_add:
@@ -364,13 +364,13 @@ load_attr:
 
     ldy #$00
 @attr_loop:
-    lda (attr_ptr), y 
+    lda (attr_ptr), y
     sta $2007 ; transfer
-    iny 
+    iny
     cpy #ATTR_SIZE
     bne @attr_loop
 
-    rts 
+    rts
 
 ; this sub routine loads a color palette
 ; inputs:
@@ -380,9 +380,9 @@ load_attr:
 load_palette:
     ; sets up ppu for palette transfer
     bit $2002 ; read PPU status to reset the high/low latch to high
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
 
     lda #$3F
     sta $2006
@@ -413,9 +413,9 @@ load_level:
     lda $2002 ; read PPU status to reset the high/low latch
 
     ; reset scroll
-    lda #$00
-    sta $2005
-    sta $2005
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005
 
     lda #$20  ; $2000 = start of ppu address
     cpx #$01
@@ -798,9 +798,9 @@ update_attr:
     sta src_ptr
 
     lda $2002 ; read PPU status to reset the high/low latch
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
 
     lda temp+1 ; write temp to ppu as start address
     sta $2006

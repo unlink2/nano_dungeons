@@ -250,8 +250,8 @@ a_input_editor_menu:
 
     vblank_wait
     ldx #$00
-    stx $2005
-    stx $2005 ; no scrolling
+    ; stx $2005
+    ; stx $2005 ; no scrolling
     jsr write_attr
     ;lda $2000
     ;ora #%10000000
@@ -281,9 +281,9 @@ a_input_editor_menu:
     jsr load_menu
 
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
     jsr init_main_menu
     vblank_wait
 @done:
@@ -334,18 +334,18 @@ a_input_editor_menu:
     jsr load_level
     jsr load_attr
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
     jsr load_palette
 
     lda #GAME_MODE_EDITOR
     sta game_mode
 
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling again
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling again
     jsr init_editor
     lda #$00
     sta nametable
@@ -379,9 +379,9 @@ a_input_main_menu:
     sta sprite_data+1
 
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
     jsr init_editor_menu
     rts
 
@@ -501,9 +501,9 @@ a_input_main_menu:
     sta nametable
 
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
     jsr init_game
 
     vblank_wait
@@ -652,9 +652,9 @@ b_input_editor_menu:
     sta game_mode
 
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
     jsr init_editor
     lda #$00
     sta nametable
@@ -772,9 +772,9 @@ start_input_message:
     jsr load_menu
 
     vblank_wait
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
     jsr init_main_menu
 
     vblank_wait
