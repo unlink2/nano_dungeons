@@ -50,16 +50,20 @@
 
 .define ERROR_NO_START_TILE 1
 
-.define SPRITE_TILES 8 
-.define SPRITE_TILES_START $50
-.define SPRITE_TILES_END $51
+.define SPRITE_TILES 8
+.define SPRITE_TILES_START $70
+.define SPRITE_TILES_END $71
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 .enum $00
 frame_count 1
-nmi_flags 1 ; 0th bit = 1 -> loading; 1st bit = 1 -> nmi active, clear at end of nmi, 2nd bit = 1 -> disable inputs
-; 0th bit = 1 -> switch disabled, barries can be passed, 1st bit = 1 -> sprite update enabled
-game_flags 1 
+; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
+nmi_flags 1
+; 7th bit = 1 -> switch disabled, barries can be passed, 6th bit = 1 -> sprite update enabled
+game_flags 1
+; 7th bit = 1 -> barrier disabled
+map_flags 1
+
 errno 1 ; error number, nonzero values are errors
 
 rand8 1
@@ -305,8 +309,6 @@ nmi:
 
     jsr convert_tile_location
 
-    jsr update_sprites
-
     ; apply smooth scrolling offsets
     jsr apply_smooth
 
@@ -318,13 +320,13 @@ nmi:
 @skip_move_delay:
 
     lda select_delay
-    beq @skip_select_delay 
+    beq @skip_select_delay
     dec select_delay
 @skip_select_delay:
 
     ; update animation just before dma
     jsr update_delay
-    cmp #$01 
+    cmp #$01
     bne @delay_not_finished
     jmp update_done
 @delay_not_finished:
@@ -341,19 +343,19 @@ nmi:
     sta $4014  ; set the high byte (02) of the RAM address, start the transfer
 
     lda #$00
-    sta $2005 ; no horizontal scroll 
+    sta $2005 ; no horizontal scroll
     sta $2005 ; no vertical scroll
-    
+
     ; error handler
     ldx errno
     beq @no_error
-    lda error_lo, x 
+    lda error_lo, x
     sta src_ptr
-    lda error_hi, x 
+    lda error_hi, x
     sta src_ptr+1
     jsr jsr_indirect
 
-    lda #$00 
+    lda #$00
     sta errno
     jmp update_done
 @no_error:
@@ -372,9 +374,11 @@ nmi:
 
     jsr adjust_smooth
 
+    jsr update_sprites
+
     jmp (update_sub) ; jump to specific update sub routine
-update_done: 
-    ; always clear the nmi flag when 
+update_done:
+    ; always clear the nmi flag when
     ; a normal nmi finishes
     unset_nmi_flag
     ; unset nmi active flag
@@ -707,14 +711,25 @@ tile_sub_lo:
 .db #<one_way_down ; down one way
 .db #<one_way_left ; left one way
 
+.db #<no_collision
+.db #<no_collision
+.db #<no_collision
+.db #<no_collision ; unused as of now
+
+.db #<barrier_switch ; barrier switch tile
+.db #<no_collision
+.db #<no_collision
+.db #<no_collision ; some as of now unused tiles
+
+.db #<barrier_tile ; barrier tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+8
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+17
 .db #<no_collision
 .endrep
 
-; mirror tiles 
-.db #<no_collision ; start tile 
+; mirror tiles
+.db #<no_collision ; start tile
 .db #<no_collision ; end tile
 .db #<no_collision ; floor tile 1
 .db #<no_collision ; floor tile 2
@@ -723,17 +738,29 @@ tile_sub_lo:
 .db #<one_way_up ; down one way
 .db #<one_way_right ; left one way
 
+.db #<no_collision
+.db #<no_collision
+.db #<no_collision
+.db #<no_collision ; unused as of now
+
+.db #<barrier_switch ; barrier switch tile
+.db #<no_collision
+.db #<no_collision
+.db #<no_collision ; some as of now unused tiles
+
+.db #<barrier_tile ; barrier tile
+
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
 .db #>collision
 .endrep
 
 .db #>jump_right ; left jump tile
-.db #>jump_up ; up jump tile 
-.db #>jump_down ; down jump tile 
+.db #>jump_up ; up jump tile
+.db #>jump_down ; down jump tile
 .db #>jump_left ; right jump tile
 
-.db #>no_collision ; start tile 
+.db #>no_collision ; start tile
 .db #>no_collision ; end tile
 .db #>no_collision ; floor tile 1
 .db #>no_collision ; floor tile 2
@@ -742,13 +769,25 @@ tile_sub_hi:
 .db #>one_way_down ; down one way
 .db #>one_way_left ; left one way
 
+.db #>no_collision
+.db #>no_collision
+.db #>no_collision
+.db #>no_collision ; unused as of now
+
+.db #>barrier_switch ; barrier switch tile
+.db #>no_collision
+.db #>no_collision
+.db #>no_collision ; some as of now unused tiles
+
+.db #>barrier_tile ; barrier tile
+
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+8
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+17
 .db #>no_collision
 .endrep
 
-; mirror tiles 
-.db #>no_collision ; start tile 
+; mirror tiles
+.db #>no_collision ; start tile
 .db #>no_collision ; end tile
 .db #>no_collision ; floor tile 1
 .db #>no_collision ; floor tile 2
@@ -757,9 +796,21 @@ tile_sub_hi:
 .db #>one_way_up ; down one way
 .db #>one_way_right ; left one way
 
+.db #>no_collision
+.db #>no_collision
+.db #>no_collision
+.db #>no_collision ; unused as of now
+
+.db #>barrier_switch ; barrier switch tile
+.db #>no_collision
+.db #>no_collision
+.db #>no_collision ; some as of now unused tiles
+
+.db #>barrier_tile ; barrier tile
+
 ; error handlers
 error_lo:
-.db $00 
+.db $00
 .db #<load_map_start_error
 
 error_hi:

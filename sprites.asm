@@ -29,52 +29,87 @@ update_sprites:
     rts 
 
 ; default sprite init, no special stuff
+; inits the sprite as a barrier
 ; this routine should not destroy any registers
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_init_default:
-    pha 
-    tya 
     pha
-    txa 
-    pha 
+    tya
+    pha
+    txa
+    pha
 
-    ; test code
+    ; set up location
     lda sprite_tile_obj, y
-    tax 
+    tax
     lda obj_index_to_addr, x
     sta sprite_ptr
 
     tya
-    tax ; need y value, but need y for indirect,y 
+    tax ; need y value, but need y for indirect,y
 
-    lda #32
-    ldy #$00 ; for indirect, y 
+    lda sprite_tile_x, x
+    sta temp
+    lda sprite_tile_y, x
+    sta temp+1
+
+    ldx temp+1
+    lda tile_convert_table, x ; y position
+    ldy #$00 ; for indirect, y
     sta (sprite_ptr), y
 
-    lda #32
-    ldy #$03 
+    ldx temp
+    lda tile_convert_table, x ; x position
+    ldy #$03
     sta (sprite_ptr), y
 
-    pla 
-    tax 
-    pla 
-    tay 
     pla
-    rts 
+    tax
+    pla
+    tay
+    pla
+    rts
 
 ; default sprite update routine
 ; this routine should not destry any registers
+; updates a barrier sprite
+; inputs:
+;   y -> pointing to sprite data offset
 sprite_update_default:
-    pha 
-    tya 
     pha
-    txa 
-    pha 
+    tya
+    pha
+    txa
+    pha
 
-    pla 
-    tax 
-    pla 
-    tay 
-    pla 
-    rts 
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ; check if barrier flag is set, if so make
+    ; tile appear as barrier
+    lda map_flags
+    and #%10000000
+    bne @barrier_clear
+
+    ; barrier is not clear
+    lda #$50
+    bne @done
+
+    ; barrier is clear
+@barrier_clear:
+    lda #$24 ; empty
+@done:
+    ; store in sprite
+    ldy #$01
+    sta (sprite_ptr), y
+
+    pla
+    tax
+    pla
+    tay
+    pla
+    rts

@@ -10,6 +10,9 @@ init_game:
     lda #GAME_MODE_PUZZLE
     sta game_mode
 
+    lda #$00
+    sta map_flags ; reset all map flags
+
     lda #<update_game
     sta update_sub
     lda #>update_game

@@ -627,8 +627,11 @@ load_level_iter:
 ;   updates level_data and nametable
 ;   changes registers and flags
 ;   increments or decrements tiles_to_clear if in puzzle mode
-;   inc/dec sprite_tile_size
+;   inc/dec sprite_tile_size in editor mode
 update_tile:
+    lda game_mode
+    cmp #GAME_MODE_EDITOR
+    bne @not_replacing_sprite
     lda sprite_data+1
     ; check if it is an AI tile
     cmp #SPRITE_TILES_START
