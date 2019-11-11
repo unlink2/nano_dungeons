@@ -206,7 +206,9 @@ a_input_editor_menu:
 @not_slot2:
     ; new slot should not save, but instead is a debug feature that loads a map based on the selected tile id
     cmp #EDITOR_MENU_NEW
-    beq @load_debug_map
+    bne @dont_load_debug_map
+    jmp @load_debug_map
+@dont_load_debug_map:
 
     cmp #EDITOR_MENU_SAVE1
     beq @slot_1 
@@ -221,28 +223,28 @@ a_input_editor_menu:
 
     lda #<attr_1
     sta attr_ptr
-    lda #>attr_1 
+    lda #>attr_1
     sta attr_ptr+1
 
-    lda #<palette_1 
+    lda #<palette_1
     sta dest_ptr
-    lda #>palette_1 
-    sta dest_ptr+1 
+    lda #>palette_1
+    sta dest_ptr+1
 
 @slot_slected:
     lda #$00
     sta $2001 ; disable rendering
 
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     ; disable NMI, don't change other flags
-    ; NMI needs to be disabled 
+    ; NMI needs to be disabled
     ; to prevent it being called again
     ; while compression is ongoing
-    set_nmi_flag 
+    set_nmi_flag
 
     jsr compress_level
 
@@ -253,16 +255,18 @@ a_input_editor_menu:
     jsr write_attr
     ;lda $2000
     ;ora #%10000000
-    ;sta $2000 ; enable NMI again 
+    ;sta $2000 ; enable NMI again
     ; copy palette
-    lda #<level_palette 
+    lda #<level_palette
     sta src_ptr
     lda #>level_palette
     sta src_ptr+1
-    ldy #PALETTE_SIZE 
+    ldy #PALETTE_SIZE
     jsr memcpy
 
-    rts 
+    vblank_wait
+
+    rts
 @no_slot:
     cmp #EDITOR_MENU_BACK
     bne @done
@@ -281,6 +285,7 @@ a_input_editor_menu:
     sta $2005
     sta $2005 ; no scrolling
     jsr init_main_menu
+    vblank_wait
 @done:
     rts
 
@@ -347,6 +352,8 @@ a_input_editor_menu:
 
     jsr init_ai_tiles
     jsr find_start
+
+    vblank_wait
 
     rts 
 
@@ -498,6 +505,8 @@ a_input_main_menu:
     sta $2005
     sta $2005 ; no scrolling
     jsr init_game
+
+    vblank_wait
 @no_slot:
 @done:
     rts 
@@ -653,6 +662,7 @@ b_input_editor_menu:
     jsr init_ai_tiles
     jsr find_start
 
+    vblank_wait
 
     rts     
 
@@ -766,6 +776,8 @@ start_input_message:
     sta $2005
     sta $2005 ; no scrolling
     jsr init_main_menu
+
+    vblank_wait
     rts 
 
 ; editor menu start input

@@ -181,6 +181,9 @@ init_win_condition:
     jsr init_message
 
     lda #$01 ; set flag to skip update
+
+    vblank_wait
+
     rts 
 
 

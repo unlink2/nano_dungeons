@@ -411,9 +411,6 @@ load_palette_loop:
 ;   x -> decides the start address based on nametable
 load_level:
     lda $2002 ; read PPU status to reset the high/low latch
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
 
     ; reset scroll
     lda #$00
@@ -585,6 +582,8 @@ load_map_start_error:
 
     ldx #$01 ; load into nametable 1
     jsr load_level
+
+    vblank_wait
 
     rts 
 
