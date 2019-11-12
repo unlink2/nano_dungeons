@@ -115,6 +115,13 @@ init_pre_jump:
     ora #%00100000
     sta nmi_flags
 
+    ; store initial x and y location
+    ; in temporary collision data
+    lda player_x
+    sta collision_data
+    lda player_y
+    sta collision_data+1
+
     rts 
 
 ; this sub routine updates the jump routines
@@ -188,6 +195,30 @@ finish_jump:
     and #%11011111
     sta nmi_flags
 
+    ; only trigger collision if player did not land on the same jump tile where
+    ; the jump was initiated
+    ; lda collision_data
+    ; cmp player_x
+    ; bne @collision
+    ; lda collision_data+1
+    ; cmp player_y
+    ; beq @done
+
+    ; only allow collision if the next tile is not a jump tile again
+    ; check this with some fancy boolean logic
+    ; eor tile with 01011100. resulting values should be between 0-3
+    ; if it is a jump tile
+    jsr get_tile
+    eor #%01011100
+    cmp #$04
+    bcc @done
+
+@collision:
+    ; trigger collision for the
+    ; current tile
+    jsr collision_check
+
+@done:
     rts
 
 ; this routine handles jumping, jumps over 1 tile

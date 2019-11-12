@@ -61,7 +61,7 @@ frame_count 1
 nmi_flags 1
 ; 7th bit = 1 -> switch disabled, barries can be passed, 6th bit = 1 -> sprite update enabled
 game_flags 1
-; 7th bit = 1 -> barrier disabled
+; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 map_flags 1
 
 errno 1 ; error number, nonzero values are errors
@@ -139,6 +139,8 @@ smooth_down 1 ; smooth movement down
 smooth_left 1 ; smooth movement left 
 smooth_right 1 ; smooth movement right
 delay_timer 2 ; frames of animation, 16 bit integer
+
+collision_data 2 ; temporary data used by collision routines
 
 sprite_tile_x SPRITE_TILES ; 32 slots for sprite tiles, x and y position in one
 sprite_tile_y  SPRITE_TILES ; y position

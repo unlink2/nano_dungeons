@@ -240,6 +240,12 @@ update_player_animation:
 ;   a = 0 -> if collision did not occur
 ;   a = 1 -> if collision occured
 collision_check:
+    lda map_flags
+    and #%01000000 ; collision off flag
+    beq @collision_enabled
+    lda #$00
+    rts
+@collision_enabled
     jsr get_tile
     tax 
     ; get routine for current tile 
