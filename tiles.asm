@@ -383,3 +383,14 @@ barrier_tile:
     lda #$01 
     rts
 
+; this us the same as the normal barrier tile
+; but the output is inverted
+barrier_tile_invert:
+    lda map_flags ; check flag for tile
+    and #%10000000
+    bne @flag_set:
+    lda #$00
+    rts
+@flag_set:
+    lda #$01
+    rts

@@ -905,8 +905,8 @@ init_ai_tiles:
     ldy sprite_tile_size
     sta sprite_tile_ai, y ; store AI offset
 
-    clc 
-    adc #AI_SPRITES_START
+    lda #AI_SPRITES_START
+    clc
     adc sprite_tile_size ; sprite to be used
     sta sprite_tile_obj, y ; object to be used
     

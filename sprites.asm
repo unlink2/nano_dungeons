@@ -113,3 +113,44 @@ sprite_update_default:
     tay
     pla
     rts
+
+; same routine as above, but it inverts the barrier behaviour
+sprite_update_barrier_invert:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ; check if barrier flag is set, if so make
+    ; tile appear as barrier
+    lda map_flags
+    and #%10000000
+    beq @barrier_clear
+
+    ; barrier is not clear
+    lda #$50
+    bne @done
+
+    ; barrier is clear
+@barrier_clear:
+    lda #$24 ; empty
+@done:
+    ; store in sprite
+    ldy #$01
+    sta (sprite_ptr), y
+
+    pla
+    tax
+    pla
+    tay
+    pla
+    rts
+
+
