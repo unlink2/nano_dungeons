@@ -57,7 +57,7 @@ init_cursor_beep:
     lda #>279
     sta $4003
 
-    lda #%10111111
+    lda #%10011111
     sta $4000
 
     rts 
