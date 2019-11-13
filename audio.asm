@@ -48,6 +48,7 @@ update_audio:
     ; pulse 1 code
     ldy #$00
     lda (pulse_ptr_1), y
+    cmp #$FF
     beq @not_pulse_1 ; no update
 
     ldx pulse_timer_1
@@ -83,6 +84,7 @@ update_audio:
     ; pulse 2 code
     ldy #$00
     lda (pulse_ptr_2), y
+    cmp #$FF
     beq @not_pulse_2 ; no update
 
     ldx pulse_timer_2
@@ -118,9 +120,7 @@ update_audio:
     ; triangle code
     ldy #$00
     lda (triangle_ptr), y
-    sta $4008 ; store channel settings
-    sta $4017
-
+    cmp #$FF 
     beq @not_triangle ; no update
 
     ldx triangle_timer
@@ -130,6 +130,9 @@ update_audio:
 
     ldx triangle_periode
     stx triangle_timer ; store periode again
+
+    sta $4008 ; store channel settings
+    sta $4017
 
     iny
     lda (triangle_ptr), y
@@ -154,7 +157,7 @@ update_audio:
     ; triangle code
     ldy #$00
     lda (noise_ptr), y
-    sta $400C ; store channel settings
+    cmp #$FF
     beq @not_noise ; no update
 
     ldx noise_timer
@@ -165,14 +168,20 @@ update_audio:
     ldx noise_periode
     stx noise_timer ; store periode again
 
+    sta $400C ; store channel settings
+
     iny
     lda (noise_ptr), y
 
     sta $400E
 
+    iny
+    lda (noise_ptr), y
+    sta $400F
+
     lda noise_ptr
     clc
-    adc #$02 ; add 2 for next pair
+    adc #$03 ; add 3 for next pair
     sta noise_ptr
     lda noise_ptr+1
     adc #$00
@@ -188,16 +197,15 @@ update_audio:
 ;   uses a register
 ;   loads sound into square 1 channel
 init_cursor_beep:
-    lda #<cursor_beep
-    sta triangle_ptr
+    lda #<test_noise
+    sta noise_ptr
+    lda #>test_noise
+    sta noise_ptr+1
 
-    lda #>cursor_beep
-    sta triangle_ptr+1
-
-    lda #10 ; 10 frames of periode
-    sta triangle_periode
+    lda #10
+    sta noise_periode ; 10 frames per periode
 
     lda #$01
-    sta triangle_timer
+    sta noise_timer
 
     rts

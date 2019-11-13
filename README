@@ -50,6 +50,7 @@ $01 $02 $02 $03 $FA $FA $FA $FA $FA $FA $FA $FA $FA
 
 This simple example saved 3 bytes in total.
 
+
 PART 4: Audio format:
 =====================
 All audio data is placed in in the following format.
@@ -59,7 +60,13 @@ Where timer_frames is the amount of frames a note plays for and note
 is a value is an offset in the periode lookup table.
 Duty is the duty setting for this note.
 Sweep is a value for the sweep unit that is unused as of now.
-If duty is $00 no update will happen.
+If duty is $FF no update will happen.
+
+Noise:
+=======
+The noise format is slightly different
+
+duty, note, length counter
 
 Part 5: Notes (To be removed):
 ===============================
@@ -71,7 +78,7 @@ Blocks:
 - Space blocks (can be walked on)
 - One way blocks in all directions
 - Switch blocks that make blocks (im)passible. Switch blocks will be blocked off with sprites
-- Start block (TODO handle error when no start is present) 
+- Start block (TODO handle error when no start is present)
 - Teleport blocks/Jump blocks
 
 TODO:
