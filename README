@@ -50,7 +50,17 @@ $01 $02 $02 $03 $FA $FA $FA $FA $FA $FA $FA $FA $FA
 
 This simple example saved 3 bytes in total.
 
-Part 4: Notes (To be removed):
+PART 4: Audio format:
+=====================
+All audio data is placed in in the following format.
+timer, note, sweep
+
+Where timer is the amount of frames a note plays for and note
+is a value is an offset in the periode lookup table.
+Sweep is a value for the sweep unit that is unused as of now.
+If timer is $00 no update will happen.
+
+Part 5: Notes (To be removed):
 ===============================
 
 TODO init save data (magic number?)

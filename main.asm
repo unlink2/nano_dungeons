@@ -91,6 +91,19 @@ palette_ptr 2 ; pointer to current palette
 src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
 
+; thse pointers are incremented every time the timer reached 0
+; as long as the next timer value is not already 0
+pulse_ptr_1 2 ; audio data for pulse 1
+pulse_ptr_2 2 ; audio data for pulse 2
+triangle_ptr 2 ; audio data for triangle 2
+noise_ptr 2 ; audio data for noise
+
+pulse_timer_1 1 ; timer pulse 1
+pulse_timer_2 1 ; timer pulse 2
+pulse_triangle 1 ; triangle timer
+noise_timer 1 ; noise timer
+
+
 sprite_ptr 2 ; may be used as a pointer to sprite oam
 
 delay_update 2 ; function pointer for update animation, set to 00, 00 to disable
@@ -121,12 +134,12 @@ sprite_data_pad 212 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 level_palette PALETTE_SIZE ; palette used by the currently loaded level, is copied whenever a level becomes active
 
-player_x 1 ; tile location of player 
+player_x 1 ; tile location of player
 player_y 1 ; tile location of player
-player_x_bac 1 ; backup location 
+player_x_bac 1 ; backup location
 player_y_bac 1 ; backup location
 
-start_x 1 ; x and y value of start location 
+start_x 1 ; x and y value of start location
 start_y 1 ; values are populated during decompression
 
 attr_value 1 ; value used for attribute painting
@@ -136,7 +149,7 @@ hex_buffer 2 ; buffer to convert hex number to be output on screen
 
 smooth_up 1 ; smooht movement up
 smooth_down 1 ; smooth movement down
-smooth_left 1 ; smooth movement left 
+smooth_left 1 ; smooth movement left
 smooth_right 1 ; smooth movement right
 delay_timer 2 ; frames of animation, 16 bit integer
 
@@ -155,9 +168,9 @@ sprite_tile_size 1 ; amount of tiles currently used
 ; prg ram ends at $7FFF
 ; each save is the size of a LEVEL + 2 for the terminator
 ; this allows the user to store an entire screen without compression
-; in thory 
+; in thory
 ; compression will still be applied however.
-.enum $6000 
+.enum $6000
 save_1 SAVE_SIZE ; saveslot 1
 attr_1 ATTR_SIZE
 
@@ -170,7 +183,7 @@ attr_3 ATTR_SIZE
 palette_1 PALETTE_SIZE ; palette 1
 palette_2 PALETTE_SIZE ; palette 2
 palette_3 PALETTE_SIZE ; palette 3
-.ende 
+.ende
 
 .macro vblank_wait
 @.mi.vblank:
@@ -179,22 +192,22 @@ palette_3 PALETTE_SIZE ; palette 3
 .endm
 
 ; this macro toggles the nmi enable flag
-.macro set_nmi_flag 
+.macro set_nmi_flag
     lda nmi_flags
     ora #%0000001
     sta nmi_flags
-.endm 
+.endm
 
 .macro unset_nmi_flag
     lda nmi_flags
     and #%11111110
     sta nmi_flags
-.endm 
+.endm
 
 
 .org $C000 ; start of program
 init:
-    sei ; disable interrupts 
+    sei ; disable interrupts
     cld ; disable decimal mode
     ldx #$40
     stx $4017 ; disable APU frame IRQ
@@ -204,6 +217,8 @@ init:
     stx $2000 ; disable NMI
     stx $2001 ; disable rendering
     stx $4010 ; disable DMC IRQs
+
+    jsr init_audio_channels
 
     vblank_wait
 
@@ -221,30 +236,30 @@ clear_mem:
     sta $0200, x    ;move all sprites off screen
     dex
     bne clear_mem
-    
+
 
     vblank_wait
 
     ; set up hi byte sprite_ptr
-    lda #$02 
+    lda #$02
     sta sprite_ptr+1
 
     ; set up palette pointer
-    ldx #$00 
+    ldx #$00
     stx palette
-    ; ldx palette 
-    lda palette_table_lo, x 
-    sta palette_ptr 
-    lda palette_table_hi, x 
+    ; ldx palette
+    lda palette_table_lo, x
+    sta palette_ptr
+    lda palette_table_hi, x
     sta palette_ptr+1
 
     jsr load_palette
 
     ; set up game mode for editor for now
-    lda #GAME_MODE_MENU 
+    lda #GAME_MODE_MENU
     sta game_mode
 
-    lda #$01 
+    lda #$01
     sta nametable
 
     ; load editor menu
@@ -264,15 +279,15 @@ clear_mem:
     lda #>empty_map
     sta level_data_ptr+1
 
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     jsr decompress_level
 
     ldx attributes
-    lda attr_table_lo, x 
+    lda attr_table_lo, x
     sta attr_ptr
     lda attr_table_hi, x
     sta attr_ptr+1
@@ -297,13 +312,13 @@ main_loop:
 
 nmi:
     ; store registers
-    pha 
-    txa 
-    pha 
-    tya 
-    pha 
+    pha
+    txa
+    pha
+    tya
+    pha
 
-    lda nmi_flags 
+    lda nmi_flags
     and #%00000010
     beq nmi_flag_not_set
     jmp nmi_flag_set
@@ -311,7 +326,7 @@ nmi_flag_not_set:
     ; don't allow nmi until
     ; this one finishes
     ; nmi active flag
-    lda nmi_flags 
+    lda nmi_flags
     ora #%00000010
     sta nmi_flags
 
@@ -406,13 +421,33 @@ update_done:
     and #%11111101
     sta nmi_flags
 nmi_flag_set:
-    pla 
-    tay 
-    pla 
-    txa 
+    ; no matter what we always update
+    ; audio
+    jsr update_audio
+
+    pla
+    tay
+    pla
+    txa
     pla
     rti
 
+; this may be called by
+; the APU on the last tick of $4017
+irq:
+    pha
+    txa
+    pha
+    tya
+    pha 
+
+    pla
+    tay
+    pla
+    tax
+    pla
+
+    rti 
 
 .include "./utility.asm"
 .include "./input.asm"
@@ -424,6 +459,7 @@ nmi_flag_set:
 .include "./tiles.asm"
 .include "./delay.asm"
 .include "./sprites.asm"
+.include "./audio.asm"
 
 palette_data:
 .db $0F,$31,$32,$33,$0F,$35,$36,$37,$0F,$39,$3A,$3B,$0F,$3D,$3E,$0F  ;background palette data
@@ -863,10 +899,40 @@ obj_index_to_addr:
 .db .ri.*4
 .endrep
 
+; audio stuff
+
+; timer value is 00 therefore no audio will play
+no_audio:
+.db $00
+
+cursor_beep:
+.db $02, $03, $00
+
+
+; NTSC period table generated by mktables.py
+period_table_lo:
+.db $f1,$7f,$13,$ad,$4d,$f3,$9d,$4c,$00,$b8,$74,$34
+.db $f8,$bf,$89,$56,$26,$f9,$ce,$a6,$80,$5c,$3a,$1a
+.db $fb,$df,$c4,$ab,$93,$7c,$67,$52,$3f,$2d,$1c,$0c
+.db $fd,$ef,$e1,$d5,$c9,$bd,$b3,$a9,$9f,$96,$8e,$86
+.db $7e,$77,$70,$6a,$64,$5e,$59,$54,$4f,$4b,$46,$42
+.db $3f,$3b,$38,$34,$31,$2f,$2c,$29,$27,$25,$23,$21
+.db $1f,$1d,$1b,$1a,$18,$17,$15,$14
+
+period_table_hi:
+.db $07,$07,$07,$06,$06,$05,$05,$05,$05,$04,$04,$04
+.db $03,$03,$03,$03,$03,$02,$02,$02,$02,$02,$02,$02
+.db $01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01,$01
+.db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+.db $00,$00,$00,$00,$00,$00,$00,$00
+
+
 .pad $FFFA
 .dw nmi ; nmi
 .dw init ; reset 
-.dw init ; irq
+.dw irq ; irq
 
 ; chr bank 8k
 .base $0000
