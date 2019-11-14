@@ -346,7 +346,9 @@ init_editor:
 ; update sub routine for editor menu
 update_editor_menu:
     ; sprite counter
-    lda sprite_tile_size
+    ldy sprite_tile_size
+    iny
+    tya
     and #$0F 
     sta sprite_data_A+1
 
