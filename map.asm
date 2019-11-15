@@ -69,12 +69,12 @@ decompress_level:
 @decompress_done:
 
     ; restore original level data ptr
-    pla 
+    pla
     sta level_data_ptr
-    pla 
+    pla
     sta level_data_ptr+1
 
-    rts 
+    rts
 
 ; increments level data ptr
 ; inputs:
@@ -85,15 +85,15 @@ decompress_level:
 inc_level_data_ptr:
     ; 16 bit add
     lda level_data_ptr
-    clc 
-    adc #$01 
+    clc
+    adc #$01
     sta level_data_ptr
     lda level_data_ptr+1
     adc #$00
     sta level_data_ptr+1
-    rts 
+    rts
 
-; writes the decompressed byte contained in a 
+; writes the decompressed byte contained in a
 ; to level_ptr_temp
 ; inputs:
 ;   level_ptr_temp pointing to the next byte location
@@ -104,7 +104,7 @@ inc_level_data_ptr:
 ;   tiles_to_clear may be incremented
 ;   if tile is a sprite tile it may set up the ai for the map
 write_decompressed_byte:
-    ldy #$00 
+    ldy #$00
 
     sta (level_ptr_temp), y
 
@@ -118,8 +118,8 @@ write_decompressed_byte:
     bcs @not_clearable
 
     lda tiles_to_clear
-    clc 
-    adc #$01 
+    clc
+    adc #$01
     sta tiles_to_clear
     lda tiles_to_clear+1
     adc #$00
@@ -129,17 +129,17 @@ write_decompressed_byte:
 
     ; 16 bit add
     lda level_ptr_temp
-    clc 
-    adc #$01 
+    clc
+    adc #$01
     sta level_ptr_temp
     lda level_ptr_temp+1
     adc #$00
     sta level_ptr_temp+1
 
     pla ; restore tile value
-    rts 
+    rts
 
-; this sub routine compresses a level 
+; this sub routine compresses a level
 ; it will follow the rules desribed in README
 ; inputs:
 ;   level_data_ptr -> pointing to destination
@@ -149,10 +149,10 @@ write_decompressed_byte:
 ;   temp, temp+1 and temp+2 are written to
 compress_level:
     ; save level data ptr
-    lda level_data_ptr 
-    pha 
-    lda level_data_ptr+1 
-    pha 
+    lda level_data_ptr
+    pha
+    lda level_data_ptr+1
+    pha
 
     ; to compress a level we need to loop for a while
     ; until we reach LEVEL_SIZE bytes
@@ -167,28 +167,28 @@ compress_level:
     lda #$00
     sta temp
 
-    ; pre-calculate end address of level 
+    ; pre-calculate end address of level
     ; temp+1 and +2 are holding the end address
     ; size is FF+FF+FF+C3
     ldx #$03 ; do this 3 times
 @end_calc_loop:
     lda temp+1
-    clc 
-    adc #$FF 
+    clc
+    adc #$FF
     sta temp+1
-    lda temp+2 
+    lda temp+2
     adc #$00 ; add carry
     sta temp+2
-    dex 
+    dex
     bne @end_calc_loop
-    ; add rest 
-    lda temp+1 
-    clc 
-    adc #$C3 ; +1 since we break after 
+    ; add rest
+    lda temp+1
+    clc
+    adc #$C3 ; +1 since we break after
     sta temp+1
     lda temp+2
     adc #$00 ; carry
-    sta temp+2 
+    sta temp+2
 
     ; loop until level_ptr_temp is the same as the end address
 @compress_loop:
@@ -200,10 +200,10 @@ compress_level:
     ; sta temp ; store last tile, or if at start store first tile again
     lda (level_ptr_temp), y ; get tile from ram
     ; check for different tile
-    cmp temp 
+    cmp temp
     bne @store_data
     inx
-    cpx #$FF 
+    cpx #$FF
     beq @store_data
     bne @next_byte
 @store_data
@@ -214,17 +214,17 @@ compress_level:
 @next_byte:
     sta temp ; store last tile now
     ; increment pointer 16 bit math
-    lda level_ptr_temp 
-    clc 
-    adc #$01 
+    lda level_ptr_temp
+    clc
+    adc #$01
     sta level_ptr_temp
     lda level_ptr_temp+1
-    adc #$00 
+    adc #$00
     sta level_ptr_temp+1
 
     ; compare to end pointer
     lda level_ptr_temp
-    cmp temp+1 
+    cmp temp+1
     bne @not_done
     lda level_ptr_temp+1
     cmp temp+2
@@ -235,27 +235,27 @@ compress_level:
     beq @compress_loop
     bne @count_repeates
 @compress_done:
-    lda temp 
+    lda temp
     jsr write_compressed_data ; add last data
 
-    lda #$FF 
-    ldx #$01 
-    ; write FF at the end 
+    lda #$FF
+    ldx #$01
+    ; write FF at the end
     jsr write_compressed_data
     lda #$00
     ldx #$01
     ; write 00 at the end
-    jsr write_compressed_data 
+    jsr write_compressed_data
 
     ; restore original level data ptr
-    pla 
+    pla
     sta level_data_ptr
-    pla 
+    pla
     sta level_data_ptr+1
-    rts 
+    rts
 
 ; this sub routine saves attributes from ppu
-; memory to 
+; memory to
 ; a location pointed to by attr_ptr
 ; inputs:
 ;   attr_ptr -> pointing to attribute destination
@@ -391,18 +391,18 @@ load_palette:
 
     ldy #$00
 load_palette_loop:
-    lda (palette_ptr), y 
+    lda (palette_ptr), y
     sta $2007 ; write to PPU
-    iny 
+    iny
     cpy #palette_data_end-palette_data
-    bne load_palette_loop 
+    bne load_palette_loop
 
     ; no scrolling
-    lda #$00 
-    sta $2005 
+    lda #$00
+    sta $2005
     sta $2005
 
-    rts 
+    rts
 
 
 ; this sub routine loads a level into NT1
@@ -421,14 +421,14 @@ load_level:
     cpx #$01
     bne @no_add
     ; if nt is 0 we dont need to change the address
-    clc 
+    clc
     adc #$04 ; add 4 to get start address of nt1
 @no_add:
     sta $2006
     lda #$00
     sta $2006 ; set up ppu for level transfer
 
-    ; copy the pointer to 
+    ; copy the pointer to
     ; save the original one
     lda level_ptr
     sta level_ptr_temp
@@ -443,15 +443,15 @@ load_level:
     jsr load_level_iter
     jsr inc_level_temp_ptr
     ; last iteration is different so no jsr
-    ldy #$00 ; remainder 
+    ldy #$00 ; remainder
 @load_level_loop:
-    lda (level_ptr_temp), y 
+    lda (level_ptr_temp), y
     sta $2007 ; write to ppu
-    iny 
+    iny
     cpy #$C3
-    bne @load_level_loop 
+    bne @load_level_loop
 
-    rts 
+    rts
 
 ; loads menu background into nametable 1
 ; inputs:
@@ -472,18 +472,18 @@ load_menu:
     sta level_data_ptr+1
 
     ; decompress location, same as level
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     jsr decompress_level
 
     ldx #$01 ; load into nametable 1
     jsr load_level
-    rts 
+    rts
 @not_editor:
-    cpx #GAME_MODE_MENU 
+    cpx #GAME_MODE_MENU
     bne @not_main
 
     ; load editor menu compressed tiles
@@ -493,16 +493,16 @@ load_menu:
     sta level_data_ptr+1
 
     ; decompress location, same as level
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     jsr decompress_level
 
     ldx #$01 ; load into nametable 1
     jsr load_level
-    rts 
+    rts
 
 @not_main:
     cpx #GAME_MODE_MESSAGE
@@ -515,9 +515,9 @@ load_menu:
     sta level_data_ptr+1
 
     ; decompress location, same as level
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     lda #<win_attr
@@ -530,7 +530,7 @@ load_menu:
 
     ; copy palette
     lda #<win_pal
-    sta palette_ptr 
+    sta palette_ptr
     lda #>win_pal
     sta palette_ptr+1
     jsr load_palette
@@ -539,14 +539,14 @@ load_menu:
     jsr load_level
 
 @invalid_menu:
-    rts 
+    rts
 
 ; this sub routine displays
 ; a map load error
 ; inputs:
 ;   none
 ; side effects:
-;   decompresses a map, 
+;   decompresses a map,
 ;   overwrites nt1
 ;   registers/flags changed
 load_map_start_error:
@@ -555,13 +555,13 @@ load_map_start_error:
 
     set_nmi_flag
 
-    lda #GAME_MODE_MESSAGE 
+    lda #GAME_MODE_MESSAGE
     sta game_mode
-    
-    lda #$01 
+
+    lda #$01
     sta nametable
 
-    lda #<update_none 
+    lda #<update_none
     sta update_sub
     lda #>update_none
     sta update_sub+1
@@ -578,9 +578,9 @@ load_map_start_error:
     sta level_data_ptr+1
 
     ; decompress location, same as level
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     jsr decompress_level
@@ -590,31 +590,31 @@ load_map_start_error:
 
     vblank_wait
 
-    rts 
+    rts
 
 ; increments level ptr by FF
 inc_level_temp_ptr:
-    lda level_ptr_temp 
-    clc 
-    adc #$FF 
+    lda level_ptr_temp
+    clc
+    adc #$FF
     sta level_ptr_temp
     bcc @no_carry:
-    lda level_ptr_temp+1 
+    lda level_ptr_temp+1
     adc #$00 ; add carry
     sta level_ptr_temp+1
 @no_carry:
-    rts 
+    rts
 
 ; first second and third iteration of load level
 load_level_iter:
     ldy #$00 ; loop counter
 @load_level_loop:
-    lda (level_ptr_temp), y 
+    lda (level_ptr_temp), y
     sta $2007 ; write to ppu
-    iny 
-    cpy #$FF 
+    iny
+    cpy #$FF
     bne @load_level_loop
-    rts 
+    rts
 
 ; this sub routine updates a tile at
 ; the player's current x/y position (tile location)
@@ -642,7 +642,7 @@ update_tile:
     cmp #SPRITE_TILES_START
     bcc @not_sprite
     cmp #SPRITE_TILES_END
-    bcs @not_sprite 
+    bcs @not_sprite
     lda sprite_tile_size
     cmp #SPRITE_TILES-1
     bne @not_max_ai
@@ -656,39 +656,39 @@ update_tile:
     cmp #SPRITE_TILES_START
     bcc @not_replacing_sprite
     cmp #SPRITE_TILES_END
-    bcs @not_replacing_sprite 
+    bcs @not_replacing_sprite
     dec sprite_tile_size
 @not_replacing_sprite:
 
     ; store all pointers
     lda level_ptr
-    pha 
+    pha
     lda level_ptr+1
-    pha 
+    pha
 
     ; temp holds pointer to ppu ram
     lda #$00
-    sta temp 
-    lda #$20 
+    sta temp
+    lda #$20
     sta temp+1
 
-    ldx player_y 
+    ldx player_y
     lda tile_update_table_lo, x
-    clc 
+    clc
     adc player_x
     sta level_ptr
 
-    lda tile_update_table_hi, x 
+    lda tile_update_table_hi, x
     adc level_ptr+1
     sta level_ptr+1
 
     ; same calculation for ppu address
     lda tile_update_table_lo, x
-    clc 
+    clc
     adc player_x
     sta temp
 
-    lda tile_update_table_hi, x 
+    lda tile_update_table_hi, x
     adc temp+1
     sta temp+1
 
@@ -709,32 +709,32 @@ update_tile:
     lda sprite_data+1
     jmp @update
 @not_editor:
-    ldy #$00 
-    lda (level_ptr), y 
+    ldy #$00
+    lda (level_ptr), y
     eor #%10000000
     jsr update_tiles_to_clear
-@update: 
+@update:
     sta $2007 ; store in ppu
-    ldy #$00 
+    ldy #$00
     sta (level_ptr), y ; store in level
 
-    ; restore level_ptr 
-    pla 
+    ; restore level_ptr
+    pla
     sta level_ptr+1
-    pla 
+    pla
     sta level_ptr
 
     lda #$00
-    sta $2005 ; no horizontal scroll 
+    sta $2005 ; no horizontal scroll
     sta $2005 ; no vertical scroll
 
-    rts 
+    rts
 
 ; this sub routine returns the current
 ; tile at the player's position
 ; inputs:
 ;   player_x
-;   player_y 
+;   player_y
 ; side effects:
 ;   registers are modified
 ; returns:
@@ -742,34 +742,85 @@ update_tile:
 get_tile:
     ; store all pointers
     lda level_ptr
-    pha 
+    pha
     lda level_ptr+1
-    pha 
+    pha
 
-    ldx player_y 
+    ldx player_y
     lda tile_update_table_lo, x
-    clc 
+    clc
     adc player_x
     sta level_ptr
 
-    lda tile_update_table_hi, x 
+    lda tile_update_table_hi, x
     adc level_ptr+1
     sta level_ptr+1
 
-    ldy #$00 
+    ldy #$00
     lda (level_ptr), y
-    tax  
+    tax
 
-    ; restore level_ptr 
-    pla 
+    ; restore level_ptr
+    pla
     sta level_ptr+1
-    pla 
+    pla
     sta level_ptr
 
-    txa 
-    rts 
+    txa
+    rts
 
-; this sub routine updates an attribute at the 
+; this sub rotuine returns
+; the tile at the current player position
+; from the nametable
+; inputs:
+;   player_x, player_y
+;   x -> the nametable
+; returns:
+;   the tile in A
+; side effects:
+;   uses temp,
+;   uses A and X register
+;   does a nametable read
+get_tile_nametable:
+    lda $2002 ; read PPU status to reset the high/low latch
+
+    txa
+    tay ; store x value somewhere else
+
+    ; use temp for pointer math
+    lda #$20
+    sta temp+1
+    lda #$00
+    sta temp
+
+    ldx player_y
+    lda tile_update_table_lo, x
+    clc
+    adc player_x
+    sta temp
+
+    lda tile_update_table_hi, x
+    adc temp+1
+    sta temp+1
+
+    lda temp+1  ; $2000 = start of ppu address
+    cpy #$01
+    bne @no_add
+    ; if nt is 0 we dont need to change the address
+    clc
+    adc #$04 ; add 4 to get start address of nt1
+@no_add:
+    sta $2006
+    lda temp
+    sta $2006 ; set up ppu for level transfer
+
+    ; read tile
+    lda $2007 ; dummy read
+    lda $2007
+
+    rts
+
+; this sub routine updates an attribute at the
 ; player's x/y position
 ; the chosen value is the player's tile index
 ; inputs:
@@ -782,24 +833,24 @@ get_tile:
 ; that counts from 0-3
 ; based on that and player location we can AND
 ; the correct value by reading ppu back and then writing again
-; can use lookup table for every possible combination of location, amount 
+; can use lookup table for every possible combination of location, amount
 ; of shifts and where to write to
 update_attr:
     ; temp holds pointer to ppu ram
-    lda #$C0 
-    sta temp 
-    lda #$23 
+    lda #$C0
+    sta temp
+    lda #$23
     sta temp+1
 
-    ldx player_y 
+    ldx player_y
     lda attr_update_table_y, x
-    clc 
+    clc
     adc temp
     sta temp
 
-    ldx player_x 
-    lda attr_update_table_x, x 
-    clc 
+    ldx player_x
+    lda attr_update_table_x, x
+    clc
     adc temp
     sta temp
 
@@ -819,13 +870,13 @@ update_attr:
     sta $2007 ; store in ppu
 
     ; no scrolling
-    lda #$00 
-    sta $2005 
+    lda #$00
+    sta $2005
     sta $2005
 
-    rts 
+    rts
 
-; this sub routine finds the start location 
+; this sub routine finds the start location
 ; of the currently loaded level
 ; it loops until start is found, or
 ; 960 bytes are reached
@@ -839,43 +890,43 @@ update_attr:
 ;   a = 1 if location found
 ;   a = 0 if no location found = ERROR state
 find_start:
-    lda #$00 
-    sta start_x 
-    sta start_y 
-    sta player_x 
+    lda #$00
+    sta start_x
+    sta start_y
+    sta player_x
     sta player_y
 @x_loop:
     jsr get_tile
     cmp #START_TILE ; if current tile is start tile we found it
-    beq @found 
+    beq @found
 
     ldx player_x
-    inx 
-    txa   
+    inx
+    txa
     and #%00011111 ; cannot be greater than 32
     sta player_x
     bne @x_loop
-    ; if zero increemnt y 
-    ldx player_y 
-    inx 
+    ; if zero increemnt y
+    ldx player_y
+    inx
     cpx #30 ; cant be more than 29 y
-    beq @done 
+    beq @done
     stx player_y
     bne @x_loop
 @done:
     lda #$00 ; not found!
-    sta player_x 
-    sta player_y 
-    sta start_x 
-    sta start_y 
-    rts 
+    sta player_x
+    sta player_y
+    sta start_x
+    sta start_y
+    rts
 @found:
-    lda player_x 
-    sta start_x 
-    lda player_y 
+    lda player_x
+    sta start_x
+    lda player_y
     sta start_y
     lda #$01 ; found
-    rts 
+    rts
 
 ; this sub routine inits all ai tiles
 ; inputs:
@@ -883,10 +934,10 @@ find_start:
 ; side effects:
 ;   registers affected, sprite oam changed
 init_ai_tiles:
-    lda #$00 
-    sta start_x 
-    sta start_y 
-    sta player_x 
+    lda #$00
+    sta start_x
+    sta start_y
+    sta player_x
     sta player_y
 @x_loop:
     jsr get_tile
@@ -897,9 +948,9 @@ init_ai_tiles:
     cmp #SPRITE_TILES_END
     bcs @not_sprite
 
-    sec 
+    sec
     sbc #SPRITE_TILES_START ; get offset for ai/init
-    
+
     inc sprite_tile_size ; increment amount of sprites in use
 
     ldy sprite_tile_size
@@ -909,67 +960,67 @@ init_ai_tiles:
     clc
     adc sprite_tile_size ; sprite to be used
     sta sprite_tile_obj, y ; object to be used
-    
+
     ; store source tile's x and y position
-    lda player_x 
-    sta sprite_tile_x, y 
-    lda player_y 
+    lda player_x
+    sta sprite_tile_x, y
+    lda player_y
     sta sprite_tile_y, y
 
-    ; call init 
-    lda sprite_tile_ai, y 
-    tay 
+    ; call init
+    lda sprite_tile_ai, y
+    tay
 
-    lda game_flags 
+    lda game_flags
     and #%01000000
     beq @no_init ; no init if sprites are disabled
 
     ; save src_ptr
     lda src_ptr
-    pha 
-    lda src_ptr+1 
-    pha 
+    pha
+    lda src_ptr+1
+    pha
 
-    lda sprite_init_lo, y 
-    sta src_ptr 
-    lda sprite_init_hi, y 
+    lda sprite_init_lo, y
+    sta src_ptr
+    lda sprite_init_hi, y
     sta src_ptr+1
     ldy sprite_tile_size ; load offset into y
     jsr jsr_indirect
 
     ; restore src ptr
-    pla 
-    sta src_ptr+1 
-    pla 
+    pla
+    sta src_ptr+1
+    pla
     sta src_ptr
 
 @no_init:
-@not_sprite 
+@not_sprite
 
 
     ldx player_x
-    inx 
-    txa   
+    inx
+    txa
     and #%00011111 ; cannot be greater than 32
     sta player_x
     bne @x_loop
-    ; if zero increemnt y 
-    ldx player_y 
-    inx 
+    ; if zero increemnt y
+    ldx player_y
+    inx
     cpx #30 ; cant be more than 29 y
-    beq @done 
+    beq @done
     stx player_y
     bne @x_loop
 @done:
     lda #$00 ; not found!
-    sta player_x 
-    sta player_y 
-    sta start_x 
-    sta start_y 
-    rts 
+    sta player_x
+    sta player_y
+    sta start_x
+    sta start_y
+    rts
 
 ; TODO
-; this sub routine clears all bytes 
+; this sub routine clears all bytes
 ; used by level_ptr
 ; inputs:
 ;   level_ptr pointing to RAM
@@ -977,4 +1028,4 @@ init_ai_tiles:
 ;   clears everything at level_ptr
 ;   uses level_ptr_temp to clear
 clear_level:
-    rts 
+    rts

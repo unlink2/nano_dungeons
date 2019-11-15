@@ -57,6 +57,12 @@
 
 .define SPACE_TILE $24 ; space tile index, required for editor
 
+; tile select bounds
+.define TILE_SELECT_MIN_X $17
+.define TILE_SELECT_MAX_X $1D
+.define TILE_SELECT_MIN_Y $05
+.define TILE_SELECT_MAX_Y $17
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs

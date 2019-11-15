@@ -161,7 +161,8 @@ a_input_editor_menu:
     lda editor_flags
     and #%10000000
     beq @not_tile_select_mode
-    jsr get_tile
+    ldx #$01 ; get current tile from nt 1
+    jsr get_tile_nametable
     sta sprite_data_1+1
     rts
 @not_tile_select_mode:

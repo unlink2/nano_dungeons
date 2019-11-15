@@ -370,6 +370,31 @@ update_editor_menu:
     lda #$3B
     sta sprite_data+1
 
+    ; check bounds
+    lda player_x
+    cmp #TILE_SELECT_MIN_X
+    bcs @not_min_x
+    ldy #TILE_SELECT_MIN_X
+    sty player_x
+@not_min_x:
+    cmp #TILE_SELECT_MAX_X+1
+    bcc @not_max_x
+    ldy #TILE_SELECT_MAX_X
+    sty player_x
+@not_max_x:
+
+    lda player_y
+    cmp #TILE_SELECT_MIN_Y
+    bcs @not_min_y
+    ldy #TILE_SELECT_MIN_Y
+    sty player_y
+@not_min_y:
+    cmp #TILE_SELECT_MAX_Y+1
+    bcc @not_max_y
+    ldy #TILE_SELECT_MAX_Y
+    sty player_y
+@not_max_y:
+
     jmp @done
 @not_tile_select_mode:
 
