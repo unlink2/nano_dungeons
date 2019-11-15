@@ -360,8 +360,20 @@ update_editor_menu:
 @no_overflow
     sta menu_select
 
+    tax
+
+    ; check for bit 1 of flags
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+
+    lda #$3B
+    sta sprite_data+1
+
+    jmp @done
+@not_tile_select_mode:
+
     ; set sprite at correct position 
-    tax 
     lda editor_menu_cursor_x, x 
     sta player_x
 
@@ -370,6 +382,10 @@ update_editor_menu:
 
     lda editor_menu_cursor_attr, x
     sta sprite_data+2
+
+    lda #$31
+    sta sprite_data+1
+
 @done:
     jmp update_done
 

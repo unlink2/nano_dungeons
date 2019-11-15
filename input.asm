@@ -158,6 +158,14 @@ a_input:
 
 ; editor menu code for a input
 a_input_editor_menu:
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+    jsr get_tile
+    sta sprite_data_1+1
+    rts
+@not_tile_select_mode:
+
     lda #MOVE_DELAY_FRAMES*2
     sta select_delay
 
@@ -288,13 +296,6 @@ a_input_editor_menu:
     vblank_wait
     rts
 @not_back:
-    cmp #EDITOR_MENU_TILE
-    bne @done
-
-    ; enable/disable tile select mode
-    lda editor_flags
-    eor #%10000000
-    sta editor_flags
 @done:
     rts
 
@@ -542,6 +543,12 @@ b_input:
 
 ; b input for editor menu
 b_input_editor_menu:
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+    rts
+@not_tile_select_mode:
+
     lda #MOVE_DELAY_FRAMES*2
     sta select_delay
 
@@ -702,25 +709,13 @@ select_input:
 
 ; select input editor menu
 select_input_editor_menu:
-    ldx #$00
-    stx $2001 ; disable rendering
+    ; cmp #EDITOR_MENU_TILE
+    ; bne @done
 
-    ; disable NMI until load is complete
-    set_nmi_flag
-
-    ldx palette
-    inx 
-    txa 
-    and #PALETTES
-    sta palette
-    tax 
-
-    lda palette_table_lo, x 
-    sta palette_ptr
-    lda palette_table_hi, x
-    sta palette_ptr+1
-
-    jsr load_palette
+    ; enable/disable tile select mode
+    lda editor_flags
+    eor #%10000000
+    sta editor_flags
     rts 
 
 ; start button input
@@ -865,6 +860,14 @@ go_left_editor:
 
 ; ediotr menu code
 go_left_editor_menu:
+    ; check for bit 1 of flags
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+    dec player_x
+    rts
+@not_tile_select_mode:
+
     ; if in editor menu we decrement tile id
     lda menu_select
     cmp #EDITOR_MENU_TILE
@@ -973,6 +976,14 @@ go_right_editor:
 
 ; editor menu code
 go_right_editor_menu:
+    ; check for bit 1 of flags
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+    inc player_x
+    rts
+@not_tile_select_mode:
+
     ; if in editor menu we increment tile id
     ; check cursor positon
     lda menu_select
@@ -1048,39 +1059,48 @@ go_up:
     bne @not_editor
 
     jsr go_up_editor
-    lda #$08 
+    lda #$08
     sta smooth_up
 
-    rts 
+    rts
 
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
 
+    ; check for bit 1 of flags
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+    dec player_y
+    rts
+@not_tile_select_mode:
+
     dec menu_select
+    rts
 @not_editor_menu:
     cmp #GAME_MODE_MENU
     bne @not_main_menu
     dec menu_select
-    rts 
+    rts
 @not_main_menu:
     cmp #GAME_MODE_PUZZLE
-    bne @done 
+    bne @done
     jsr go_up_editor
-    lda #$08 
+    lda #$08
     sta smooth_up
 @done:
-    rts 
+    rts
 
 ; editor code
 go_up_editor:
     lda #$00
-    cmp player_y ; dont allow underflow 
+    cmp player_y ; dont allow underflow
     beq @no_dec
 
     dec player_y
 @no_dec:
-    rts 
+    rts
 
 ; down input
 go_down:
@@ -1097,29 +1117,37 @@ go_down:
     cmp #GAME_MODE_EDITOR
     bne @not_editor
     jsr go_down_editor
-    lda #$08 
+    lda #$08
     sta smooth_down
 
-    rts 
+    rts
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @not_editor_menu
 
+    ; check for bit 1 of flags
+    lda editor_flags
+    and #%10000000
+    beq @not_tile_select_mode
+    inc player_y
+    rts
+@not_tile_select_mode:
+
     inc menu_select
-    rts 
+    rts
 @not_editor_menu:
     cmp #GAME_MODE_MENU
     bne @not_main_menu
     inc menu_select
-    rts 
+    rts
 @not_main_menu
     cmp #GAME_MODE_PUZZLE
-    bne @done 
+    bne @done
     jsr go_down_editor
-    lda #$08 
+    lda #$08
     sta smooth_down
-@done: 
-    rts 
+@done:
+    rts
 
 ; editor code
 go_down_editor:
