@@ -85,6 +85,8 @@ init_jump_animation:
     lda #%11000000
     sta sprite_data_3+2
 
+    jsr init_jump_noise
+
     rts 
 
 ; this sub routine inits the pre-jump state

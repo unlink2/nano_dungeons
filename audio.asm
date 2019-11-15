@@ -195,11 +195,11 @@ update_audio:
 ; noise
 ; side effects:
 ;   uses a register
-;   loads sound into square 1 channel
+;   loads sound into noise channel
 init_cursor_beep:
-    lda #<test_noise
+    lda #<cursor_noise
     sta noise_ptr
-    lda #>test_noise
+    lda #>cursor_noise
     sta noise_ptr+1
 
     lda #10
@@ -209,3 +209,22 @@ init_cursor_beep:
     sta noise_timer
 
     rts
+
+; this sub routine sets up
+; the jump sound
+; side effects:
+;   uses A register
+;   loads sound into noise channel
+init_jump_noise:
+    lda #<jump_noise
+    sta noise_ptr
+    lda #>jump_noise
+    sta noise_ptr+1
+
+    lda #$10
+    sta noise_periode
+
+    lda #$01
+    sta noise_timer
+
+    rts 

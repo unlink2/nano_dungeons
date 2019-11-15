@@ -681,7 +681,9 @@ select_input:
     bne @not_editor
 
     ; change sprite 0s sprite index
-    inc sprite_data+1
+    ; inc sprite_data+1
+    jsr get_tile
+    sta sprite_data+1
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
     bne @done

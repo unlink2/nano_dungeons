@@ -375,4 +375,26 @@ update_editor_menu:
 
 ; update sub routne for editor
 update_editor:
+    ; test if player tile is empty
+    ; if so move another sprite in place
+    ; to act as a cursor, otherwise move it offscreen
+
+    lda sprite_data+1
+    cmp #SPACE_TILE
+    bne @no_cursor
+
+    ; init cursor
+    lda sprite_data
+    sta sprite_data_5
+    lda sprite_data+3
+    sta sprite_data_5+3
+
+    lda #$3B
+    sta sprite_data_5+1
+    jmp update_done
+@no_cursor:
+    lda #$00
+    sta sprite_data_5
+    sta sprite_data_5+3
+
     jmp update_done
