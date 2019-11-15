@@ -269,7 +269,7 @@ a_input_editor_menu:
     rts
 @no_slot:
     cmp #EDITOR_MENU_BACK
-    bne @done
+    bne @not_back
     ; load nametable
     lda #$00
     sta $2001 ; no rendering
@@ -286,6 +286,15 @@ a_input_editor_menu:
     ; sta $2005 ; no scrolling
     jsr init_main_menu
     vblank_wait
+    rts
+@not_back:
+    cmp #EDITOR_MENU_TILE
+    bne @done
+
+    ; enable/disable tile select mode
+    lda editor_flags
+    eor #%10000000
+    sta editor_flags
 @done:
     rts
 

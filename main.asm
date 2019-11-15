@@ -65,6 +65,9 @@ nmi_flags 1
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 map_flags 1
+; editor flags, mostly used for menu select
+; 7th bit = 1 -> tile select mode, = 0 -> menu mode
+editor_flags 1 
 
 errno 1 ; error number, nonzero values are errors
 
