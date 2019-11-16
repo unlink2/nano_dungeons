@@ -178,6 +178,9 @@ sprite_tile_x SPRITE_TILES ; 32 slots for sprite tiles, x and y position in one
 sprite_tile_y  SPRITE_TILES ; y position
 sprite_tile_ai SPRITE_TILES ; ai type
 sprite_tile_data SPRITE_TILES ; data for sprite may be used by AI as needed
+; flags for each sprite
+; 7th bit = 1 -> sprite enabled, collision will occur
+sprite_tile_flags SPRITE_TILES
 sprite_tile_obj SPRITE_TILES ; object to be used for this sprite, may be set up as needed
 sprite_tile_size 1 ; amount of tiles currently used
 .ende

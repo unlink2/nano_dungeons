@@ -11,21 +11,56 @@ update_sprites:
     beq @done
 
     ldy sprite_tile_size
-    cpy #$FF 
+    cpy #$FF
     beq @done
 @loop:
     ldx sprite_tile_ai, y
-    lda sprite_ai_lo, x 
+    lda sprite_ai_lo, x
     sta src_ptr
-    lda sprite_ai_hi, x 
+    lda sprite_ai_hi, x
     sta src_ptr+1
 
     jsr jsr_indirect
 
-    dey 
+    dey
     cpy #$FF
     bne @loop
 @done:
+    rts
+
+
+; this sub routine loops through all sprite tiles
+; inputs:
+;   player_x, _y
+; returns:
+;   a = 1 if collision occured
+;   a = 0 if no collision
+sprite_collision:
+    ldx #$00
+
+@loop:
+    lda sprite_tile_flags, x
+    and #%00000000 ; enable flag, turn off because collision is handeled by tile in this case
+    beq @no_collision
+
+    lda sprite_tile_x, x
+    cmp player_x
+    bne @no_collision
+
+    lda sprite_tile_y, x
+    cmp player_y
+    beq @collision ; if both passed collision occured
+
+@no_collision:
+    inx
+    cpx #SPRITE_TILES
+    bne @loop
+
+
+    lda #$00
+    rts
+@collision:
+    lda #$01
     rts 
 
 ; default sprite init, no special stuff
@@ -39,6 +74,13 @@ sprite_init_default:
     pha
     txa
     pha
+
+    ; reset sprite flags and data
+    lda #$00
+    sta sprite_tile_data, y
+
+    lda #%10000000
+    sta sprite_tile_flags, y
 
     ; set up location
     lda sprite_tile_obj, y

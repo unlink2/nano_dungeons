@@ -256,24 +256,32 @@ collision_check:
 
     jsr jsr_indirect
     cmp #$01 
-    bne @no_collision
+    bne @no_collision_tile
+    beq @collision_tile
+@no_collision_tile:
 
+    ; after we have checked tile collision also verify sprite collision
+    jsr sprite_collision
+    cmp #$01
+    bne @no_collision
+@collision_tile:
     ; if collision, restore previous location
     ; and remove smooth movement
-    ldx #$00 
-    stx smooth_left 
-    stx smooth_right 
-    stx smooth_up 
+    ldx #$00
+    stx smooth_left
+    stx smooth_right
+    stx smooth_up
     stx smooth_down
 
-    ldx player_x_bac 
+    ldx player_x_bac
     stx player_x
     ldx player_y_bac
     stx player_y
 
     jsr convert_tile_location
-
+    rts
 @no_collision:
+
     rts 
 
 ; this sub routine updates the tiles to clear counter
