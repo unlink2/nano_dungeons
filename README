@@ -80,6 +80,10 @@ Blocks:
 - Switch blocks that make blocks (im)passible. Switch blocks will be blocked off with sprites
 - Start block (TODO handle error when no start is present)
 - Teleport blocks/Jump blocks
+- Push block, pushable block may also be pushed onto empty tile where it then "falls"
+- Red door, opens when Red door key is collected
+- Blue door, opens when Blue door key is collected
+- Green door, opens when Green door key is collected
 
 TODO:
 Each map may have up to 32 sprite based tiles. each of those tiles gets 1 sprite slot assigned.

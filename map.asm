@@ -934,6 +934,22 @@ find_start:
 ; side effects:
 ;   registers affected, sprite oam changed
 init_ai_tiles:
+    ; clear all AI tiles first
+    ldy #$00
+    lda #$00
+@clear_loop:
+    sta sprite_tile_ai, y
+    sta sprite_tile_obj, y
+    sta sprite_tile_x, y
+    sta sprite_tile_y, y
+    sta sprite_tile_data, y
+    sta sprite_tile_flags, y
+
+    iny
+    cpy #SPRITE_TILES
+    bne @clear_loop
+
+
     lda #$00
     sta start_x
     sta start_y

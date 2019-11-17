@@ -68,7 +68,7 @@ sprite_collision:
 
     jsr jsr_indirect
 
-    lda #$01
+    ; lda #$01
     rts 
 
 ; default sprite init, no special stuff
@@ -206,7 +206,11 @@ sprite_update_barrier_invert:
 ; default sprite on collision handler
 ; inputs:
 ;   y -> pointing to sprite data offset
+; returns:
+;   a = 1 if collision was valid
+;   a = 0 when collision was invalid
 sprite_on_collision:
+    lda #$01
     rts
 
 
