@@ -52,7 +52,7 @@
 
 .define SPRITE_TILES 8
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $72
+.define SPRITE_TILES_END $73
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 .define SPACE_TILE $24 ; space tile index, required for editor
@@ -816,9 +816,10 @@ tile_sub_lo:
 
 .db #<barrier_tile ; barrier tile
 .db #<barrier_tile_invert ; inverted barrier
+.db #<no_collision ; push tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+18
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+19
 .db #<no_collision
 .endrep
 
@@ -844,6 +845,7 @@ tile_sub_lo:
 
 .db #<barrier_tile ; barrier tile
 .db #<barrier_tile_invert ; inverted barrier
+.db #<no_collision ; push tilev
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -876,9 +878,10 @@ tile_sub_hi:
 
 .db #>barrier_tile ; barrier tile
 .db #>barrier_tile_invert ; inverted barrier
+.db #>no_collision ; push tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+18
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+19
 .db #>no_collision
 .endrep
 
@@ -904,6 +907,7 @@ tile_sub_hi:
 
 .db #>barrier_tile ; barrier tile
 .db #>barrier_tile_invert ; inverted barrier
+.db #>no_collision ; push tile
 
 ; error handlers
 error_lo:
@@ -917,18 +921,32 @@ error_hi:
 sprite_init_lo:
 .db #<sprite_init_default
 .db #<sprite_init_default
+.db #<sprite_init_push
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
+.db #>sprite_init_push
 
 sprite_ai_lo:
 .db #<sprite_update_default
 .db #<sprite_update_barrier_invert
+.db #<sprite_update_push
 
 sprite_ai_hi:
 .db #>sprite_update_default
 .db #>sprite_update_barrier_invert
+.db #>sprite_update_push
+
+sprite_collision_lo:
+.db #<sprite_on_collision
+.db #<sprite_on_collision
+.db #<sprite_push_collision
+
+sprite_collision_hi:
+.db #>sprite_on_collision
+.db #>sprite_on_collision
+.db #>sprite_push_collision
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:

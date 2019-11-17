@@ -36,30 +36,38 @@ update_sprites:
 ;   a = 1 if collision occured
 ;   a = 0 if no collision
 sprite_collision:
-    ldx #$00
+    ldy #$00
 
 @loop:
-    lda sprite_tile_flags, x
-    and #%00000000 ; enable flag, turn off because collision is handeled by tile in this case
+    lda sprite_tile_flags, y
+    and #%10000000 ; enable flag,
     beq @no_collision
 
-    lda sprite_tile_x, x
+    lda sprite_tile_x, y
     cmp player_x
     bne @no_collision
 
-    lda sprite_tile_y, x
+    lda sprite_tile_y, y
     cmp player_y
     beq @collision ; if both passed collision occured
 
 @no_collision:
-    inx
-    cpx #SPRITE_TILES
+    iny
+    cpy #SPRITE_TILES
     bne @loop
 
 
     lda #$00
     rts
 @collision:
+    ; call collision routine
+    lda sprite_collision_lo, y
+    sta src_ptr
+    lda sprite_collision_hi, y
+    sta src_ptr+1
+
+    jsr jsr_indirect
+
     lda #$01
     rts 
 
@@ -79,7 +87,7 @@ sprite_init_default:
     lda #$00
     sta sprite_tile_data, y
 
-    lda #%10000000
+    lda #%00000000 ; turn off because collision is handeled by tile in this case
     sta sprite_tile_flags, y
 
     ; set up location
@@ -195,4 +203,46 @@ sprite_update_barrier_invert:
     pla
     rts
 
+; default sprite on collision handler
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_on_collision:
+    rts
+
+
+; inits the push tile
+; inputs:
+;   y -> sprite data offset
+sprite_init_push:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+    jsr sprite_init_default
+
+    lda #$80 ; enable flag
+    sta sprite_tile_flags, y
+
+    pla
+    tax
+    pla
+    tay
+    pla
+    rts
+
+    rts
+
+; this sub routine updates a push block
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_update_push:
+    rts
+
+; this sub routine handles collision with a push sprite
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_push_collision:
+    rts
 
