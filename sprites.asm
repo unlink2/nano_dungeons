@@ -36,40 +36,44 @@ update_sprites:
 ;   a = 1 if collision occured
 ;   a = 0 if no collision
 sprite_collision:
-    ldy #$00
+    ldx #$00
 
 @loop:
-    lda sprite_tile_flags, y
+    lda sprite_tile_flags, x
     and #%10000000 ; enable flag,
     beq @no_collision
 
-    lda sprite_tile_x, y
+    lda sprite_tile_x, x
     cmp player_x
     bne @no_collision
 
-    lda sprite_tile_y, y
+    lda sprite_tile_y, x
     cmp player_y
     beq @collision ; if both passed collision occured
 
 @no_collision:
-    iny
-    cpy #SPRITE_TILES
+    inx
+    cpx #SPRITE_TILES
     bne @loop
 
 
     lda #$00
     rts
 @collision:
+    lda sprite_tile_ai, x
+    tay
+
     ; call collision routine
     lda sprite_collision_lo, y
     sta src_ptr
     lda sprite_collision_hi, y
     sta src_ptr+1
 
+
     jsr jsr_indirect
 
     ; lda #$01
-    rts 
+    rts
 
 ; default sprite init, no special stuff
 ; inits the sprite as a barrier
@@ -248,5 +252,6 @@ sprite_update_push:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_push_collision:
+    lda #$00
     rts
 
