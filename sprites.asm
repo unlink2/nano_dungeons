@@ -69,6 +69,8 @@ sprite_collision:
     lda sprite_collision_hi, y
     sta src_ptr+1
 
+    txa
+    tay ; put data offset into y
 
     jsr jsr_indirect
 
@@ -246,23 +248,126 @@ sprite_init_push:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_update_push:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    pla
+    tax
+    pla
+    tay
+    pla
+    rts
+
+
     rts
 
 ; this sub routine handles collision with a push sprite
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_push_collision:
-    ; store player location since we need to modify it
-
     ; check which direction the player is coming from
+    lda player_y
+    cmp player_y_bac
+    beq @not_up_down ; if equal skip
+    bcs @down ; if greater than player went down
+
+
 @up:
+    ldx sprite_tile_y, y
+    dex
+    stx get_tile_y
+    ldx sprite_tile_x, y
+    stx get_tile_x
+
+    jmp @tile_got
 
 @down:
+    ldx sprite_tile_y, y
+    inx
+    stx get_tile_y
+    ldx sprite_tile_x, y
+    stx get_tile_x
+
+    jmp @tile_got
+
+@not_up_down:
+    lda player_x
+    cmp player_x_bac
+    beq @not_left_right ; if equal skip
+    bcs @right ; if greater player went right
+
 
 @left:
+    ldx sprite_tile_x, y
+    dex
+    stx get_tile_x
+    ldx sprite_tile_y, y
+    stx get_tile_y
 
+    jmp @tile_got
 @right:
+    ldx sprite_tile_x, y
+    inx
+    stx get_tile_x
+    ldx sprite_tile_y, y
+    stx get_tile_y
 
-    lda #$00
+    jmp @tile_got
+
+
+@not_left_right:
+@collision:
+    lda #$01
+    rts
+
+@tile_got:
+    sty temp ; need y value again
+
+    ; verify that the move can go ahead
+    jsr get_tile
+
+    cmp #$24 ; empty tile
+    beq @no_collision
+    cmp #CLEARABLE_TILES_START
+    bcc @collision
+    cmp #CLEARABLE_TILES_END
+    bcs @collision
+
+@no_collision:
+    lda #$08 ; fine tuning offset for sprite to move
+    ldy temp
+    sta sprite_tile_data, y
+
+    lda get_tile_x
+    sta sprite_tile_x, y
+    lda get_tile_y
+    sta sprite_tile_y, y
+
     rts
 
