@@ -50,10 +50,11 @@
 
 .define ERROR_NO_START_TILE 1
 
-.define SPRITE_TILES 8
+.define SPRITE_TILES 15
 .define SPRITE_TILES_START $70
 .define SPRITE_TILES_END $73
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
+
 
 .define SPACE_TILE $24 ; space tile index, required for editor
 
@@ -267,6 +268,7 @@ clear_mem:
     ; set up hi byte sprite_ptr
     lda #$02
     sta sprite_ptr+1
+
 
     ; set up palette pointer
     ldx #$00

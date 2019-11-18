@@ -4,11 +4,39 @@
 ; inputs:
 ;   sprite_tile_size -> amount of sprites in use on current map
 ; side effects:
-;   updates all sprites
+;   updates all sprites up to 8 per frame
 update_sprites:
     lda game_flags
     and #%01000000 ; sprite enable flag
     beq @done
+
+    ; we need sprite tile size + 1
+    ldx sprite_tile_size
+    inx
+    stx temp
+
+    ; shuffle sprites to
+    ; get everyone to render every once in a while
+    ldy sprite_tile_size
+    cpy #$FF
+    beq @done
+@shuffle_loop:
+    lda sprite_tile_obj, y
+    tax
+    inx
+    txa
+    and #%00001111 ; remove this bit
+    cmp temp ; sprite tile size
+    bcc @not_out_of_bounds
+@out_of_bounds:
+    ldx #AI_SPRITES_START
+@not_out_of_bounds:
+    txa
+    sta sprite_tile_obj, y
+    dey
+    cpy #$FF
+    bne @shuffle_loop
+
 
     ldy sprite_tile_size
     cpy #$FF
@@ -26,6 +54,9 @@ update_sprites:
     cpy #$FF
     bne @loop
 @done:
+
+
+
     rts
 
 
@@ -139,6 +170,17 @@ sprite_update_default:
     txa
     pha
 
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
     ; set up pointer
     lda sprite_tile_obj, y
     tax
@@ -163,6 +205,15 @@ sprite_update_default:
     ldy #$01
     sta (sprite_ptr), y
 
+    ; positon sprite
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
     pla
     tax
     pla
@@ -177,6 +228,17 @@ sprite_update_barrier_invert:
     pha
     txa
     pha
+
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
 
     ; set up pointer
     lda sprite_tile_obj, y
@@ -201,6 +263,17 @@ sprite_update_barrier_invert:
     ; store in sprite
     ldy #$01
     sta (sprite_ptr), y
+
+    ; positon sprite
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+
 
     pla
     tax
@@ -347,6 +420,10 @@ sprite_update_push:
 
     ldy #$00
     lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda #$00
     sta (sprite_ptr), y
 
     ldy #$03
