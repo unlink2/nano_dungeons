@@ -210,6 +210,10 @@ finish_jump:
     ; check this with some fancy boolean logic
     ; eor tile with 01011100. resulting values should be between 0-3
     ; if it is a jump tile
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile
     eor #%01011100
     cmp #$04

@@ -92,6 +92,11 @@ update_game_crit:
 
     ; test if the current tile
     ; is already marked if so, do not update the previous tile but rather unmark the current
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
+
     jsr get_tile
     and #%10000000
     beq @tile_update_not_marked
@@ -246,6 +251,11 @@ collision_check:
     lda #$00
     rts
 @collision_enabled
+
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile
     tax 
     ; get routine for current tile 

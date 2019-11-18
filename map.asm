@@ -652,6 +652,10 @@ update_tile:
 @not_sprite
 
     ; check if previous tile was AI tile
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile
     cmp #SPRITE_TILES_START
     bcc @not_replacing_sprite
@@ -733,8 +737,8 @@ update_tile:
 ; this sub routine returns the current
 ; tile at the player's position
 ; inputs:
-;   player_x
-;   player_y
+;   get_tile_x
+;   get_tile_y
 ; side effects:
 ;   registers are modified
 ; returns:
@@ -746,10 +750,10 @@ get_tile:
     lda level_ptr+1
     pha
 
-    ldx player_y
+    ldx get_tile_y
     lda tile_update_table_lo, x
     clc
-    adc player_x
+    adc get_tile_x
     sta level_ptr
 
     lda tile_update_table_hi, x
@@ -773,7 +777,7 @@ get_tile:
 ; the tile at the current player position
 ; from the nametable
 ; inputs:
-;   player_x, player_y
+;   get_tile_x, get_tile_y
 ;   x -> the nametable
 ; returns:
 ;   the tile in A
@@ -793,10 +797,10 @@ get_tile_nametable:
     lda #$00
     sta temp
 
-    ldx player_y
+    ldx get_tile_y
     lda tile_update_table_lo, x
     clc
-    adc player_x
+    adc get_tile_x
     sta temp
 
     lda tile_update_table_hi, x
@@ -896,6 +900,11 @@ find_start:
     sta player_x
     sta player_y
 @x_loop:
+
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile
     cmp #START_TILE ; if current tile is start tile we found it
     beq @found
@@ -956,6 +965,10 @@ init_ai_tiles:
     sta player_x
     sta player_y
 @x_loop:
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile
 
     ; check if it is an AI tile

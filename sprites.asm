@@ -252,6 +252,17 @@ sprite_update_push:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_push_collision:
+    ; store player location since we need to modify it
+
+    ; check which direction the player is coming from
+@up:
+
+@down:
+
+@left:
+
+@right:
+
     lda #$00
     rts
 

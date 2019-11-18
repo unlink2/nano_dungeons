@@ -132,7 +132,11 @@ last_inputs 1 ; inputs of controller 1
 
 ; 16 bit count of tiles that have to be cleared, when both are $00 map is won
 ; this is populated during decompression of a map
-tiles_to_clear 2 
+tiles_to_clear 2
+
+; x and y coordinates for get_tile
+get_tile_x 1
+get_tile_y 1
 .ende
 
 ; sprite memory

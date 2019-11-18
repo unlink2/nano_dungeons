@@ -162,6 +162,11 @@ a_input_editor_menu:
     and #%10000000
     beq @not_tile_select_mode
     ldx #$01 ; get current tile from nt 1
+
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile_nametable
     sta sprite_data_1+1
     rts
@@ -699,6 +704,11 @@ select_input:
 
     ; change sprite 0s sprite index
     ; inc sprite_data+1
+
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
     jsr get_tile
     sta sprite_data+1
 @not_editor:
