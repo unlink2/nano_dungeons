@@ -247,6 +247,11 @@ sprite_init_push:
 ; this sub routine updates a push block
 ; inputs:
 ;   y -> pointing to sprite data offset
+; sprite data documentation:
+;   this AI type uses sprite_data as an offset to its x or y position
+;   the lower 4 bits are the actual offset value
+;   7th bit = 1 -> sbc; = 0 -> adc
+;   6th bit = 1 -> x position; = 0 -> y position
 sprite_update_push:
     pha
     tya
@@ -259,9 +264,80 @@ sprite_update_push:
     lda tile_convert_table, x
     sta temp
 
+    ; load y position
     ldx sprite_tile_y, y
     lda tile_convert_table, x
     sta temp+1
+
+    ; sett if we need fine tuning
+    lda sprite_tile_data, y
+    and #%00001111
+    beq @no_adjust ; if the lower 4 bits are already 0 there is no need to adjust
+
+    ; now test what value we need to use as a base
+    lda sprite_tile_data, y
+    sta temp+3 ; used for bit instruction
+
+    bit temp+3 ; N flag = bit 7, V flag = bit 6
+
+    bvs @y_position ; test bit 7
+
+    ; x position adjust
+    ; test if sbc or adc
+    bpl @x_add
+
+    ; x sub
+    lda sprite_tile_data, y
+    and #%00001111
+    sta temp+3 ; store for sub
+    lda temp
+    sec
+    sbc temp+3
+    sta temp
+
+    jmp @adjust_done 
+@x_add:
+    lda sprite_tile_data, y
+
+    lda sprite_tile_data, y
+    and #%00001111
+    clc
+    adc temp
+    sta temp
+
+    jmp @adjust_done
+@y_position
+
+    ; y position adjust
+    ; test if sbc or adc
+    bpl @y_add
+
+    ; y sub
+    lda sprite_tile_data, y
+    and #%00001111
+    sta temp+3 ; store for sub
+    lda temp+1
+    sec
+    sbc temp+3
+    sta temp+1
+
+    jmp @adjust_done
+@y_add:
+    lda sprite_tile_data, y
+
+    lda sprite_tile_data, y
+    and #%00001111
+    clc
+    adc temp+1
+    sta temp+1
+
+
+@adjust_done:
+    lda sprite_tile_data, y
+    sec
+    sbc #$01
+    sta sprite_tile_data, y
+@no_adjust:
 
     ; set up pointer
     lda sprite_tile_obj, y
@@ -305,6 +381,9 @@ sprite_push_collision:
     ldx sprite_tile_x, y
     stx get_tile_x
 
+    lda #%01000000
+    sta sprite_tile_data, y
+
     jmp @tile_got
 
 @down:
@@ -313,6 +392,9 @@ sprite_push_collision:
     stx get_tile_y
     ldx sprite_tile_x, y
     stx get_tile_x
+
+    lda #%11000000
+    sta sprite_tile_data, y
 
     jmp @tile_got
 
@@ -330,6 +412,9 @@ sprite_push_collision:
     ldx sprite_tile_y, y
     stx get_tile_y
 
+    lda #%00000000
+    sta sprite_tile_data, y
+
     jmp @tile_got
 @right:
     ldx sprite_tile_x, y
@@ -337,6 +422,9 @@ sprite_push_collision:
     stx get_tile_x
     ldx sprite_tile_y, y
     stx get_tile_y
+
+    lda #%10000000
+    sta sprite_tile_data, y
 
     jmp @tile_got
 
@@ -360,8 +448,9 @@ sprite_push_collision:
     bcs @collision
 
 @no_collision:
-    lda #$08 ; fine tuning offset for sprite to move
     ldy temp
+    lda sprite_tile_data, y
+    ora #$08 ; fine tuning offset for sprite to move
     sta sprite_tile_data, y
 
     lda get_tile_x
