@@ -369,5 +369,7 @@ sprite_push_collision:
     lda get_tile_y
     sta sprite_tile_y, y
 
+    lda #$00
+
     rts
 
