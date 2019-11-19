@@ -423,7 +423,7 @@ sprite_update_push:
     sta (sprite_ptr), y
 
     iny
-    lda #$00
+    lda #$37
     sta (sprite_ptr), y
 
     ldy #$03

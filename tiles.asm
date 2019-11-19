@@ -69,20 +69,24 @@ init_jump_animation:
     lda #>jump_update
     sta delay_update+1
 
-    lda #$38
+    ; lda #$38
+    lda #$40
     sta sprite_data+1
+    lda #$42
     sta sprite_data_1+1
-    sta sprite_data_2+1 
+    lda #$41
+    sta sprite_data_2+1
+    lda #$43
     sta sprite_data_3+1
 
     ; set up attributes
-    lda #$00 
+    lda #$00
     sta sprite_data+21
-    lda #%10000000
+    ; lda #%10000000
     sta sprite_data_1+2
-    lda #%01000000
+    ; lda #%01000000
     sta sprite_data_2+2
-    lda #%11000000
+    ; lda #%11000000
     sta sprite_data_3+2
 
     jsr init_jump_noise
