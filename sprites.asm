@@ -342,7 +342,7 @@ sprite_update_push:
     lda tile_convert_table, x
     sta temp+1
 
-    ; sett if we need fine tuning
+    ; set if we need fine tuning
     lda sprite_tile_data, y
     and #%00001111
     beq @no_adjust ; if the lower 4 bits are already 0 there is no need to adjust
@@ -516,6 +516,7 @@ sprite_push_collision:
 
     ; verify that the move can go ahead
     jsr get_tile
+    and #%01111111 ; bit 7 does not matter
 
     cmp #$24 ; empty tile
     beq @no_collision
@@ -539,3 +540,201 @@ sprite_push_collision:
 
     rts
 
+; this sub routine handles collision with a key sprite
+; if touched increments key count by 1 and disables sprite
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_key_collision:
+    ; test collected flag
+    lda sprite_tile_data, y
+    and #%10000000
+    bne @done
+
+    ; add one to key count and flag key as collected
+    inc key_count
+    lda #$F0
+    sta sprite_tile_data, y
+
+@done:
+    lda #$00
+    rts
+
+; this sub routine updates key sprites
+; inputs:
+;   y -> pointing to sprite data offset
+; sprite data documentation:
+;   7th bit = 1 -> key was collected, disable functionality
+sprite_key_update:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+    ; enable sprite for collision
+    lda #$F0
+    sta sprite_tile_flags, y
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+    ; test if key is makred as collected
+    lda sprite_tile_data, y
+    and #%10000000
+    bne @collected
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda #$59
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    jmp @done
+@collected:
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ; if it was collected we display the key in the bottom left
+    ; corner to indicate a key is in players posession unless key count is 0
+
+    ldy #$00
+    lda #$D0
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda #$10
+    sta (sprite_ptr), y
+
+    lda key_count
+    beq @no_key
+
+    ldy #$01
+    lda #$59
+    sta (sprite_ptr), y
+
+    jmp @done
+@no_key:
+    ldy #$01
+    lda #$24
+    sta (sprite_ptr), y
+
+@done:
+    pla
+    tax
+    pla
+    tay
+    pla
+
+    rts
+
+; this sub routine handles collision with a door sprite
+; doors only allow passage if keycound > 0
+; dec key count by 1 when passed and disables door
+; inputs:
+;   y -> pointing to sprite data offset
+; sprite data documentation:
+;   7th bit = 1 -> door was opened, disable functionality
+sprite_door_collision:
+    ; test if sprite is enabled
+    lda sprite_tile_data, y
+    and #%10000000
+    bne @done
+
+    lda key_count
+    bne @got_key
+    lda #$01
+    rts ; do not let palyer proceed without a key
+@got_key:
+    lda #$F0
+    sta sprite_tile_data, y
+    dec key_count
+
+@done:
+    lda #$00
+    rts
+
+; this sub routine handles door sprite updates
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_door_update:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+    ; enable sprite for collision
+    lda #$F0
+    sta sprite_tile_flags, y
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+    ; load tile
+    lda sprite_tile_data, y
+    and #%10000000
+    beq @door_locked
+
+    lda #$24
+    sta temp+2
+    jmp @tile_found
+@door_locked:
+    lda #$5A
+    sta temp+2
+
+@tile_found:
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda temp+2
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    pla
+    tax
+    pla
+    tay
+    pla
+
+    rts

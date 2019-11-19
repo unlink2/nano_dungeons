@@ -52,7 +52,7 @@
 
 .define SPRITE_TILES 15
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $73
+.define SPRITE_TILES_END $75
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -72,6 +72,7 @@ nmi_flags 1
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 map_flags 1
+key_count 1 ; amount of keys collected
 ; editor flags, mostly used for menu select
 ; 7th bit = 1 -> tile select mode, = 0 -> menu mode
 editor_flags 1 
@@ -823,9 +824,11 @@ tile_sub_lo:
 .db #<barrier_tile ; barrier tile
 .db #<barrier_tile_invert ; inverted barrier
 .db #<no_collision ; push tile
+.db #<no_collision ; key tile
+.db #<no_collision ; door tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+19
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+21
 .db #<no_collision
 .endrep
 
@@ -851,7 +854,10 @@ tile_sub_lo:
 
 .db #<barrier_tile ; barrier tile
 .db #<barrier_tile_invert ; inverted barrier
-.db #<no_collision ; push tilev
+.db #<no_collision ; push tile
+.db #<no_collision ; key tile
+.db #<no_collision ; door tile
+
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -885,9 +891,11 @@ tile_sub_hi:
 .db #>barrier_tile ; barrier tile
 .db #>barrier_tile_invert ; inverted barrier
 .db #>no_collision ; push tile
+.db #>no_collision ; key tile
+.db #>no_collision ; door tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+19
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+21
 .db #>no_collision
 .endrep
 
@@ -914,6 +922,8 @@ tile_sub_hi:
 .db #>barrier_tile ; barrier tile
 .db #>barrier_tile_invert ; inverted barrier
 .db #>no_collision ; push tile
+.db #>no_collision ; key tile
+.db #>no_collision ; door tile
 
 ; error handlers
 error_lo:
@@ -925,34 +935,46 @@ error_hi:
 .db #>load_map_start_error
 
 sprite_init_lo:
-.db #<sprite_init_default
-.db #<sprite_init_default
-.db #<sprite_init_push
+.db #<sprite_init_default ; barrier
+.db #<sprite_init_default ; inverted barrier
+.db #<sprite_init_push ; push tile
+.db #<sprite_init_default ; key tile
+.db #<sprite_init_default ; door tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
+.db #>sprite_init_default
 
 sprite_ai_lo:
 .db #<sprite_update_default
 .db #<sprite_update_barrier_invert
 .db #<sprite_update_push
+.db #<sprite_key_update
+.db #<sprite_door_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
 .db #>sprite_update_barrier_invert
 .db #>sprite_update_push
+.db #>sprite_key_update
+.db #>sprite_door_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
 .db #<sprite_on_collision
 .db #<sprite_push_collision
+.db #<sprite_key_collision
+.db #<sprite_door_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
 .db #>sprite_on_collision
 .db #>sprite_push_collision
+.db #>sprite_key_collision
+.db #>sprite_door_collision
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:

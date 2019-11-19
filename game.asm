@@ -12,6 +12,7 @@ init_game:
 
     lda #$00
     sta map_flags ; reset all map flags
+    sta key_count ; no keys when map begins
 
     lda #<update_game
     sta update_sub
