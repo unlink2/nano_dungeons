@@ -69,6 +69,7 @@ frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
 nmi_flags 1
 ; 7th bit = 1 -> switch disabled, barries can be passed, 6th bit = 1 -> sprite update enabled
+; 0th bit = 1 -> collision check failed
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 map_flags 1
@@ -389,9 +390,6 @@ nmi_flag_not_set:
     jmp update_done
 @delay_not_finished:
 
-    ; inputs
-    jsr input_handler
-
     ; if load nmi flag is set skip normal updates until next frame
     lda nmi_flags
     and #%00000001
@@ -400,6 +398,9 @@ nmi_flag_not_set:
     jmp (update_sub_crit)
 
 update_crit_done:
+
+    ; inputs
+    jsr input_handler
 
     bit $2002 ; read ppu status to reset latch
 

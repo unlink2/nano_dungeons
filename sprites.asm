@@ -116,20 +116,22 @@ sprite_collision:
     pha ; next result
 
     inc collision_counter
-    lda collision_counter
-    cmp #$02 ; no more than 3 please
-    bne @no_wait
-    ; lag frame if too many collisions happen
-    lda #$00
-    sta collision_counter
-    vblank_wait
-    sta $2005
-    sta $2005 ; no scroll
-@no_wait:
-    jmp @no_collision 
 
-    ; lda #$01
-    rts
+    ; This was part of the code when
+    ; collision was checked during time critical code
+    ; it is now redundant
+    ; lda collision_counter
+    ; cmp #$02 ; no more than 3 please
+    ; bne @no_wait
+    ; lag frame if too many collisions happen
+    ; lda #$00
+    ; sta collision_counter
+    ; vblank_wait
+    ; sta $2005
+    ; sta $2005 ; no scroll
+; @no_wait:
+    jmp @no_collision
+
 
 ; default sprite init, no special stuff
 ; inits the sprite as a barrier

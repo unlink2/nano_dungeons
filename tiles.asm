@@ -193,7 +193,7 @@ finish_jump:
     sta sprite_data_3
     sta sprite_data_3+3
 
-    lda #$31
+    lda #$32
     sta sprite_data+1
 
     ; enable inputs

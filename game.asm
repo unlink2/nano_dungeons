@@ -87,7 +87,10 @@ update_game_crit:
     bne @player_not_moved
 
     ; test collision
-    jsr collision_check
+    ; jsr collision_check
+    ; load collision result from previous frame
+    lda game_flags
+    and #%00000001
     ; if a = 1 collision occured
     cmp #$01
     beq @player_not_moved
@@ -139,12 +142,36 @@ update_game_crit:
     sta player_y_bac
     jmp update_crit_done
 
-; non-critical game updates 
+; non-critical game updates
 update_game:
+    ; check if player moved
+    lda #$00 ; move flag
+    ldx player_x
+    cpx player_x_bac
+    beq @player_not_moved_x
+
+    lda #$01 ; did move
+@player_not_moved_x:
+    ldx player_y
+    cpx player_y_bac
+    beq @player_not_moved_y
+    lda #$01 ; did move
+@player_not_moved_y:
+    cmp #$01
+    bne @player_not_moved
+
+    jsr collision_check
+    sta temp
+    lda game_flags
+    and #%11111110
+    ora temp
+    sta game_flags ; store this frames collision result in game_flags
+@player_not_moved:
+
     ; test victory condition
     ; if only one tile is left to clear the player must be on it
     lda tiles_to_clear+1
-    cmp #$00 
+    cmp #$00
     bne @done
     lda tiles_to_clear 
     cmp #$01
