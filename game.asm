@@ -70,19 +70,7 @@ init_game:
 ; it updates the game state
 ; critical game update
 update_game_crit:
-    ; check if player moved
-    lda #$00 ; move flag
-    ldx player_x
-    cpx player_x_bac
-    beq @player_not_moved_x
-
-    lda #$01 ; did move
-@player_not_moved_x:
-    ldx player_y
-    cpx player_y_bac
-    beq @player_not_moved_y
-    lda #$01 ; did move
-@player_not_moved_y:
+    jsr check_player_move
     cmp #$01
     bne @player_not_moved
 
@@ -144,19 +132,7 @@ update_game_crit:
 
 ; non-critical game updates
 update_game:
-    ; check if player moved
-    lda #$00 ; move flag
-    ldx player_x
-    cpx player_x_bac
-    beq @player_not_moved_x
-
-    lda #$01 ; did move
-@player_not_moved_x:
-    ldx player_y
-    cpx player_y_bac
-    beq @player_not_moved_y
-    lda #$01 ; did move
-@player_not_moved_y:
+    jsr check_player_move
     cmp #$01
     bne @player_not_moved
 
@@ -173,14 +149,14 @@ update_game:
     lda tiles_to_clear+1
     cmp #$00
     bne @done
-    lda tiles_to_clear 
+    lda tiles_to_clear
     cmp #$01
     bne @done
 
     ; if animation timer is already going do not prceed
     lda delay_timer
     ora delay_timer+1
-    bne @done 
+    bne @done
 
     ; only finish if movment finished as well
     lda smooth_up
@@ -191,16 +167,16 @@ update_game:
 
     ; set up win condition pointers
     sta delay_timer
-    lda #$00 
+    lda #$00
     sta delay_timer+1 ; second byte, we only need first byte
-    lda #<empty_sub 
-    sta delay_update 
+    lda #<empty_sub
+    sta delay_update
     lda #>empty_sub
     sta delay_update+1
 
-    lda #<update_none 
+    lda #<update_none
     sta update_sub
-    lda #>update_none 
+    lda #>update_none
     sta update_sub+1
 
     lda #<update_crit_none
@@ -398,3 +374,27 @@ init_message:
 ; update routine for the win screen
 update_message:
     jmp update_done
+
+; this sub routine checks if player has moved
+; compared to its previous position
+; inputs:
+;   player_x, y,
+;   player_x_bac, y_bac
+; returns:
+;   a = 0 -> no move
+;   a = 1 -> move
+check_player_move:
+    ; check if player moved
+    lda #$00 ; move flag
+    ldx player_x
+    cpx player_x_bac
+    beq @player_not_moved_x
+
+    lda #$01 ; did move
+@player_not_moved_x:
+    ldx player_y
+    cpx player_y_bac
+    beq @player_not_moved_y
+    lda #$01 ; did move
+@player_not_moved_y:
+    rts
