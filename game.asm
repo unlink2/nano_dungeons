@@ -13,6 +13,7 @@ init_game:
     lda #$00
     sta map_flags ; reset all map flags
     sta key_count ; no keys when map begins
+    sta player_timer ; no timer for player
 
     lda #<update_game
     sta update_sub
@@ -221,18 +222,29 @@ update_player_animation:
     lda delay_timer ; do not update during delay timer
     bne @done
 
-    lda last_inputs
-    and #%11110000
-    beq @idle
+    ; update player animation
+    ; every 128 frames blink
+    lda player_timer
+    bne @done
 
-    ; TODO check for specific keys
-
-@idle 
-    lda #$32
+    lda sprite_data+1
+    eor #%10000000
     sta sprite_data+1
-    lda #$00 
-    sta sprite_data+2
+    and #%10000000
+    bne @short_timer ; blink for 8 frames
+
+    ; long timer wait 128 frames
+    jsr random
+    lda rand8
+    ora #%10000000
+    sta player_timer ; at least 128 frames, but maybe more
+    rts
+@short_timer:
+    lda #08
+    sta player_timer
+    rts 
 @done:
+    dec player_timer
     rts
 
 ; checks for player collision based on the currently occupied tile

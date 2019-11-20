@@ -190,4 +190,22 @@ hide_objs:
     inx
     cpx #$FF
     bne @loop 
-    rts 
+    rts
+
+; this sub routine generates
+; a simple 8-bit pseudo
+; random number
+; inputs:
+;   rand8 -> nonzero value
+; side effects:
+;   a register and flags are used
+;   rand8 changes
+random:
+	lda rand8
+	lsr
+	bcc @noeor
+	eor #$B4
+@noeor
+	sta rand8
+	rts
+

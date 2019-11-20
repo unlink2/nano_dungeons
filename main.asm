@@ -163,6 +163,7 @@ player_x 1 ; tile location of player
 player_y 1 ; tile location of player
 player_x_bac 1 ; backup location
 player_y_bac 1 ; backup location
+player_timer 1 ; animation timer
 
 start_x 1 ; x and y value of start location
 start_y 1 ; values are populated during decompression
@@ -269,6 +270,9 @@ clear_mem:
     ; set up hi byte sprite_ptr
     lda #$02
     sta sprite_ptr+1
+
+    lda #$01
+    sta rand8 ; rand8 must be nonzero
 
 
     ; set up palette pointer
@@ -453,6 +457,8 @@ nmi_flag_set:
     ; no matter what we always update
     ; audio
     jsr update_audio
+
+    jsr random ; tick rng
 
     pla
     tay
