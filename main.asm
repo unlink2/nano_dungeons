@@ -92,6 +92,8 @@ temp 4 ; 4 bytes of universal temporary storage
 nametable 1 ; either 0 or 1 depending on which nametable is active
 menu_select 1 ; cursor location in menu
 
+collision_counter 1 ; counts amount of sprite collisions in a frame
+
 ; ptr to sub routine called for timing critical updates such as ppu updates, is called right at start of nmi
 ; must be short.
 ; must jump to update_crti_done when finished

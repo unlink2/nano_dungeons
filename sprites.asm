@@ -68,7 +68,9 @@ update_sprites:
 ;   a = 0 if no collision
 sprite_collision:
     ldx #$00
-
+    txa
+    pha ; push value to stack, this value is the collision result
+    sta collision_counter ; reuse menu select to count amount of collisions
 @loop:
     lda sprite_tile_flags, x
     and #%10000000 ; enable flag,
@@ -88,7 +90,7 @@ sprite_collision:
     bne @loop
 
 
-    lda #$00
+    pla ; pull result ; lda #$00
     rts
 @collision:
     lda sprite_tile_ai, x
@@ -101,9 +103,30 @@ sprite_collision:
     sta src_ptr+1
 
     txa
+    pha ; store x value for later
     tay ; put data offset into y
 
     jsr jsr_indirect
+    sta temp
+    pla
+    tax ; get x value back
+
+    pla
+    ora temp
+    pha ; next result
+
+    inc collision_counter
+    lda collision_counter
+    cmp #$02 ; no more than 3 please
+    bne @no_wait
+    ; lag frame if too many collisions happen
+    lda #$00
+    sta collision_counter
+    vblank_wait
+    sta $2005
+    sta $2005 ; no scroll
+@no_wait:
+    jmp @no_collision 
 
     ; lda #$01
     rts
