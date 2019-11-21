@@ -350,6 +350,7 @@ sprite_init_push:
 ;   the lower 4 bits are the actual offset value
 ;   7th bit = 1 -> sbc; = 0 -> adc
 ;   6th bit = 1 -> x position; = 0 -> y position
+;   5th bit = 1 -> inits falling animation, if lower 4 bits are 0 hides sprite
 sprite_update_push:
     pha
     tya
@@ -437,6 +438,25 @@ sprite_update_push:
     sta sprite_tile_data, y
 @no_adjust:
 
+    lda #$37
+    sta temp+2 ; sprite value
+    ; check data flag to see if we need to disable
+    lda sprite_tile_data, y
+    and #%00100000 ; both flag needs to be set and the offset needs to be 0
+    beq @no_disable
+
+    ; load smaller sprite
+    lda #$39
+    sta temp+2
+
+    lda sprite_tile_data, y
+    and #%00001111 ; although both need to be true it needs to be 2 checks
+    bne @no_disable
+    lda #$24 ; empty tile
+    sta temp+2
+@no_disable
+    
+
     ; set up pointer
     lda sprite_tile_obj, y
     tax
@@ -448,7 +468,7 @@ sprite_update_push:
     sta (sprite_ptr), y
 
     iny
-    lda #$37
+    lda temp+2
     sta (sprite_ptr), y
 
     ldy #$03
@@ -544,7 +564,20 @@ sprite_push_collision:
     and #%01111111 ; bit 7 does not matter
 
     cmp #$24 ; empty tile
-    beq @no_collision
+    bne @not_empty
+
+    ldy temp ; need y value again
+    ; if it is an empty tile set the disable flag,
+    ; this will remove the sprite when the offset in
+    ; tile_data reaches 0
+    lda sprite_tile_data, y
+    ora #%00100000
+    sta sprite_tile_data, y
+
+    ; this is a branch always since a is a constant value
+    ; saves a byte
+    bne @no_collision
+@not_empty:
     cmp #CLEARABLE_TILES_START
     bcc @collision
     cmp #CLEARABLE_TILES_END
