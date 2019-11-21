@@ -85,6 +85,8 @@ Blocks:
 - Blue door, opens when Blue door key is collected
 - Green door, opens when Green door key is collected
 
+- Mimmic AI that copies player can interact with switches (inverted sprite of player?)
+
 TODO:
 Each map may have up to 32 sprite based tiles. each of those tiles gets 1 sprite slot assigned.
 These tiles are looked for in the same routine as the find_start tile.

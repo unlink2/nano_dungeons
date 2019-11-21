@@ -25,7 +25,9 @@ update_sprites:
     tax
     inx
     txa
-    and #%00001111 ; remove this bit
+    sec
+    sbc #AI_SPRITES_START
+    ; and #%00001111 ; remove this bit
     cmp temp ; sprite tile size
     bcc @not_out_of_bounds
 @out_of_bounds:
@@ -653,8 +655,6 @@ sprite_key_update:
     txa
     pha
 
-
-
     ; load x position
     ldx sprite_tile_x, y
     lda tile_convert_table, x
@@ -828,3 +828,57 @@ sprite_door_update:
     pla
 
     rts
+
+; updates skelleton sprite
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_skel_update:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+
+    ldy #$01
+    lda #$34
+    sta (sprite_ptr), y
+
+
+    pla
+    tax
+    pla
+    tay
+    pla
+
+    rts
+
+; handles collision with skelleton sprite
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_skel_collision:
+    rts 

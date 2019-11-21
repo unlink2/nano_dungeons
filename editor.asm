@@ -266,6 +266,11 @@ init_editor_menu:
     lda #14*8
     sta sprite_data_A
 
+    lda #20*8
+    sta sprite_data_B+3
+    lda #14*8
+    sta sprite_data_B
+
     jsr init_attr_display
     jsr init_color_display
     jsr init_value_display
@@ -310,6 +315,8 @@ init_editor:
     sta sprite_data_9+3
     sta sprite_data_A 
     sta sprite_data_A+3
+    sta sprite_data_B
+    sta sprite_data_B+3
 
     ; attributes 0 for player
     sta sprite_data+2
@@ -351,6 +358,16 @@ update_editor_menu:
     tya
     and #$0F 
     sta sprite_data_A+1
+    ldy sprite_tile_size
+    iny
+    tya
+    and #$F0
+    lsr
+    lsr
+    lsr
+    lsr
+    sta sprite_data_B+1
+
 
     lda menu_select
     and #EDITOR_MENU_MAX_SELECT ; only 3 possible options

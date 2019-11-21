@@ -50,9 +50,9 @@
 
 .define ERROR_NO_START_TILE 1
 
-.define SPRITE_TILES 15
+.define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $75
+.define SPRITE_TILES_END $76
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -158,7 +158,8 @@ sprite_data_7 4 ; sprite 8
 sprite_data_8 4 ; sprite 9
 sprite_data_9 4 ; sprite 10
 sprite_data_A 4 ; sprite 11
-sprite_data_pad 212 ; remainder, unused as of now
+sprite_data_B 4 ; sprite 12
+sprite_data_pad 208 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 level_palette PALETTE_SIZE ; palette used by the currently loaded level, is copied whenever a level becomes active
 
@@ -949,11 +950,13 @@ sprite_init_lo:
 .db #<sprite_init_push ; push tile
 .db #<sprite_init_default ; key tile
 .db #<sprite_init_default ; door tile
+.db #<sprite_init_default ; skelleton tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 
@@ -963,6 +966,7 @@ sprite_ai_lo:
 .db #<sprite_update_push
 .db #<sprite_key_update
 .db #<sprite_door_update
+.db #<sprite_skel_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -970,6 +974,7 @@ sprite_ai_hi:
 .db #>sprite_update_push
 .db #>sprite_key_update
 .db #>sprite_door_update
+.db #>sprite_skel_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -977,6 +982,7 @@ sprite_collision_lo:
 .db #<sprite_push_collision
 .db #<sprite_key_collision
 .db #<sprite_door_collision
+.db #<sprite_skel_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -984,6 +990,7 @@ sprite_collision_hi:
 .db #>sprite_push_collision
 .db #>sprite_key_collision
 .db #>sprite_door_collision
+.db #>sprite_skel_collision
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:
