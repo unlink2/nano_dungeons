@@ -15,15 +15,15 @@ init_attr_display:
     and #%00001100 ; bottom left
     lsr 
     lsr 
-    sta sprite_data_3+1
+    sta sprite_data_4+1
 
     lda attr_value
     and #%00110000 ; top right
-    lsr 
-    lsr 
-    lsr 
-    lsr 
-    sta sprite_data_4+1
+    lsr
+    lsr
+    lsr
+    lsr
+    sta sprite_data_3+1
 
     lda attr_value
     and #%11000000 ; bottom right 
@@ -96,16 +96,16 @@ transfert_attr_display:
     asl 
     sta attr_value
 
-    lda sprite_data_4+1
+    lda sprite_data_3+1
     sta src_ptr
-    asl 
-    asl 
-    asl 
+    asl
+    asl
+    asl
     asl
     ora attr_value
     sta attr_value
 
-    lda sprite_data_3+1
+    lda sprite_data_4+1
     asl 
     asl 
     ora attr_value
