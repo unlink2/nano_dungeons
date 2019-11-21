@@ -550,6 +550,30 @@ sprite_push_collision:
     cmp #CLEARABLE_TILES_END
     bcs @collision
 
+    ; test all active sprites to verify we are not colliding
+    ldy sprite_tile_size
+    cpy #$FF
+    beq @no_collision
+@sprite_collision_loop:
+    lda sprite_tile_flags, y
+    and #%10000000 ; check if sprite is enabled in the first place
+    beq @skip ; if not, skip
+
+    ; verify location matches, if so collision
+    lda sprite_tile_x, y
+    cmp get_tile_x
+    bne @skip
+
+    lda sprite_tile_y, y
+    cmp get_tile_y
+    beq @collision
+
+@skip:
+    dey
+    cpy #$FF
+    bne @sprite_collision_loop
+
+
 @no_collision:
     ldy temp
     lda sprite_tile_data, y
@@ -596,9 +620,7 @@ sprite_key_update:
     txa
     pha
 
-    ; enable sprite for collision
-    lda #$F0
-    sta sprite_tile_flags, y
+
 
     ; load x position
     ldx sprite_tile_x, y
@@ -614,6 +636,10 @@ sprite_key_update:
     lda sprite_tile_data, y
     and #%10000000
     bne @collected
+
+    ; enable sprite for collision
+    lda #$F0
+    sta sprite_tile_flags, y
 
     ; set up pointer
     lda sprite_tile_obj, y
@@ -635,6 +661,10 @@ sprite_key_update:
 
     jmp @done
 @collected:
+    ; enable sprite for no collision
+    lda #$00
+    sta sprite_tile_flags, y
+
     ; set up pointer
     lda sprite_tile_obj, y
     tax
@@ -710,10 +740,6 @@ sprite_door_update:
     txa
     pha
 
-    ; enable sprite for collision
-    lda #$F0
-    sta sprite_tile_flags, y
-
     ; load x position
     ldx sprite_tile_x, y
     lda tile_convert_table, x
@@ -731,10 +757,16 @@ sprite_door_update:
 
     lda #$24
     sta temp+2
+    lda #$00
+    sta sprite_tile_flags, y ; disable collision
+
     jmp @tile_found
 @door_locked:
     lda #$5A
     sta temp+2
+    ; enable sprite for collision
+    lda #$F0
+    sta sprite_tile_flags, y
 
 @tile_found:
 
