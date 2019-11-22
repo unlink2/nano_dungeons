@@ -866,6 +866,17 @@ sprite_door_update:
 ; updates skelleton sprite
 ; inputs:
 ;   y -> pointing to sprite data offset
+; AI behaviour:
+;   if player is within a distance of 10 tiles
+;   the AI will try to move towards said tile
+;   it will always prefer a path
+;   that directly reduces the distance,
+;   it will prefer the following directions:
+;   down, left, right, up
+;   if it is unable to reduce the distance it will pick
+;   a direction that increases it by its preference
+;   it will only make its next move once
+;   the player has moved
 sprite_skel_update:
     pha
     tya
