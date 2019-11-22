@@ -898,14 +898,28 @@ sprite_skel_update:
 
     ; pick a direction to move in
     jsr random
-    and #%00000011
-    beq @down ; down
+    and #%00000111
+@direction_pick:
+    beq @left
     cmp #$01
     beq @up
     cmp #$02
-    beq @left
-    cmp #$03
     beq @right
+    cmp #$03
+    beq @down
+
+    ; otherwise just keep going the same way
+    ; this is eaily done by just shifting bits in
+    ; data
+    lda sprite_tile_data, y
+    and #%11000000
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    jmp @direction_pick
 
 @down:
     lda sprite_tile_y, y
