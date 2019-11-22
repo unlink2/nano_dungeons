@@ -232,6 +232,7 @@ verify_sprite_move:
     lda #$00
     rts
 @collision:
+    ldy temp ; restore temp
     lda #$01
     rts
 
@@ -872,7 +873,7 @@ sprite_door_update:
 ;   it will always prefer a path
 ;   that directly reduces the distance,
 ;   it will prefer the following directions:
-;   down, left, right, up
+;   down, up, left, right
 ;   if it is unable to reduce the distance it will pick
 ;   a direction that increases it by its preference
 ;   it will only make its next move once
@@ -885,20 +886,150 @@ sprite_skel_update:
     pha
 
     lda actions
-    bne @no_move
-    lda #$00
-@no_move
+    beq @move
+    jmp @no_move
+@move:
+    ; only run movement code if no actions are left
+    ; find the target coordinates
+    lda sprite_tile_y, y
+    sec
+    sbc player_y
+    beq @no_up_down ; if equal no move up or down is needed, pick next preference
+    bcc @down ; find if we want to move up or down
+    bcs @up
 
-    ; load x position
-    ldx sprite_tile_x, y
-    lda tile_convert_table, x
-    sta temp
+@down:
+    lda sprite_tile_y, y
+    tax
+    inx
+    stx get_tile_y
 
-    ; load y position
-    ldx sprite_tile_y, y
-    lda tile_convert_table, x
-    sta temp+1
+    lda sprite_tile_x, y
+    sta get_tile_x
 
+    lda #%11000000 ; down animation
+    sta sprite_tile_data, y
+    bne @tile_found_preference ; branch always
+@up:
+    lda sprite_tile_y, y
+    tax
+    dex
+    stx get_tile_y
+
+    lda sprite_tile_x, y
+    sta get_tile_x
+
+    lda #%01000000 ; up animation
+    sta sprite_tile_data, y
+    bne @tile_found_preference ; branch always
+@no_up_down:
+
+    ; if up and down failed we chekc for left and right
+    lda sprite_tile_x, y
+    sec
+    sbc player_x
+    beq @no_preference ; if both are equal no move is needed
+    bcc @right  ; find if we want to move left or right
+    bcs @left
+
+@right:
+    lda sprite_tile_x, y
+    tax
+    inx
+    stx get_tile_x
+
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    lda #%10000000 ; right animation
+    sta sprite_tile_data, y
+    bne @tile_found_preference ; branch always
+@left:
+    lda sprite_tile_x, y
+    tax
+    dex
+    stx get_tile_x
+
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    lda #%00000000 ; left animation
+    sta sprite_tile_data, y
+    bne @tile_found_preference ; branch always
+
+@tile_found_preference:
+    ; verify move based on preference, if collision happenes
+    ; pick first best non-collision tile that is allowed
+    jsr verify_sprite_move
+
+    beq @no_move ; if a = 0 we are good
+
+@no_preference:
+    ; if not try next best choice
+    ; down
+    lda sprite_tile_x, y
+    sta get_tile_x
+
+    lda sprite_tile_y, y
+    tax
+    inx
+    stx get_tile_y
+
+    lda #%11000000 ; down animation
+    sta sprite_tile_data, y
+
+    jsr verify_sprite_move
+    beq @no_move
+
+    ; keep trying
+    ; left
+
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    lda sprite_tile_x, y
+    tax
+    dex
+    stx get_tile_x
+
+    lda #%00000000 ; left animation
+    sta sprite_tile_data, y
+
+    jsr verify_sprite_move
+    beq @no_move
+
+    ; up
+    lda sprite_tile_x, y
+    sta get_tile_x
+
+    lda sprite_tile_y, y
+    tax
+    dex
+    stx get_tile_y
+
+    lda #%10000000 ; up animation
+    sta sprite_tile_data, y
+
+    jsr verify_sprite_move
+    beq @no_move
+
+    ; right
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    lda sprite_tile_x, y
+    tax
+    inx
+    stx get_tile_x
+
+    lda #%01000000 ; right animation
+    sta sprite_tile_data, y
+
+    jsr verify_sprite_move
+    beq @no_move
+@no_move:
+
+    jsr sprite_pos_adjust
     ; set up pointer
     lda sprite_tile_obj, y
     tax
