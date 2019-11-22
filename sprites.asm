@@ -164,6 +164,7 @@ sprite_pos_adjust:
 ; returns:
 ;   a = 0 -> no collision
 ;   a = 1 -> collision
+;   sets bit 6 of sprite_tile_data to 1 if collision occured with empty tile
 ; side effects:
 ;   sprtie position is updated if no collision occurs
 verify_sprite_move:
