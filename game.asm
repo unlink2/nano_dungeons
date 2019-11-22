@@ -83,6 +83,11 @@ update_game_crit:
     cmp #$01
     beq @player_not_moved
 
+    ; if player did move set remaining actions
+    ; to 0. a move ends the turn
+    lda #$00
+    sta actions
+
     ; test if the current tile
     ; is already marked if so, do not update the previous tile but rather unmark the current
     lda player_x

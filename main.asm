@@ -64,6 +64,8 @@
 .define TILE_SELECT_MIN_Y $05
 .define TILE_SELECT_MAX_Y $17
 
+.define ACTIONS_PER_TURN $01 ; actions per turn, default value
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
@@ -84,6 +86,7 @@ rand8 1
 game_mode 1
 move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
+actions 1 ; player's action until "turn" ends. Turn is considered ended when this has a non-zero value
 
 level_ptr 2 ; points to the current level in ram
 level_data_ptr 2 ; pointer to rom/sram of level
@@ -371,6 +374,13 @@ nmi_flag_not_set:
 
     ; apply smooth scrolling offsets
     jsr apply_smooth
+
+    ; check if actions have reached 0
+    lda actions
+    bne @no_new_turn
+    lda #ACTIONS_PER_TURN
+    sta actions ; refresh actions
+@no_new_turn
 
 
     inc frame_count

@@ -876,13 +876,18 @@ sprite_door_update:
 ;   if it is unable to reduce the distance it will pick
 ;   a direction that increases it by its preference
 ;   it will only make its next move once
-;   the player has moved
+;   the player has 0 actions remaining
 sprite_skel_update:
     pha
     tya
     pha
     txa
     pha
+
+    lda actions
+    bne @no_move
+    lda #$00
+@no_move
 
     ; load x position
     ldx sprite_tile_x, y
