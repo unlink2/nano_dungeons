@@ -889,14 +889,23 @@ sprite_skel_update:
     beq @move
     jmp @no_move
 @move:
-    ; only run movement code if no actions are left
-    ; find the target coordinates
+    ; save locations
+    ; in case it tries to go oob
     lda sprite_tile_y, y
-    sec
-    sbc player_y
-    beq @no_up_down ; if equal no move up or down is needed, pick next preference
-    bcc @down ; find if we want to move up or down
-    bcs @up
+    pha
+    lda sprite_tile_x, y
+    pha
+
+    ; pick a direction to move in
+    jsr random
+    and #%00000011
+    beq @down ; down
+    cmp #$01
+    beq @up
+    cmp #$02
+    beq @left
+    cmp #$03
+    beq @right
 
 @down:
     lda sprite_tile_y, y
@@ -922,16 +931,6 @@ sprite_skel_update:
     lda #%01000000 ; up animation
     sta sprite_tile_data, y
     bne @tile_found_preference ; branch always
-@no_up_down:
-
-    ; if up and down failed we chekc for left and right
-    lda sprite_tile_x, y
-    sec
-    sbc player_x
-    beq @no_preference ; if both are equal no move is needed
-    bcc @right  ; find if we want to move left or right
-    bcs @left
-
 @right:
     lda sprite_tile_x, y
     tax
@@ -961,72 +960,24 @@ sprite_skel_update:
     ; verify move based on preference, if collision happenes
     ; pick first best non-collision tile that is allowed
     jsr verify_sprite_move
+    ; if 6th bit of data is set restore positon and dont have any movement
+    lda sprite_tile_data, y
+    and #%00100000
+    beq @no_empty_tile
 
-    beq @no_move ; if a = 0 we are good
+    lda #$00
+    sta sprite_tile_data, y ; no animation
 
-@no_preference:
-    ; if not try next best choice
-    ; down
-    lda sprite_tile_x, y
-    sta get_tile_x
+    pla
+    sta sprite_tile_x, y
+    pla
+    sta sprite_tile_y, y
+    jmp @no_move ; done
 
-    lda sprite_tile_y, y
-    tax
-    inx
-    stx get_tile_y
+@no_empty_tile:
+    pla
+    pla ; just pull
 
-    lda #%11000000 ; down animation
-    sta sprite_tile_data, y
-
-    jsr verify_sprite_move
-    beq @no_move
-
-    ; keep trying
-    ; left
-
-    lda sprite_tile_y, y
-    sta get_tile_y
-
-    lda sprite_tile_x, y
-    tax
-    dex
-    stx get_tile_x
-
-    lda #%00000000 ; left animation
-    sta sprite_tile_data, y
-
-    jsr verify_sprite_move
-    beq @no_move
-
-    ; up
-    lda sprite_tile_x, y
-    sta get_tile_x
-
-    lda sprite_tile_y, y
-    tax
-    dex
-    stx get_tile_y
-
-    lda #%10000000 ; up animation
-    sta sprite_tile_data, y
-
-    jsr verify_sprite_move
-    beq @no_move
-
-    ; right
-    lda sprite_tile_y, y
-    sta get_tile_y
-
-    lda sprite_tile_x, y
-    tax
-    inx
-    stx get_tile_x
-
-    lda #%01000000 ; right animation
-    sta sprite_tile_data, y
-
-    jsr verify_sprite_move
-    beq @no_move
 @no_move:
 
     jsr sprite_pos_adjust
