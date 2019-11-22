@@ -61,6 +61,178 @@ update_sprites:
 
     rts
 
+; this sub routine adjusts sprite positon
+; inputs:
+;   y -> pointing to sprite data offset
+; sprite data documentation:
+;   this AI type uses sprite_data as an offset to its x or y position
+;   the lower 4 bits are the actual offset value
+;   7th bit = 1 -> sbc; = 0 -> adc
+;   6th bit = 1 -> x position; = 0 -> y position
+;   5th bit = 1 -> inits falling animation, if lower 4 bits are 0 hides sprite
+; returns:
+;   x position in temp
+;   y positon in temp+1
+sprite_pos_adjust:
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+    ; set if we need fine tuning
+    lda sprite_tile_data, y
+    and #%00001111
+    beq @no_adjust ; if the lower 4 bits are already 0 there is no need to adjust
+
+    ; now test what value we need to use as a base
+    lda sprite_tile_data, y
+    sta temp+3 ; used for bit instruction
+
+    bit temp+3 ; N flag = bit 7, V flag = bit 6
+
+    bvs @y_position ; test bit 7
+
+    ; x position adjust
+    ; test if sbc or adc
+    bpl @x_add
+
+    ; x sub
+    lda sprite_tile_data, y
+    and #%00001111
+    sta temp+3 ; store for sub
+    lda temp
+    sec
+    sbc temp+3
+    sta temp
+
+    jmp @adjust_done
+@x_add:
+    lda sprite_tile_data, y
+
+    lda sprite_tile_data, y
+    and #%00001111
+    clc
+    adc temp
+    sta temp
+
+    jmp @adjust_done
+@y_position
+
+    ; y position adjust
+    ; test if sbc or adc
+    bpl @y_add
+
+    ; y sub
+    lda sprite_tile_data, y
+    and #%00001111
+    sta temp+3 ; store for sub
+    lda temp+1
+    sec
+    sbc temp+3
+    sta temp+1
+
+    jmp @adjust_done
+@y_add:
+    lda sprite_tile_data, y
+
+    lda sprite_tile_data, y
+    and #%00001111
+    clc
+    adc temp+1
+    sta temp+1
+
+
+@adjust_done:
+    lda sprite_tile_data, y
+    sec
+    sbc #$01
+    sta sprite_tile_data, y
+@no_adjust:
+    rts
+
+; this sub routine verifies a sprite move
+; handles general collision
+; inputs:
+;   y -> pointing to sprite data offset
+;   get_tile_x -> proposed x positon
+;   get_tile_y -> proposed y position
+; returns:
+;   a = 0 -> no collision
+;   a = 1 -> collision
+; side effects:
+;   sprtie position is updated if no collision occurs
+verify_sprite_move:
+    sty temp ; need y value again
+
+    ; verify that the move can go ahead
+    jsr get_tile
+    and #%01111111 ; bit 7 does not matter
+
+    cmp #$24 ; empty tile
+    bne @not_empty
+
+    ldy temp ; need y value again
+    ; if it is an empty tile set the disable flag,
+    ; this will remove the sprite when the offset in
+    ; tile_data reaches 0
+    lda sprite_tile_data, y
+    ora #%00100000
+    sta sprite_tile_data, y
+
+    ; this is a branch always since a is a constant value
+    ; saves a byte
+    bne @no_collision
+@not_empty:
+    cmp #CLEARABLE_TILES_START
+    bcc @collision
+    cmp #CLEARABLE_TILES_END
+    bcs @collision
+
+    ; test all active sprites to verify we are not colliding
+    ldy sprite_tile_size
+    cpy #$FF
+    beq @no_collision
+@sprite_collision_loop:
+    lda sprite_tile_flags, y
+    and #%10000000 ; check if sprite is enabled in the first place
+    beq @skip ; if not, skip
+
+    ; verify location matches, if so collision
+    lda sprite_tile_x, y
+    cmp get_tile_x
+    bne @skip
+
+    lda sprite_tile_y, y
+    cmp get_tile_y
+    beq @collision
+
+@skip:
+    dey
+    cpy #$FF
+    bne @sprite_collision_loop
+
+
+@no_collision:
+    ldy temp
+    lda sprite_tile_data, y
+    ora #$08 ; fine tuning offset for sprite to move
+    sta sprite_tile_data, y
+
+    lda get_tile_x
+    sta sprite_tile_x, y
+    lda get_tile_y
+    sta sprite_tile_y, y
+
+    lda #$00
+    rts
+@collision:
+    lda #$01
+    rts
 
 ; this sub routine loops through all sprite tiles
 ; inputs:
@@ -360,85 +532,7 @@ sprite_update_push:
     txa
     pha
 
-    ; load x position
-    ldx sprite_tile_x, y
-    lda tile_convert_table, x
-    sta temp
-
-    ; load y position
-    ldx sprite_tile_y, y
-    lda tile_convert_table, x
-    sta temp+1
-
-    ; set if we need fine tuning
-    lda sprite_tile_data, y
-    and #%00001111
-    beq @no_adjust ; if the lower 4 bits are already 0 there is no need to adjust
-
-    ; now test what value we need to use as a base
-    lda sprite_tile_data, y
-    sta temp+3 ; used for bit instruction
-
-    bit temp+3 ; N flag = bit 7, V flag = bit 6
-
-    bvs @y_position ; test bit 7
-
-    ; x position adjust
-    ; test if sbc or adc
-    bpl @x_add
-
-    ; x sub
-    lda sprite_tile_data, y
-    and #%00001111
-    sta temp+3 ; store for sub
-    lda temp
-    sec
-    sbc temp+3
-    sta temp
-
-    jmp @adjust_done 
-@x_add:
-    lda sprite_tile_data, y
-
-    lda sprite_tile_data, y
-    and #%00001111
-    clc
-    adc temp
-    sta temp
-
-    jmp @adjust_done
-@y_position
-
-    ; y position adjust
-    ; test if sbc or adc
-    bpl @y_add
-
-    ; y sub
-    lda sprite_tile_data, y
-    and #%00001111
-    sta temp+3 ; store for sub
-    lda temp+1
-    sec
-    sbc temp+3
-    sta temp+1
-
-    jmp @adjust_done
-@y_add:
-    lda sprite_tile_data, y
-
-    lda sprite_tile_data, y
-    and #%00001111
-    clc
-    adc temp+1
-    sta temp+1
-
-
-@adjust_done:
-    lda sprite_tile_data, y
-    sec
-    sbc #$01
-    sta sprite_tile_data, y
-@no_adjust:
+    jsr sprite_pos_adjust
 
     lda #$37
     sta temp+2 ; sprite value
@@ -559,68 +653,7 @@ sprite_push_collision:
     rts
 
 @tile_got:
-    sty temp ; need y value again
-
-    ; verify that the move can go ahead
-    jsr get_tile
-    and #%01111111 ; bit 7 does not matter
-
-    cmp #$24 ; empty tile
-    bne @not_empty
-
-    ldy temp ; need y value again
-    ; if it is an empty tile set the disable flag,
-    ; this will remove the sprite when the offset in
-    ; tile_data reaches 0
-    lda sprite_tile_data, y
-    ora #%00100000
-    sta sprite_tile_data, y
-
-    ; this is a branch always since a is a constant value
-    ; saves a byte
-    bne @no_collision
-@not_empty:
-    cmp #CLEARABLE_TILES_START
-    bcc @collision
-    cmp #CLEARABLE_TILES_END
-    bcs @collision
-
-    ; test all active sprites to verify we are not colliding
-    ldy sprite_tile_size
-    cpy #$FF
-    beq @no_collision
-@sprite_collision_loop:
-    lda sprite_tile_flags, y
-    and #%10000000 ; check if sprite is enabled in the first place
-    beq @skip ; if not, skip
-
-    ; verify location matches, if so collision
-    lda sprite_tile_x, y
-    cmp get_tile_x
-    bne @skip
-
-    lda sprite_tile_y, y
-    cmp get_tile_y
-    beq @collision
-
-@skip:
-    dey
-    cpy #$FF
-    bne @sprite_collision_loop
-
-
-@no_collision:
-    ldy temp
-    lda sprite_tile_data, y
-    ora #$08 ; fine tuning offset for sprite to move
-    sta sprite_tile_data, y
-
-    lda get_tile_x
-    sta sprite_tile_x, y
-    lda get_tile_y
-    sta sprite_tile_y, y
-
-    lda #$00
+    jsr verify_sprite_move
 
     rts
 
