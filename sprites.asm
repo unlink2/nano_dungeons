@@ -324,6 +324,7 @@ sprite_init_default:
     ; reset sprite flags and data
     lda #$00
     sta sprite_tile_data, y
+    sta sprite_tile_temp, y
 
     lda #%00000000 ; turn off because collision is handeled by tile in this case
     sta sprite_tile_flags, y
@@ -878,6 +879,9 @@ sprite_door_update:
 ;   a direction that increases it by its preference
 ;   it will only make its next move once
 ;   the player has 0 actions remaining
+; temp data:
+;   temp holds the previous move, this is read by
+;   the movement routine to prevent moving back
 sprite_skel_update:
     pha
     tya
@@ -896,7 +900,7 @@ sprite_skel_update:
     lda sprite_tile_x, y
     pha
 
-    ; pick a direction to move in
+    ; pick a direction to move in randomly
     jsr random
     and #%00000111
 @direction_pick:
@@ -922,6 +926,11 @@ sprite_skel_update:
     jmp @direction_pick
 
 @down:
+    ; check previous move
+    lda sprite_tile_temp, y
+    cmp #$01
+    beq @up
+
     lda sprite_tile_y, y
     tax
     inx
@@ -934,6 +943,10 @@ sprite_skel_update:
     sta sprite_tile_data, y
     bne @tile_found_preference ; branch always
 @up:
+    lda sprite_tile_temp, y
+    cmp #$03
+    beq @down
+
     lda sprite_tile_y, y
     tax
     dex
@@ -946,6 +959,10 @@ sprite_skel_update:
     sta sprite_tile_data, y
     bne @tile_found_preference ; branch always
 @right:
+    lda sprite_tile_temp, y
+    cmp #$00
+    beq @left
+
     lda sprite_tile_x, y
     tax
     inx
@@ -958,6 +975,10 @@ sprite_skel_update:
     sta sprite_tile_data, y
     bne @tile_found_preference ; branch always
 @left:
+    lda sprite_tile_temp, y
+    cmp #$02
+    beq @right
+
     lda sprite_tile_x, y
     tax
     dex
@@ -974,13 +995,28 @@ sprite_skel_update:
     ; verify move based on preference, if collision happenes
     ; pick first best non-collision tile that is allowed
     jsr verify_sprite_move
+    cmp #$01
+    beq @collision
     ; if 6th bit of data is set restore positon and dont have any movement
     lda sprite_tile_data, y
     and #%00100000
     beq @no_empty_tile
 
+@collision:
+    ; store the bad previous move so the AI
+    ; does not pick it again
+    lda sprite_tile_data, y
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    eor #%00000010 ; eor this bit to invert the invalid move
+    sta sprite_tile_temp, y ; store invalid move to allow next move to proceed regardless
+
     lda #$00
-    sta sprite_tile_data, y ; no animation
+    sta sprite_tile_data, y ; no animation 
 
     pla
     sta sprite_tile_x, y
@@ -992,7 +1028,17 @@ sprite_skel_update:
     pla
     pla ; just pull
 
+    ; store previous move
+    lda sprite_tile_data, y
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr
+    lsr ; 6 shifts to get the correct number
+    sta sprite_tile_temp, y ; store it
 @no_move:
+
 
     jsr sprite_pos_adjust
     ; set up pointer

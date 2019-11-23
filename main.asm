@@ -195,6 +195,7 @@ sprite_tile_data SPRITE_TILES ; data for sprite may be used by AI as needed
 ; flags for each sprite
 ; 7th bit = 1 -> sprite enabled, collision will occur
 sprite_tile_flags SPRITE_TILES
+sprite_tile_temp SPRITE_TILES ; temporary storage for sprites may be used differently depending on sprite
 sprite_tile_obj SPRITE_TILES ; object to be used for this sprite, may be set up as needed
 sprite_tile_size 1 ; amount of tiles currently used
 .ende
@@ -846,9 +847,10 @@ tile_sub_lo:
 .db #<no_collision ; push tile
 .db #<no_collision ; key tile
 .db #<no_collision ; door tile
+.db #<no_collision ; skel tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+21
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+22
 .db #<no_collision
 .endrep
 
@@ -877,7 +879,7 @@ tile_sub_lo:
 .db #<no_collision ; push tile
 .db #<no_collision ; key tile
 .db #<no_collision ; door tile
-
+.db #<no_collision ; skel tile
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -913,9 +915,10 @@ tile_sub_hi:
 .db #>no_collision ; push tile
 .db #>no_collision ; key tile
 .db #>no_collision ; door tile
+.db #>no_collision ; skel tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+21
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+22
 .db #>no_collision
 .endrep
 
@@ -944,6 +947,7 @@ tile_sub_hi:
 .db #>no_collision ; push tile
 .db #>no_collision ; key tile
 .db #>no_collision ; door tile
+.db #>no_collision ; skel tile
 
 ; error handlers
 error_lo:

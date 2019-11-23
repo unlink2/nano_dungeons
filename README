@@ -86,6 +86,9 @@ Blocks:
 - Green door, opens when Green door key is collected
 
 - Mimmic AI that copies player can interact with switches (inverted sprite of player?)
+- Skel AI moves randomly
+- Bat AI moves left, until wall then right until wall
+- Scorpion AI moves up, until wall then down until wall
 
 TODO:
 Each map may have up to 32 sprite based tiles. each of those tiles gets 1 sprite slot assigned.
