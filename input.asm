@@ -486,12 +486,29 @@ a_input_main_menu:
     sta src_ptr+1
 
 @slot_selected:
+    ; store pointers in backup
+    lda level_data_ptr
+    sta level_data_ptr_bac
+    lda level_data_ptr+1
+    sta level_data_ptr_bac+1
+
+    lda attr_ptr
+    sta attr_ptr_bac
+    lda attr_ptr+1
+    sta attr_ptr_bac+1
+
+    lda src_ptr
+    sta palette_ptr_bac
+    lda src_ptr+1
+    sta palette_ptr_bac+1
+    ; now all pointers are backed up 
+
     ldx #$00
     stx $2001 ; disable rendering
 
-    lda #<level_data 
-    sta level_ptr 
-    lda #>level_data 
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
     sta level_ptr+1
 
     ; disable NMI until load is complete
@@ -507,8 +524,8 @@ a_input_main_menu:
 
     ; copy palette
     lda #<level_palette
-    sta dest_ptr 
-    lda #>level_palette 
+    sta dest_ptr
+    lda #>level_palette
     sta dest_ptr+1
     ldy #PALETTE_SIZE
     jsr memcpy
@@ -525,7 +542,8 @@ a_input_main_menu:
     vblank_wait
 @no_slot:
 @done:
-    rts 
+    rts
+
 
 ; b button input 
 ; b loads a map in editor menu
@@ -711,10 +729,16 @@ select_input:
     sta get_tile_y
     jsr get_tile
     sta sprite_data+1
+    rts
 @not_editor:
     cmp #GAME_MODE_EDITOR_MENU
-    bne @done
+    bne @not_editor_menu
     jsr select_input_editor_menu
+    rts 
+@not_editor_menu:
+    cmp #GAME_MODE_PUZZLE
+    bne @done
+    jsr reload_room
 @done: 
     rts 
 

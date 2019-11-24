@@ -209,3 +209,64 @@ random:
 	sta rand8
 	rts
 
+; this sub routine reloads a room
+; inputs:
+;   level_data_ptr_bac
+;   level_ptr_bac
+;   attr_ptr_bac
+;   palette_ptr_bac  (src_ptr)
+reload_room:
+    ; reload the pointers
+    lda level_data_ptr_bac
+    sta level_data_ptr
+    lda level_data_ptr_bac+1
+    sta level_data_ptr+1
+
+    lda attr_ptr_bac
+    sta attr_ptr
+    lda attr_ptr_bac+1
+    sta attr_ptr+1
+
+    lda palette_ptr_bac
+    sta src_ptr
+    lda palette_ptr_bac+1
+    sta src_ptr+1
+
+    ldx #$00
+    stx $2001 ; disable rendering
+
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
+    sta level_ptr+1
+
+    ; disable NMI until load is complete
+    set_nmi_flag
+
+    jsr decompress_level
+
+
+    ldx $00 ; nametable 0
+    jsr load_level
+    jsr load_attr
+
+
+    ; copy palette
+    lda #<level_palette
+    sta dest_ptr
+    lda #>level_palette
+    sta dest_ptr+1
+    ldy #PALETTE_SIZE
+    jsr memcpy
+
+    lda #$00
+    sta nametable
+
+    vblank_wait
+    ; lda #$00
+    ; sta $2005
+    ; sta $2005 ; no scrolling
+    jsr init_game
+
+    vblank_wait
+    rts

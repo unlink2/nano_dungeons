@@ -198,6 +198,12 @@ sprite_tile_flags SPRITE_TILES
 sprite_tile_temp SPRITE_TILES ; temporary storage for sprites may be used differently depending on sprite
 sprite_tile_obj SPRITE_TILES ; object to be used for this sprite, may be set up as needed
 sprite_tile_size 1 ; amount of tiles currently used
+
+; these are backup pointers allowing
+; the user to reload a room during puzzle mode
+level_data_ptr_bac 2
+palette_ptr_bac 2
+attr_ptr_bac 2
 .ende
 
 ; start of prg ram

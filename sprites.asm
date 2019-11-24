@@ -889,6 +889,9 @@ sprite_skel_update:
     txa
     pha
 
+    lda #%10000000 ; enable collison
+    sta sprite_tile_flags, y
+
     lda actions
     beq @move
     jmp @no_move
@@ -1073,4 +1076,23 @@ sprite_skel_update:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_skel_collision:
+    ; set up delay timer to play death animation
+    lda #<empty_sub
+    sta delay_update
+    lda #>empty_sub
+    sta delay_update
+
+    lda #<@reload_map
+    sta delay_done
+    lda #>@reload_map
+    sta delay_done+1
+
+    lda #$00
+    sta delay_timer+1
+    lda #$01
+    sta delay_timer
+
+@reload_map:
+    vblank_wait
+    jsr reload_room ; on collision reload area
     rts 
