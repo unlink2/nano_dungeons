@@ -157,6 +157,11 @@ inc_dec_attr:
 
 ; inits editor menu
 init_editor_menu:
+    ; clear bank select
+    lda #$00
+    sta level_data_ptr_bac
+    sta level_data_ptr_bac+1 
+
     ; backup player's location and
     ; move to cursor position
     lda player_x
@@ -271,6 +276,38 @@ init_editor_menu:
     lda #14*8
     sta sprite_data_B
 
+    ; move sprites for bank, address, and value
+    ; to correct location
+
+    ; 3 pairs of sprites
+    ; x positions are always the same, y is different for each pair
+    lda #19*8 ; x position
+    sta sprite_data_C+3
+    sta sprite_data_E+3
+    sta sprite_data_10+3
+    lda #20*8 ; x position
+    sta sprite_data_D+3
+    sta sprite_data_F+3
+    sta sprite_data_11+3
+
+
+    lda #18*8 ; y position
+    sta sprite_data_C
+    sta sprite_data_D 
+
+    lda #19*8
+    sta sprite_data_E
+    sta sprite_data_F
+
+    lda #20*8
+    sta sprite_data_10
+    sta sprite_data_11
+
+    
+    lda #18*8 ; y position
+    sta sprite_data_C
+    sta sprite_data_D
+
     jsr init_attr_display
     jsr init_color_display
     jsr init_value_display
@@ -317,6 +354,18 @@ init_editor:
     sta sprite_data_A+3
     sta sprite_data_B
     sta sprite_data_B+3
+    sta sprite_data_C
+    sta sprite_data_C+3
+    sta sprite_data_D
+    sta sprite_data_D+3
+    sta sprite_data_E
+    sta sprite_data_E+3
+    sta sprite_data_F
+    sta sprite_data_F+3
+    sta sprite_data_10
+    sta sprite_data_10+3
+    sta sprite_data_11
+    sta sprite_data_11+3
 
     ; attributes 0 for player
     sta sprite_data+2
@@ -350,13 +399,19 @@ init_editor:
 
     rts
 
+
 ; update sub routine for editor menu
+; this uses level_data_ptr_bac as temporary storage for
+; address and bank offsets
+; make sure that addresses dont
+; ever attempt to read NES registers
+; only ram and cartridge related values
 update_editor_menu:
     ; sprite counter
     ldy sprite_tile_size
     iny
     tya
-    and #$0F 
+    and #$0F
     sta sprite_data_A+1
     ldy sprite_tile_size
     iny
@@ -371,7 +426,7 @@ update_editor_menu:
 
     lda menu_select
     and #EDITOR_MENU_MAX_SELECT ; only 3 possible options
-    cmp #$0C ; if more than 9, overflow
+    cmp #$0F ; if more than 9, overflow
     bcc @no_overflow
     lda #$00
 @no_overflow
@@ -415,11 +470,11 @@ update_editor_menu:
     jmp @done
 @not_tile_select_mode:
 
-    ; set sprite at correct position 
-    lda editor_menu_cursor_x, x 
+    ; set sprite at correct position
+    lda editor_menu_cursor_x, x
     sta player_x
 
-    lda editor_menu_cursor_y, x 
+    lda editor_menu_cursor_y, x
     sta player_y
 
     lda editor_menu_cursor_attr, x
@@ -427,6 +482,48 @@ update_editor_menu:
 
     lda #$31
     sta sprite_data+1
+
+
+    ; set up address related sprites
+    ; bank is temp stored in level_data_ptr_bac
+    ; address is stored in level_data_ptr_bac+1
+    lda level_data_ptr_bac
+    and #$0F
+    sta sprite_data_D+1
+    lda level_data_ptr_bac
+    lsr
+    lsr
+    lsr
+    lsr
+    sta sprite_data_C+1
+
+    lda level_data_ptr_bac+1
+    and #$0F
+    sta sprite_data_F+1
+    lda level_data_ptr_bac+1
+    lsr
+    lsr
+    lsr
+    lsr
+    sta sprite_data_E+1
+
+    lda level_data_ptr_bac
+    sta src_ptr+1
+    lda level_data_ptr_bac+1
+    sta src_ptr
+    ldy #$00
+    lda (src_ptr), y ; load value from that location
+
+    sta temp ; temporarily store it here
+    lda temp
+    and #$0F
+    sta sprite_data_11+1
+    lda temp
+    lsr
+    lsr
+    lsr
+    lsr
+    sta sprite_data_10+1
 
 @done:
     jmp update_done

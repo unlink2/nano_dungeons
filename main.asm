@@ -34,6 +34,9 @@
 .define EDITOR_MENU_ATTR_1 6
 .define EDITOR_MENU_COLOR 10
 .define EDITOR_MENU_VALUE 11
+.define EDITOR_MENU_BANK 12
+.define EDITOR_MENU_ADDR 13
+.define EDITOR_MENU_MEMVALUE 14
 
 .define MAIN_MENU_LEVEL 0 
 .define MAIN_MENU_SLOT_1 1
@@ -163,7 +166,15 @@ sprite_data_8 4 ; sprite 9
 sprite_data_9 4 ; sprite 10
 sprite_data_A 4 ; sprite 11
 sprite_data_B 4 ; sprite 12
-sprite_data_pad 208 ; remainder, unused as of now
+
+sprite_data_C 4 ; sprite 13
+sprite_data_D 4 ; sprite 14
+sprite_data_E 4 ; sprite 15
+sprite_data_F 4 ; sprite 16
+sprite_data_10 4 ;sprtie 17
+sprite_data_11 4 ; sprite 18
+
+sprite_data_pad 184 ; remainder, unused as of now
 level_data LEVEL_SIZE ; copy of uncompressed level in ram, important this must always start at a page boundry
 level_palette PALETTE_SIZE ; palette used by the currently loaded level, is copied whenever a level becomes active
 
@@ -569,6 +580,9 @@ editor_menu_cursor_x:
 .db $12  ; color bottom right
 .db $0C ; color palette select
 .db $0C ; color select
+.db $0C ; bank
+.db $0C ; address
+.db $0C ; value
 
 editor_menu_cursor_y:
 .db $09
@@ -583,6 +597,9 @@ editor_menu_cursor_y:
 .db $07
 .db $0A
 .db $0C
+.db $12
+.db $13
+.db $14
 
 editor_menu_cursor_attr:
 .db $00
@@ -597,6 +614,10 @@ editor_menu_cursor_attr:
 .db %01000000
 .db $00
 .db $00
+.db $00
+.db $00
+.db $00
+
 
 ; same as editor menu tables
 main_menu_cursor_x:

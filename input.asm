@@ -966,14 +966,40 @@ go_left_editor_menu:
     rts 
 @not_color
     cmp #EDITOR_MENU_VALUE 
-    bne @done
-    ldy color_select 
+    bne @not_value
+    ldy color_select
     lda level_palette, y
-    tax 
+    tax
     dex
-    txa  
+    txa
     sta level_palette, y
     jsr init_value_display
+@not_value:
+    cmp #EDITOR_MENU_BANK
+    bne @not_bank
+    ldy level_data_ptr_bac
+    dey
+    cpy #$3F
+    bne @not_outside_ram
+    ldy #$07
+@not_outside_ram:
+    sty level_data_ptr_bac
+@not_bank:
+    cmp #EDITOR_MENU_ADDR
+    bne @not_addr
+    dec level_data_ptr_bac+1
+@not_addr:
+    cmp #EDITOR_MENU_MEMVALUE
+    bne @done
+    lda level_data_ptr_bac
+    sta src_ptr+1
+    lda level_data_ptr_bac+1
+    sta src_ptr
+    ldy #$00
+    lda (src_ptr), y
+    sec
+    sbc #$01
+    sta (src_ptr), y
 @done:
     rts 
 
@@ -1083,15 +1109,41 @@ go_right_editor_menu:
     jsr init_value_display
     rts 
 @not_color
-    cmp #EDITOR_MENU_VALUE 
-    bne @done
-    ldy color_select 
-    lda level_palette, y 
-    tax 
-    inx 
+    cmp #EDITOR_MENU_VALUE
+    bne @not_value
+    ldy color_select
+    lda level_palette, y
+    tax
+    inx
     txa
     sta level_palette, y
     jsr init_value_display
+@not_value:
+    cmp #EDITOR_MENU_BANK
+    bne @not_bank
+    ldy level_data_ptr_bac
+    iny
+    cpy #$08
+    bne @not_outside_ram
+    ldy #$40
+@not_outside_ram:
+    sty level_data_ptr_bac
+@not_bank:
+    cmp #EDITOR_MENU_ADDR
+    bne @not_addr
+    inc level_data_ptr_bac+1
+@not_addr:
+    cmp #EDITOR_MENU_MEMVALUE
+    bne @done
+    lda level_data_ptr_bac
+    sta src_ptr+1
+    lda level_data_ptr_bac+1
+    sta src_ptr
+    ldy #$00
+    lda (src_ptr), y
+    clc
+    adc #$01
+    sta (src_ptr), y
 @done:
     rts 
 
