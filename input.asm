@@ -422,6 +422,13 @@ a_input_main_menu:
     sta src_ptr 
     lda palette_table_hi, x 
     sta src_ptr+1
+
+    ; load sub routine
+    lda map_sub_lo, x
+    sta map_sub_ptr
+    lda map_sub_hi, x
+    sta map_sub_ptr+1
+
     jmp @slot_selected
 @not_level_select:
 
@@ -444,10 +451,15 @@ a_input_main_menu:
     lda #>palette_1 
     sta src_ptr+1
 
+    ; load no update routine for custom levels
+    lda #$FF
+    sta map_sub_ptr
+    sta map_sub_ptr+1
+
     jmp @slot_selected
 @not_slot_1:
 
-    cmp #MAIN_MENU_SLOT_2 
+    cmp #MAIN_MENU_SLOT_2
     bne @not_slot2
 
     lda #<save_2
@@ -464,6 +476,12 @@ a_input_main_menu:
     sta src_ptr
     lda #>palette_2
     sta src_ptr+1
+
+    ; load no update routine for custom levels
+    lda #$FF
+    sta map_sub_ptr
+    sta map_sub_ptr+1
+
     jmp @slot_selected
 @not_slot2:
 
@@ -484,6 +502,11 @@ a_input_main_menu:
     sta src_ptr
     lda #>palette_3
     sta src_ptr+1
+
+    ; load no update routine for custom levels
+    lda #$FF
+    sta map_sub_ptr
+    sta map_sub_ptr+1
 
 @slot_selected:
     ; store pointers in backup

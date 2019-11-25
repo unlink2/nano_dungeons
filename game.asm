@@ -149,6 +149,19 @@ update_game:
     sta game_flags ; store this frames collision result in game_flags
 @player_not_moved:
 
+    ; run custom update routine unless ptr is FF FF
+    lda map_sub_ptr
+    and map_sub_ptr+1 ; FF and FF = FF
+    cmp #$FF
+    beq @no_sub
+
+    lda map_sub_ptr
+    sta src_ptr
+    lda map_sub_ptr+1
+    sta src_ptr+1
+    jsr jsr_indirect
+@no_sub:
+
     ; test victory condition
     ; if only one tile is left to clear the player must be on it
     lda tiles_to_clear+1

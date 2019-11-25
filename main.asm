@@ -91,6 +91,7 @@ actions 1 ; player's action until "turn" ends. Turn is considered ended when thi
 level_ptr 2 ; points to the current level in ram
 level_data_ptr 2 ; pointer to rom/sram of level
 attr_ptr 2 ; points to the attributes for the current level
+map_sub_ptr 2 ; pointing to an update routine for levels, if FFFF -> ignore. only runs duinrg gameplay
 level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
 temp 4 ; 4 bytes of universal temporary storage
 nametable 1 ; either 0 or 1 depending on which nametable is active
@@ -728,6 +729,23 @@ palette_table_hi:
 .db #>win_pal
 .db #>palette_data
 .db #>level_1_pal
+
+; map update routines
+map_sub_lo:
+.db #<empty_sub
+.db #<empty_sub
+.db #<empty_sub
+.db #<empty_sub
+.db #<empty_sub
+.db #<empty_sub
+
+map_sub_hi:
+.db #>empty_sub
+.db #>empty_sub
+.db #>empty_sub
+.db #>empty_sub
+.db #>empty_sub
+.db #>empty_sub
 
 ; player animation frames for each direction
 player_animation_right:
