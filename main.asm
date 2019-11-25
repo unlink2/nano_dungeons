@@ -227,6 +227,11 @@ attr_3 ATTR_SIZE
 palette_1 PALETTE_SIZE ; palette 1
 palette_2 PALETTE_SIZE ; palette 2
 palette_3 PALETTE_SIZE ; palette 3
+
+save_sub_1 32 ; 32 bytes of custom code
+save_sub_2 32 ; 32 bytes of custom code
+save_sub_3 32 ; 32 bytes of custom code
+magic 16 ; hard-coded sequence of sram magic values, if they are not present run init
 .ende
 
 .macro vblank_wait
@@ -279,8 +284,10 @@ clear_mem:
     dex
     bne clear_mem
 
-
     vblank_wait
+
+    ; init sram
+    jsr init_sram
 
     ; set up hi byte sprite_ptr
     lda #$02

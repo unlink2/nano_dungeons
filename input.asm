@@ -443,17 +443,18 @@ a_input_main_menu:
 
     lda #<attr_1
     sta attr_ptr
-    lda #>attr_1 
+    lda #>attr_1
     sta attr_ptr+1
 
-    lda #<palette_1 
+    lda #<palette_1
     sta src_ptr
-    lda #>palette_1 
+    lda #>palette_1
     sta src_ptr+1
 
     ; load no update routine for custom levels
-    lda #$FF
+    lda #<save_sub_1
     sta map_sub_ptr
+    lda #>save_sub_1
     sta map_sub_ptr+1
 
     jmp @slot_selected
@@ -469,7 +470,7 @@ a_input_main_menu:
 
     lda #<attr_2
     sta attr_ptr
-    lda #>attr_2 
+    lda #>attr_2
     sta attr_ptr+1
 
     lda #<palette_2
@@ -478,8 +479,9 @@ a_input_main_menu:
     sta src_ptr+1
 
     ; load no update routine for custom levels
-    lda #$FF
+    lda #<save_sub_2
     sta map_sub_ptr
+    lda #>save_sub_2
     sta map_sub_ptr+1
 
     jmp @slot_selected
@@ -504,8 +506,9 @@ a_input_main_menu:
     sta src_ptr+1
 
     ; load no update routine for custom levels
-    lda #$FF
+    lda #<save_sub_3
     sta map_sub_ptr
+    lda #>save_sub_3
     sta map_sub_ptr+1
 
 @slot_selected:

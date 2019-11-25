@@ -270,3 +270,60 @@ reload_room:
 
     vblank_wait
     rts
+
+; this sub routine should be called at the start of the
+; program
+; first it checks the magic number sequence
+; if it is not present it sets up default values
+; for all sram functionality
+init_sram:
+    ldx #$00
+@magic_check:
+    lda magic_bytes, x
+    cmp magic, x
+    bne @init
+    inx
+    cpx #16
+    bne @magic_check
+
+    rts
+
+@init:
+    ; if check was not OK start
+    ; init
+    ; first set up magic values correctly
+
+    ldx #$00
+@magic_init:
+    lda magic_bytes, x
+    sta magic, x
+    inx
+    cpx #16
+    bne @magic_init
+
+
+    ; lastly make the custom code
+    ; an rts
+    lda #$60 ; rts opcode
+    sta save_sub_1
+    sta save_sub_2
+    sta save_sub_3
+
+    ; then set up a completely empty
+    ; tileset for all maps
+    ldx #00
+@empty_map_init:
+    lda empty_map, x
+    sta save_1, x
+    sta save_2, x
+    sta save_3, x
+    inx
+    cpx #$14
+    bne @empty_map_init 
+
+
+    rts 
+
+; 16 random values
+magic_bytes:
+.db $0e ,$94 ,$3f ,$76 ,$9c ,$dd ,$f0 ,$ba ,$5c ,$ba ,$72 ,$36 ,$f8 ,$2d ,$d3, $46
