@@ -160,6 +160,7 @@ init_editor_menu:
     ; clear bank select
     lda #$00
     sta level_data_ptr_bac
+    lda #$01
     sta level_data_ptr_bac+1 
 
     ; backup player's location and
