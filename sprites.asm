@@ -915,6 +915,7 @@ sprite_skel_update:
     cmp #$03
     beq @down
 
+@resume_direction:
     ; otherwise just keep going the same way
     ; this is eaily done by just shifting bits in
     ; data

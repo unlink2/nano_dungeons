@@ -69,6 +69,11 @@
 
 .define ACTIONS_PER_TURN $01 ; actions per turn, default value
 
+.define UP $00
+.define DOWN $01
+.define LEFT $02
+.define RIGHT $03
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
@@ -183,6 +188,9 @@ player_y 1 ; tile location of player
 player_x_bac 1 ; backup location
 player_y_bac 1 ; backup location
 player_timer 1 ; animation timer
+last_move 1 ; 0 = up, 1 = down, 2 = left, 3 = right
+weapon_x 1 ; players weapon x and y location
+weapon_y 1
 
 start_x 1 ; x and y value of start location
 start_y 1 ; values are populated during decompression

@@ -1,19 +1,22 @@
 ; handles all inputs
 input_handler:
-    lda nmi_flags 
+    ; reset latch
+    lda #$01
+    sta $4016
+    lda #$00
+    sta $4016 ; both controllers are latching now
+
+    lda nmi_flags
     and #%00100000 ; check disable input flag
     beq @not_disabled
-    rts 
+
+    ; latch buttons anyway
+    lda $4016
+    rts
 @not_disabled:
 
-    lda #$00 
-    sta last_inputs
-
-    ; reset latch
-    lda #$01 
-    sta $4016
-    lda #$00 
-    sta $4016 ; both controllers are latching now
+    lda #$00
+    sta last_inputs 
 
     lda $4016 ; p1 - A
     and #%00000001 
@@ -151,9 +154,63 @@ a_input:
     rts 
 @not_editor_menu:
     cmp #GAME_MODE_MENU
-    bne @done 
+    bne @not_main_menu
     jsr a_input_main_menu
+@not_main_menu:
+    cmp #GAME_MODE_PUZZLE
+    bne @done
+    jsr a_input_game
 @done:
+    rts
+
+; in-game a input
+a_input_game:
+    lda #<sword_update
+    sta delay_update
+    lda #>sword_update
+    sta delay_update+1
+
+    lda #<sword_done
+    sta delay_done
+    lda #>sword_done
+    sta delay_done+1
+
+    lda #$00
+    sta delay_timer+1
+    lda #$04
+    sta delay_timer
+
+    ; disable inputs
+    lda nmi_flags
+    ora #%00100000
+    sta nmi_flags
+
+    ; move weapon x and y based on last inputs
+    lda player_x
+    sta weapon_x
+    lda player_y
+    sta weapon_y
+
+    lda last_move
+    cmp #UP
+    bne @no_up
+    dec weapon_y
+@no_up:
+    cmp #DOWN
+    bne @no_down
+    inc weapon_y
+@no_down
+
+    cmp #LEFT
+    bne @no_left
+    dec weapon_x
+@no_left:
+    cmp #RIGHT
+    bne @no_right
+    inc weapon_x
+@no_right:
+    
+
     rts 
 
 ; editor menu code for a input
@@ -915,6 +972,9 @@ go_left_editor:
     cmp player_x ; dont allow underflow 
     beq @no_dec
 
+    lda #LEFT
+    sta last_move
+
     dec player_x
 @no_dec:
     rts 
@@ -1056,6 +1116,9 @@ go_right_editor:
     lda #$1F
     cmp player_x ; dont allow overflow 
     beq @no_inc
+
+    lda #RIGHT
+    sta last_move
 
     inc player_x
 @no_inc:
@@ -1211,6 +1274,9 @@ go_up_editor:
     cmp player_y ; dont allow underflow
     beq @no_dec
 
+    lda #UP
+    sta last_move
+
     dec player_y
 @no_dec:
     rts
@@ -1267,6 +1333,9 @@ go_down_editor:
     lda #$1D
     cmp player_y ; dont allow overflow 
     beq @no_inc 
+
+    lda #DOWN
+    sta last_move
 
     inc player_y
 @no_inc:

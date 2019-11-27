@@ -416,3 +416,22 @@ check_player_move:
     lda #$01 ; did move
 @player_not_moved_y:
     rts
+
+
+; updates the sword sprite
+; based on the delay timer
+sword_update:
+    rts
+
+; moves sword to 0/0
+; enables player inputs
+sword_done:
+    lda nmi_flags
+    and #%11011111
+    sta nmi_flags
+
+    lda #$00
+    sta weapon_x
+    sta weapon_y
+
+    rts
