@@ -892,6 +892,22 @@ sprite_skel_update:
     lda #%10000000 ; enable collison
     sta sprite_tile_flags, y
 
+    ; if position is the same as
+    ; the player's weapon
+    ; we move this sprite 0/0
+    lda sprite_tile_x, y
+    cmp weapon_x
+    bne @no_weapon_hit
+    lda sprite_tile_y, y
+    cmp weapon_y
+    bne @no_weapon_hit
+
+    lda #$00
+    sta sprite_tile_x, y
+    sta sprite_tile_y, y
+
+@no_weapon_hit:
+
     lda actions
     beq @move
     jmp @no_move
