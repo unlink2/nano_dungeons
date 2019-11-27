@@ -177,7 +177,7 @@ a_input_game:
 
     lda #$00
     sta delay_timer+1
-    lda #$04
+    lda #$0F
     sta delay_timer
 
     ; disable inputs
@@ -191,23 +191,42 @@ a_input_game:
     lda player_y
     sta weapon_y
 
+    lda #$33 ; tile
+    sta sprite_data_1+1
+
     lda last_move
     cmp #UP
     bne @no_up
     dec weapon_y
+    lda #%10000000 ; flip
+    sta sprite_data_1+2
+    rts
 @no_up:
     cmp #DOWN
     bne @no_down
     inc weapon_y
+    lda #%00000000 ; no flip
+    sta sprite_data_1+2
+    rts
 @no_down
 
+    lda #$B3 ; tile
+    sta sprite_data_1+1
+
+    lda last_move
     cmp #LEFT
     bne @no_left
     dec weapon_x
+    lda #%01000000 ; flip
+    sta sprite_data_1+2
+    rts
 @no_left:
     cmp #RIGHT
     bne @no_right
     inc weapon_x
+    lda #%00000000 ; flip
+    sta sprite_data_1+2
+    rts
 @no_right:
     
 

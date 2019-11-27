@@ -418,9 +418,20 @@ check_player_move:
     rts
 
 
-; updates the sword sprite
+; updates the sword sprite (sprite 1)
 ; based on the delay timer
 sword_update:
+    ; lda #$33 ; tile
+    ; sta sprite_data_1+1
+
+    ldy weapon_x
+    lda tile_convert_table, y
+    sta sprite_data_1+3
+
+    ldy weapon_y
+    lda tile_convert_table, y
+    sta sprite_data_1
+
     rts
 
 ; moves sword to 0/0
@@ -433,5 +444,11 @@ sword_done:
     lda #$00
     sta weapon_x
     sta weapon_y
+
+    sta actions
+
+    sta sprite_data_1
+    sta sprite_data_1+3
+    sta sprite_data_1+2
 
     rts
