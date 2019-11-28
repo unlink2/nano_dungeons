@@ -165,14 +165,16 @@ a_input:
 
 ; in-game a input
 a_input_game:
-    lda #<sword_update
+    ldy weapon_type
+
+    lda weapon_update_lo
     sta delay_update
-    lda #>sword_update
+    lda weapon_update_hi
     sta delay_update+1
 
-    lda #<sword_done
+    lda weapon_done_lo
     sta delay_done
-    lda #>sword_done
+    lda weapon_done_hi
     sta delay_done+1
 
     lda #$00

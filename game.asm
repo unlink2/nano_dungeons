@@ -14,6 +14,7 @@ init_game:
     sta map_flags ; reset all map flags
     sta key_count ; no keys when map begins
     sta player_timer ; no timer for player
+    sta weapon_type
 
     lda #<update_game
     sta update_sub

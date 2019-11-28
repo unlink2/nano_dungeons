@@ -191,6 +191,7 @@ player_timer 1 ; animation timer
 last_move 1 ; 0 = up, 1 = down, 2 = left, 3 = right
 weapon_x 1 ; players weapon x and y location
 weapon_y 1
+weapon_type 1 ; id of weapon 0 = sword
 
 start_x 1 ; x and y value of start location
 start_y 1 ; values are populated during decompression
@@ -1065,6 +1066,20 @@ sprite_collision_hi:
 .db #>sprite_key_collision
 .db #>sprite_door_collision
 .db #>sprite_skel_collision
+
+; sub routines for weapon upgrades
+weapon_update_lo:
+.db #<sword_update
+
+weapon_update_hi:
+.db #>sword_update
+
+weapon_done_lo:
+.db #<sword_done
+
+weapon_done_hi:
+.db #>sword_done
+
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:
