@@ -166,15 +166,19 @@ a_input:
 ; in-game a input
 a_input_game:
     ldy weapon_type
+    ; no weapon if 0
+    bne @init
+    rts
+@init: 
 
-    lda weapon_update_lo
+    lda weapon_update_lo, y
     sta delay_update
-    lda weapon_update_hi
+    lda weapon_update_hi, y
     sta delay_update+1
 
-    lda weapon_done_lo
+    lda weapon_done_lo, y
     sta delay_done
-    lda weapon_done_hi
+    lda weapon_done_hi, y
     sta delay_done+1
 
     lda #$00
@@ -193,7 +197,7 @@ a_input_game:
     lda player_y
     sta weapon_y
 
-    lda #$33 ; tile
+    lda weapon_sprite, y ; tile
     sta sprite_data_1+1
 
     lda last_move
@@ -212,7 +216,8 @@ a_input_game:
     rts
 @no_down
 
-    lda #$B3 ; tile
+    lda weapon_sprite, y ; tile
+    ora #%10000000 ; get horizontal version
     sta sprite_data_1+1
 
     lda last_move

@@ -1112,4 +1112,91 @@ sprite_skel_collision:
 @reload_map:
     vblank_wait
     jsr reload_room ; on collision reload area
-    rts 
+    rts
+
+; sword pikcup AI
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_sword_collision:
+    lda sprite_tile_data, y
+    and #%10000000 ; disable flag
+    bne @done
+    ora #%10000000
+    sta sprite_tile_data, y
+
+    lda #$01 ; sword value
+    sta weapon_type
+@done:
+    lda #$00 ; never return a collision value
+    rts
+
+; sprite pickup update
+; inputs:
+;   y -> pointing to sprite data offset
+; Data:
+;   7th bit -> collected, disable collision and draw next to key icon
+sprite_sword_update:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+
+    lda sprite_tile_data, y
+    and #%10000000
+    beq @enabled
+
+    lda #$00
+    sta sprite_tile_flags, y
+
+    ; store position in UI
+    lda #3*8
+    sta temp
+
+    lda #26*8
+    sta temp+1
+
+    jmp @done
+@enabled:
+    lda #%10000000
+    sta sprite_tile_flags, y
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+@done:
+
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda #$33
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    pla
+    tax
+    pla
+    tay
+    pla
+
+    rts

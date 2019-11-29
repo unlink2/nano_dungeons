@@ -55,7 +55,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $76
+.define SPRITE_TILES_END $77
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -909,9 +909,10 @@ tile_sub_lo:
 .db #<no_collision ; key tile
 .db #<no_collision ; door tile
 .db #<no_collision ; skel tile
+.db #<no_collision ; sword tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+22
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+23
 .db #<no_collision
 .endrep
 
@@ -941,6 +942,7 @@ tile_sub_lo:
 .db #<no_collision ; key tile
 .db #<no_collision ; door tile
 .db #<no_collision ; skel tile
+.db #<no_collision ; sword tile
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -977,9 +979,10 @@ tile_sub_hi:
 .db #>no_collision ; key tile
 .db #>no_collision ; door tile
 .db #>no_collision ; skel tile
+.db #>no_collision ; sword tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+22
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+23
 .db #>no_collision
 .endrep
 
@@ -1009,6 +1012,7 @@ tile_sub_hi:
 .db #>no_collision ; key tile
 .db #>no_collision ; door tile
 .db #>no_collision ; skel tile
+.db #>no_collision ; sword tile
 
 ; error handlers
 error_lo:
@@ -1026,11 +1030,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; key tile
 .db #<sprite_init_default ; door tile
 .db #<sprite_init_default ; skelleton tile
+.db #<sprite_init_default ; sword weapon
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1042,6 +1048,7 @@ sprite_ai_lo:
 .db #<sprite_key_update
 .db #<sprite_door_update
 .db #<sprite_skel_update
+.db #<sprite_sword_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1050,6 +1057,7 @@ sprite_ai_hi:
 .db #>sprite_key_update
 .db #>sprite_door_update
 .db #>sprite_skel_update
+.db #>sprite_sword_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1058,6 +1066,7 @@ sprite_collision_lo:
 .db #<sprite_key_collision
 .db #<sprite_door_collision
 .db #<sprite_skel_collision
+.db #<sprite_sword_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1066,20 +1075,31 @@ sprite_collision_hi:
 .db #>sprite_key_collision
 .db #>sprite_door_collision
 .db #>sprite_skel_collision
+.db #>sprite_sword_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
+.db #<empty_sub
 .db #<sword_update
 
 weapon_update_hi:
+.db #>empty_sub
 .db #>sword_update
 
 weapon_done_lo:
 .db #<sword_done
+.db #<sword_done
 
 weapon_done_hi:
 .db #>sword_done
+.db #>sword_done
 
+; sprites based on tile
+; this number is the vertical sprite
+; it is ord with #%10000000 to get the horizontal version
+weapon_sprite:
+.db #$24
+.db #$33
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:
