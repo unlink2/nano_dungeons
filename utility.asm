@@ -352,10 +352,6 @@ crash_handler:
 
     bit $2002 ; reset latch
 
-    lda #$00
-    sta $2005
-    sta $2005 ; no scrolling
-
     lda #$20
     sta $2006
     lda #$00
@@ -366,28 +362,73 @@ crash_handler:
     pla ; y value
 
     ; this macro outputs
-    ; a value in a to the screen
+    ; prints value in A to the screen
 .macro output_value_crash
     pha
-    and #$0F
+    lsr
+    lsr
+    lsr
+    lsr
     sta $2007
     pla
-    lsr
-    lsr
-    lsr
-    lsr
+    and #$0F
     sta $2007
 .endm
+    ; y value
     output_value_crash
 
+    lda #$24 ; space
+    sta $2007
 
+    lda #$21 ; 'X'
+    sta $2007
+
+    pla ; x value
+    output_value_crash
+
+    lda #$24 ; space
+    sta $2007
+
+    lda #$0A ; 'A'
+    sta $2007
+    pla
+    output_value_crash
+
+    lda #$24 ; space
+    sta $2007
+
+    lda #$1C ; 'S'
+    sta $2007
+
+    tsx
+    txa
+    output_value_crash
+
+    ; loop all of stack
+    lda #$20
+    sta $2006
+    lda #$C0
+    sta $2006
+
+    ldy #$00
+    ldx #$24
+@stack_loop:
+    lda $0100, y
+    output_value_crash
+    ; stx $2007
+
+    iny 
+    bne @stack_loop
+    
 crash_loop:
     vblank_wait
     ; enable rendering
-    lda #%00000000
+    lda #%00000000   ; enable NMI, sprites from Pattern Table 0
     sta $2000
-    lda #%00100001 ; render bg and grayscale
+
+    lda #%00001111   ; enable sprites, bg, grayscale mode
     sta $2001
+
     lda #$00
     sta $2005
     sta $2005
