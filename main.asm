@@ -519,19 +519,21 @@ nmi_flag_set:
 ; this may be called by
 ; the APU on the last tick of $4017
 irq:
-    pha
-    txa
-    pha
-    tya
-    pha 
+    ; pha
+    ; txa
+    ; pha
+    ; tya
+    ; pha
 
-    pla
-    tay
-    pla
-    tax
-    pla
+    jmp crash_handler
 
-    rti 
+    ; pla
+    ; tay
+    ; pla
+    ; tax
+    ; pla
+
+    rti
 
 .include "./utility.asm"
 .include "./input.asm"

@@ -327,3 +327,68 @@ init_sram:
 ; 16 random values
 magic_bytes:
 .db $0e ,$94 ,$3f ,$76 ,$9c ,$dd ,$f0 ,$ba ,$5c ,$ba ,$72 ,$36 ,$f8 ,$2d ,$d3, $46
+
+; this sub routine is called when
+; a brk occurs
+; or any other IRQ is called
+; since IRQ should never be activated
+; it prints out all register values
+; and the stack
+; abandon all hope ye who calls this
+crash_handler:
+    pha ; store A value for output later on
+    txa
+    pha ; store X value
+    tya
+    pha ; store Y value
+
+    vblank_wait
+
+    ; disable sprites and rendering
+    ; disable NMI
+    lda #$00
+    sta $2000
+    sta $2001
+
+    bit $2002 ; reset latch
+
+    lda #$00
+    sta $2005
+    sta $2005 ; no scrolling
+
+    lda #$20
+    sta $2006
+    lda #$00
+    sta $2006 ; write address
+
+    lda #$22 ; 'Y'
+    sta $2007
+    pla ; y value
+
+    ; this macro outputs
+    ; a value in a to the screen
+.macro output_value_crash
+    pha
+    and #$0F
+    sta $2007
+    pla
+    lsr
+    lsr
+    lsr
+    lsr
+    sta $2007
+.endm
+    output_value_crash
+
+
+crash_loop:
+    vblank_wait
+    ; enable rendering
+    lda #%00000000
+    sta $2000
+    lda #%00100001 ; render bg and grayscale
+    sta $2001
+    lda #$00
+    sta $2005
+    sta $2005
+    jmp crash_loop
