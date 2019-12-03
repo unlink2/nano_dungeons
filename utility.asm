@@ -404,6 +404,21 @@ crash_handler:
     txa
     output_value_crash
 
+    ; output error message
+    lda #$20
+    sta $2006
+    lda #$80
+    sta $2006
+
+    ldy #$00
+@message_loop:
+    lda @error_str, y
+    beq @message_done
+    sta $2007
+    iny
+    bne @message_loop
+@message_done:
+
     ; loop all of stack
     lda #$20
     sta $2006
@@ -417,10 +432,10 @@ crash_handler:
     output_value_crash
     ; stx $2007
 
-    iny 
+    iny
     bne @stack_loop
-    
-crash_loop:
+
+@crash_loop:
     vblank_wait
     ; enable rendering
     lda #%00000000   ; enable NMI, sprites from Pattern Table 0
@@ -432,4 +447,8 @@ crash_loop:
     lda #$00
     sta $2005
     sta $2005
-    jmp crash_loop
+    jmp @crash_loop
+; strings for crash handler
+@error_str
+.db "OH NO THE GAME CRASHED", $00
+@error_str_end
