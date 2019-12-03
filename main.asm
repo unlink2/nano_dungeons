@@ -7,6 +7,8 @@
 .db $00 ; no prg ram 
 .db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
 
+.include "charmap.asm"
+
 .define MOVE_DELAY_FRAMES 10
 .define GAME_MODE_MENU 0
 .define GAME_MODE_PUZZLE 1
