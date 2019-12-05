@@ -372,8 +372,8 @@ clear_mem:
     jsr load_attr
 
     ; set up game mode for editor testing
-    lda GAME_MODE_EDITOR
-    sta game_mode
+    ; lda GAME_MODE_EDITOR
+    ; sta game_mode
 
     jsr init_audio_channels
 
