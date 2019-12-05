@@ -235,7 +235,7 @@ a_input_game:
     sta sprite_data_1+2
     rts
 @no_right:
-    
+
 
     rts 
 

@@ -892,6 +892,17 @@ sprite_skel_update:
     lda #%10000000 ; enable collison
     sta sprite_tile_flags, y
 
+    ; check if new position is the same as player
+    lda sprite_tile_y, y ; y position
+    cmp player_y
+    bne @no_collision
+    lda sprite_tile_x, y ; x position
+    cmp player_x
+    bne @no_collision
+    ; if collision trigger skel collision code
+    jsr sprite_skel_collision
+@no_collision
+
     ; if position is the same as
     ; the player's weapon
     ; we move this sprite 0/0
@@ -1036,7 +1047,7 @@ sprite_skel_update:
     sta sprite_tile_temp, y ; store invalid move to allow next move to proceed regardless
 
     lda #$00
-    sta sprite_tile_data, y ; no animation 
+    sta sprite_tile_data, y ; no animation
 
     pla
     sta sprite_tile_x, y
@@ -1080,7 +1091,7 @@ sprite_skel_update:
     lda #$34
     sta (sprite_ptr), y
 
-
+@done:
     pla
     tax
     pla
