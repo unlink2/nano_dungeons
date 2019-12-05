@@ -919,6 +919,23 @@ sprite_skel_update:
 
 @no_weapon_hit:
 
+    lda sprite_tile_ai, y
+    cmp #$05 ; skel AI
+    beq @skel_sprite
+    cmp #$07 ; bat AI
+    beq @bat_sprite
+    cmp #$08 ; also bat AI
+    beq @bat_sprite
+@skel_sprite:
+    ; decide what sprite to use
+    lda #$34
+    sta temp+2 ; sprite gfx
+    bne @sprite_picked
+@bat_sprite
+    lda #$35
+    sta temp+2 ; bat sprite 
+@sprite_picked:
+
     lda actions
     beq @move
     jmp @no_move
@@ -930,9 +947,31 @@ sprite_skel_update:
     lda sprite_tile_x, y
     pha
 
+
+    ; compare which AI is loaded
+    ; this is because all enemies share the same logic, apart
+    ; fro mthe way the direction is picked
+    ; for now there is only one moveable AI type
+    lda sprite_tile_ai, y
+    cmp #$05 ; skel AI
+    beq @skel_move_logic
+    cmp #$07 ; bat AI
+    beq @bat_up_move_logic
+    cmp #$08 ; bat left AI
+    beq @bat_left_move_logic
+    ; skel move logic, random
+@skel_move_logic:
     ; pick a direction to move in randomly
     jsr random
     and #%00000111
+    jmp @direction_pick
+
+@bat_up_move_logic:
+    lda #$01 ; always up
+    bne @direction_pick
+
+@bat_left_move_logic:
+    lda #$00
 @direction_pick:
     beq @left
     cmp #$01
@@ -1088,7 +1127,7 @@ sprite_skel_update:
 
 
     ldy #$01
-    lda #$34
+    lda temp+2 ; sprite to load
     sta (sprite_ptr), y
 
 @done:

@@ -57,7 +57,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $77
+.define SPRITE_TILES_END $79
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -1035,11 +1035,15 @@ sprite_init_lo:
 .db #<sprite_init_default ; door tile
 .db #<sprite_init_default ; skelleton tile
 .db #<sprite_init_default ; sword weapon
+.db #<sprite_init_default ; bat tile
+.db #<sprite_init_default ; bat left tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1053,6 +1057,8 @@ sprite_ai_lo:
 .db #<sprite_door_update
 .db #<sprite_skel_update
 .db #<sprite_sword_update
+.db #<sprite_skel_update
+.db #<sprite_skel_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1062,6 +1068,8 @@ sprite_ai_hi:
 .db #>sprite_door_update
 .db #>sprite_skel_update
 .db #>sprite_sword_update
+.db #>sprite_skel_update
+.db #>sprite_skel_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1071,6 +1079,8 @@ sprite_collision_lo:
 .db #<sprite_door_collision
 .db #<sprite_skel_collision
 .db #<sprite_sword_collision
+.db #<sprite_skel_collision
+.db #<sprite_skel_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1080,6 +1090,8 @@ sprite_collision_hi:
 .db #>sprite_door_collision
 .db #>sprite_skel_collision
 .db #>sprite_sword_collision
+.db #>sprite_skel_collision
+.db #>sprite_skel_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
