@@ -15,6 +15,7 @@
 .define GAME_MODE_EDITOR 2
 .define GAME_MODE_EDITOR_MENU 3
 .define GAME_MODE_MESSAGE 4
+.define GAME_MODE_TITLE 5
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
@@ -88,7 +89,11 @@ map_flags 1
 key_count 1 ; amount of keys collected
 ; editor flags, mostly used for menu select
 ; 7th bit = 1 -> tile select mode, = 0 -> menu mode
-editor_flags 1 
+editor_flags 1
+
+; 5th bit = 1 -> sprite pattent table
+; 4th bit = 1 -> bg pattern table
+gfx_flags 1
 
 errno 1 ; error number, nonzero values are errors
 
@@ -338,15 +343,15 @@ clear_mem:
     sta nametable
 
     ; load editor menu
-    ldx #GAME_MODE_MENU
+    ldx #GAME_MODE_TITLE
     jsr load_menu
 
     ; position editor sprite
-    lda #$04
+    lda #$00
     sta player_x
     sta player_y
 
-    jsr init_main_menu
+    jsr init_title
 
     ; set up empty
     lda #<empty_map
@@ -378,7 +383,10 @@ clear_mem:
     jsr init_audio_channels
 
 start:
-    lda #%10000000   ; enable NMI, sprites from Pattern Table 0
+    ; load user defined patterns
+    lda gfx_flags
+    and #%00110000 ; only those bits are important
+    ora #%10000000   ; enable NMI, sprites from Pattern Table 0
     sta $2000
 
     lda #%00011110   ; enable sprites
@@ -476,7 +484,9 @@ update_crit_done:
     jmp update_done
 @no_error:
 
-    lda #%10000000   ; enable NMI, sprites from Pattern Table 0
+    lda gfx_flags
+    and #%00110000 ; only those bits are important
+    ora #%10000000   ; enable NMI, sprites from Pattern Table 0
     ora nametable
     sta $2000
 
@@ -542,6 +552,7 @@ irq:
 .include "./editor.asm"
 .include "./mainmenu.asm"
 .include "./game.asm"
+.include "./title.asm"
 
 .include "./map.asm"
 .include "./tiles.asm"

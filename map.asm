@@ -506,6 +506,41 @@ load_menu:
 
 @not_main:
     cpx #GAME_MODE_MESSAGE
+    bne @not_message
+
+    ; load win menu compressed tiles
+    lda #<win_gfx
+    sta level_data_ptr
+    lda #>win_gfx
+    sta level_data_ptr+1
+
+    ; decompress location, same as level
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
+    sta level_ptr+1
+
+    lda #<win_attr
+    sta attr_ptr
+    lda #>win_attr
+    sta attr_ptr+1
+
+    jsr decompress_level
+    jsr load_attr
+
+    ; copy palette
+    lda #<win_pal
+    sta palette_ptr
+    lda #>win_pal
+    sta palette_ptr+1
+    jsr load_palette
+
+    ldx #$01 ; load into nametable 1
+    jsr load_level
+
+    rts
+@not_message:
+    cpx #GAME_MODE_TITLE
     bne @invalid_menu
 
     ; load win menu compressed tiles

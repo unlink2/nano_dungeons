@@ -9,6 +9,9 @@
 ;   nametables are updated, sprites changed
 ;   registers changed
 init_main_menu:
+    lda #$00
+    sta gfx_flags
+
     lda #<update_main_menu
     sta update_sub
     lda #>update_main_menu

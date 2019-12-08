@@ -7,6 +7,9 @@
 ;   palette_ptr -> pointing to palette
 ;   enables sprite updating
 init_game:
+    lda #$00
+    sta gfx_flags
+
     lda #GAME_MODE_PUZZLE
     sta game_mode
 

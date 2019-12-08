@@ -236,7 +236,6 @@ a_input_game:
     rts
 @no_right:
 
-
     rts 
 
 ; editor menu code for a input
@@ -902,7 +901,11 @@ start_input:
     cmp #GAME_MODE_MESSAGE
     bne @not_win 
     jsr start_input_message
+    rts
 @not_win:
+    cmp #GAME_MODE_TITLE
+    bne @done
+    jsr start_input_message
 @done:
     rts
 
