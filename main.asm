@@ -58,7 +58,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $79
+.define SPRITE_TILES_END $7A
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -72,10 +72,10 @@
 
 .define ACTIONS_PER_TURN $01 ; actions per turn, default value
 
-.define UP $00
-.define DOWN $01
-.define LEFT $02
-.define RIGHT $03
+.define LEFT $00
+.define UP $01
+.define RIGHT $02
+.define DOWN $03
 
 .enum $00
 frame_count 1
@@ -590,6 +590,13 @@ level_1_attr:
 level_1_pal:
 .incbin "./graphics/level_1.pal"
 
+title_gfx:
+.incbin "./graphics/title.gfx"
+title_attr:
+.incbin "./graphics/title.attr"
+title_pal:
+.incbin "./graphics/title.pal"
+
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
 .db $01 ; location save 1
@@ -738,6 +745,7 @@ map_table_lo:
 .db #<main_menu_gfx
 .db #<win_gfx
 .db #<no_start_msg_gfx
+.db #<title_gfx
 .db #<level_1_gfx
 
 map_table_hi:
@@ -746,6 +754,7 @@ map_table_hi:
 .db #>main_menu_gfx
 .db #>win_gfx
 .db #>no_start_msg_gfx
+.db #>title_gfx
 .db #>level_1_gfx
 
 ; color attribute lookup table
@@ -755,6 +764,7 @@ attr_table_lo:
 .db #<test_attr
 .db #<win_attr
 .db #<test_attr
+.db #<title_attr
 .db #<level_1_attr
 
 attr_table_hi:
@@ -763,6 +773,7 @@ attr_table_hi:
 .db #>test_attr
 .db #>win_attr
 .db #>test_attr
+.db #>title_attr
 .db #>level_1_attr
 
 ; color palette table
@@ -772,6 +783,7 @@ palette_table_lo:
 .db #<palette_data
 .db #<win_pal
 .db #<palette_data
+.db #<title_pal
 .db #<level_1_pal
 
 palette_table_hi:
@@ -780,6 +792,7 @@ palette_table_hi:
 .db #>palette_data
 .db #>win_pal
 .db #>palette_data
+.db #>title_pal
 .db #>level_1_pal
 
 ; map update routines
@@ -790,8 +803,10 @@ map_sub_lo:
 .db #<empty_sub
 .db #<empty_sub
 .db #<empty_sub
+.db #<empty_sub
 
 map_sub_hi:
+.db #>empty_sub
 .db #>empty_sub
 .db #>empty_sub
 .db #>empty_sub
@@ -925,9 +940,12 @@ tile_sub_lo:
 .db #<no_collision ; door tile
 .db #<no_collision ; skel tile
 .db #<no_collision ; sword tile
+.db #<no_collision ; bat tile
+.db #<no_collision ; bat left tile
+.db #<no_collision ; mimic tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+23
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+26
 .db #<no_collision
 .endrep
 
@@ -958,6 +976,9 @@ tile_sub_lo:
 .db #<no_collision ; door tile
 .db #<no_collision ; skel tile
 .db #<no_collision ; sword tile
+.db #<no_collision ; bat tile
+.db #<no_collision ; bat left tile
+.db #<no_collision ; mimic tile
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -995,9 +1016,12 @@ tile_sub_hi:
 .db #>no_collision ; door tile
 .db #>no_collision ; skel tile
 .db #>no_collision ; sword tile
+.db #>no_collision ; bat tile
+.db #>no_collision ; bat left tile
+.db #>no_collision ; mimic tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+23
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+26
 .db #>no_collision
 .endrep
 
@@ -1028,6 +1052,9 @@ tile_sub_hi:
 .db #>no_collision ; door tile
 .db #>no_collision ; skel tile
 .db #>no_collision ; sword tile
+.db #>no_collision ; bat tile
+.db #>no_collision ; bat left tile
+.db #>no_collision ; mimic tile
 
 ; error handlers
 error_lo:
@@ -1048,11 +1075,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; sword weapon
 .db #<sprite_init_default ; bat tile
 .db #<sprite_init_default ; bat left tile
+.db #<sprite_init_default ; mimic tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1070,6 +1099,7 @@ sprite_ai_lo:
 .db #<sprite_sword_update
 .db #<sprite_skel_update
 .db #<sprite_skel_update
+.db #<sprite_skel_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1079,6 +1109,7 @@ sprite_ai_hi:
 .db #>sprite_door_update
 .db #>sprite_skel_update
 .db #>sprite_sword_update
+.db #>sprite_skel_update
 .db #>sprite_skel_update
 .db #>sprite_skel_update
 
@@ -1092,6 +1123,7 @@ sprite_collision_lo:
 .db #<sprite_sword_collision
 .db #<sprite_skel_collision
 .db #<sprite_skel_collision
+.db #<sprite_skel_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1101,6 +1133,7 @@ sprite_collision_hi:
 .db #>sprite_door_collision
 .db #>sprite_skel_collision
 .db #>sprite_sword_collision
+.db #>sprite_skel_collision
 .db #>sprite_skel_collision
 .db #>sprite_skel_collision
 

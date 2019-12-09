@@ -926,6 +926,8 @@ sprite_skel_update:
     beq @bat_sprite
     cmp #$08 ; also bat AI
     beq @bat_sprite
+    cmp #$09 ; mimic AI
+    beq @mimic_sprite
 @skel_sprite:
     ; decide what sprite to use
     lda #$34
@@ -933,7 +935,12 @@ sprite_skel_update:
     bne @sprite_picked
 @bat_sprite
     lda #$35
-    sta temp+2 ; bat sprite 
+    sta temp+2 ; bat sprite
+    bne @sprite_picked
+
+@mimic_sprite:
+    lda #$36
+    sta temp+2 ; mimi sprite
 @sprite_picked:
 
     lda actions
@@ -959,6 +966,8 @@ sprite_skel_update:
     beq @bat_up_move_logic
     cmp #$08 ; bat left AI
     beq @bat_left_move_logic
+    cmp  #$09 ; mimic move AI 
+    beq @mimic_move_logic
     ; skel move logic, random
 @skel_move_logic:
     ; pick a direction to move in randomly
@@ -972,13 +981,18 @@ sprite_skel_update:
 
 @bat_left_move_logic:
     lda #$00
+    beq @direction_pick
+
+@mimic_move_logic:
+    lda last_move
+
 @direction_pick:
     beq @left
-    cmp #$01
+    cmp #UP
     beq @up
-    cmp #$02
+    cmp #RIGHT
     beq @right
-    cmp #$03
+    cmp #DOWN
     beq @down
 
 @resume_direction:
@@ -998,7 +1012,7 @@ sprite_skel_update:
 @down:
     ; check previous move
     lda sprite_tile_temp, y
-    cmp #$01
+    cmp #UP
     beq @up
 
     lda sprite_tile_y, y
@@ -1014,7 +1028,7 @@ sprite_skel_update:
     bne @tile_found_preference ; branch always
 @up:
     lda sprite_tile_temp, y
-    cmp #$03
+    cmp #DOWN
     beq @down
 
     lda sprite_tile_y, y
@@ -1030,7 +1044,7 @@ sprite_skel_update:
     bne @tile_found_preference ; branch always
 @right:
     lda sprite_tile_temp, y
-    cmp #$00
+    cmp #LEFT
     beq @left
 
     lda sprite_tile_x, y
@@ -1046,7 +1060,7 @@ sprite_skel_update:
     bne @tile_found_preference ; branch always
 @left:
     lda sprite_tile_temp, y
-    cmp #$02
+    cmp #RIGHT
     beq @right
 
     lda sprite_tile_x, y

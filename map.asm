@@ -544,9 +544,9 @@ load_menu:
     bne @invalid_menu
 
     ; load win menu compressed tiles
-    lda #<win_gfx
+    lda #<title_gfx
     sta level_data_ptr
-    lda #>win_gfx
+    lda #>title_gfx
     sta level_data_ptr+1
 
     ; decompress location, same as level
@@ -555,18 +555,18 @@ load_menu:
     lda #>level_data
     sta level_ptr+1
 
-    lda #<win_attr
+    lda #<title_attr
     sta attr_ptr
-    lda #>win_attr
+    lda #>title_attr
     sta attr_ptr+1
 
     jsr decompress_level
     jsr load_attr
 
     ; copy palette
-    lda #<win_pal
+    lda #<title_pal
     sta palette_ptr
-    lda #>win_pal
+    lda #>title_pal
     sta palette_ptr+1
     jsr load_palette
 
