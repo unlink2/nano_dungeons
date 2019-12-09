@@ -10,6 +10,12 @@ init_game:
     lda #$00
     sta gfx_flags
 
+    ; re-enable input just in case player died
+    ; during sword animation
+    lda nmi_flags
+    and #%11011111 ; enables input
+    sta nmi_flags
+
     lda #GAME_MODE_PUZZLE
     sta game_mode
 
@@ -442,7 +448,7 @@ sword_update:
 ; enables player inputs
 sword_done:
     lda nmi_flags
-    and #%11011111
+    and #%11011111 ; enables input
     sta nmi_flags
 
     lda #$00
