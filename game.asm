@@ -44,21 +44,21 @@ init_game:
 
     jsr hide_objs
 
-    lda game_flags 
+    lda game_flags
     ora #%01000000
     sta game_flags ; enable sprite updating
 
     jsr init_ai_tiles
     jsr find_start
     ; check if start was found
-    cmp #$01 
-    beq @no_error 
+    cmp #$01
+    beq @no_error
     ; error state
     lda #ERROR_NO_START_TILE
     sta errno
 @no_error:
 
-    lda player_x 
+    lda player_x
     sta player_x_bac
     lda player_y
     sta player_y_bac
@@ -73,6 +73,8 @@ init_game:
     sta sprite_data_1+3
     sta sprite_data_2
     sta sprite_data_2+3
+
+    jsr init_test_song
 
     rts
 

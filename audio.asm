@@ -227,4 +227,37 @@ init_jump_noise:
     lda #$01
     sta noise_timer
 
-    rts 
+    rts
+
+; this sub routine inits the test song
+; side effects:
+;   uses A register
+;   loads sound into both square wave channels
+;   and the triangle channel
+init_test_song:
+    lda #$0C ; periode
+    sta pulse_periode_1
+    sta pulse_periode_2
+    sta triangle_timer
+
+    lda #$01
+    sta pulse_timer_1
+    sta pulse_timer_2
+    sta triangle_timer
+
+    lda #<test_song_square_1
+    sta pulse_ptr_1
+    lda #>test_song_square_1
+    sta pulse_ptr_1+1
+
+    lda #<test_song_square_2
+    sta pulse_ptr_2
+    lda #>test_song_square_2
+    sta pulse_ptr_2+1
+
+    lda #<test_song_triangle
+    sta triangle_ptr
+    lda #>test_song_triangle
+    sta triangle_ptr
+
+    rts
