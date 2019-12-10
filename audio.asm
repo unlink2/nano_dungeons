@@ -79,6 +79,9 @@ update_audio:
     adc #$00
     sta pulse_ptr_1+1
 
+    lda pulse_sweep_1
+    sta $4001
+
 @not_pulse_1:
 
     ; pulse 2 code
@@ -115,12 +118,15 @@ update_audio:
     adc #$00
     sta pulse_ptr_2+1
 
+    lda pulse_sweep_2
+    sta $4005
+
 @not_pulse_2:
 
     ; triangle code
     ldy #$00
     lda (triangle_ptr), y
-    cmp #$FF 
+    cmp #$FF
     beq @not_triangle ; no update
 
     ldx triangle_timer
@@ -262,5 +268,9 @@ init_test_song:
     sta triangle_ptr
     lda #>test_song_triangle
     sta triangle_ptr+1
+
+    lda #%1000000
+    sta pulse_sweep_1
+    sta pulse_sweep_2
 
     rts

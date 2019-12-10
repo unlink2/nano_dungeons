@@ -147,6 +147,10 @@ pulse_periode_2 1 ; timer periode
 triangle_periode 1 ; triangle timer
 noise_periode 1 ; noise periode
 
+; sweep settings for pulse channels
+pulse_sweep_1 1
+pulse_sweep_2 1
+
 sprite_ptr 2 ; may be used as a pointer to sprite oam
 
 delay_update 2 ; function pointer for update animation, set to 00, 00 to disable
