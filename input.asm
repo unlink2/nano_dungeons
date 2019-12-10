@@ -169,7 +169,9 @@ a_input_game:
     ; no weapon if 0
     bne @init
     rts
-@init: 
+@init:
+
+    jsr init_sword_noise
 
     lda weapon_update_lo, y
     sta delay_update

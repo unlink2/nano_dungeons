@@ -658,6 +658,12 @@ sprite_push_collision:
 @tile_got:
     jsr verify_sprite_move
 
+    pha
+    bne @no_noise ; no collision
+    jsr init_push_noise
+@no_noise:
+    pla 
+
     rts
 
 ; this sub routine handles collision with a key sprite
@@ -913,10 +919,14 @@ sprite_skel_update:
     cmp weapon_y
     bne @no_weapon_hit
 
+    ; only play noise if location is not already 0/0
+    and sprite_tile_x, y
+    beq @no_noise
+    jsr init_hit_noise
+@no_noise:
     lda #$00
     sta sprite_tile_x, y
     sta sprite_tile_y, y
-
 @no_weapon_hit:
 
     lda sprite_tile_ai, y
@@ -1176,6 +1186,7 @@ sprite_skel_collision:
 @reload_map:
     vblank_wait
     jsr reload_room ; on collision reload area
+    jsr init_hit_noise
     rts
 
 ; sword pikcup AI

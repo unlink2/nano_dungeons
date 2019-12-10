@@ -215,6 +215,9 @@ init_cursor_beep:
 ; side effects:
 ;   uses A register
 ;   loads sound into noise channel
+init_sword_noise:
+init_hit_noise:
+init_push_noise:
 init_jump_noise:
     lda #<jump_noise
     sta noise_ptr
@@ -258,6 +261,6 @@ init_test_song:
     lda #<test_song_triangle
     sta triangle_ptr
     lda #>test_song_triangle
-    sta triangle_ptr
+    sta triangle_ptr+1
 
     rts
