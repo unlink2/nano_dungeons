@@ -174,6 +174,14 @@ update_game:
     jsr jsr_indirect
 @no_sub:
 
+    ; see if song finished by testing square wave 1
+    ldy #$00
+    lda (pulse_ptr_1), y
+    cmp #$FF
+    bne @no_audio_reset
+    jsr init_test_song
+@no_audio_reset:
+
     ; test victory condition
     ; if only one tile is left to clear the player must be on it
     lda tiles_to_clear+1
