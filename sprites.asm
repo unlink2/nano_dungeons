@@ -396,11 +396,17 @@ sprite_update_default:
     bne @barrier_clear
 
     ; barrier is not clear
+    lda #%10000000
+    sta sprite_tile_flags, y
+
     lda #$50
     bne @done
 
     ; barrier is clear
 @barrier_clear:
+    lda #%00000000
+    sta sprite_tile_flags, y
+
     lda #$24 ; empty
 @done:
     ; store in sprite
@@ -452,6 +458,7 @@ sprite_update_barrier_invert:
     ; tile appear as barrier
     lda map_flags
     and #%10000000
+    sta sprite_tile_flags, y
     beq @barrier_clear
 
     ; barrier is not clear

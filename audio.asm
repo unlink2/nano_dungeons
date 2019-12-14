@@ -259,10 +259,10 @@ init_test_song:
     lda #>test_song_square_1
     sta pulse_ptr_1+1
 
-    lda #<test_song_square_2
-    sta pulse_ptr_2
-    lda #>test_song_square_2
-    sta pulse_ptr_2+1
+    ;lda #<test_song_square_2
+    ;sta pulse_ptr_2
+    ;lda #>test_song_square_2
+    ;sta pulse_ptr_2+1
 
     lda #<test_song_triangle
     sta triangle_ptr

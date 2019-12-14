@@ -89,6 +89,7 @@ Blocks:
 - Skel AI moves randomly
 - Bat AI moves left, until wall then right until wall
 - Scorpion AI moves up, until wall then down until wall
+- Block that changes solid every time player moves
 
 TODO:
 Each map may have up to 32 sprite based tiles. each of those tiles gets 1 sprite slot assigned.
