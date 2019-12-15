@@ -991,6 +991,11 @@ go_left:
 @not_main_menu:
     cmp #GAME_MODE_PUZZLE
     bne @done
+
+    lda #LEFT
+    jsr check_move_delay
+    beq @done
+
     jsr go_left_editor
     lda #$08 
     sta smooth_left
@@ -1135,7 +1140,12 @@ go_right:
     rts
 @not_main_menu
     cmp #GAME_MODE_PUZZLE
-    bne @done 
+    bne @done
+
+    lda #RIGHT
+    jsr check_move_delay
+    beq @done
+
     jsr go_right_editor
     lda #$08 
     sta smooth_right
@@ -1293,6 +1303,11 @@ go_up:
 @not_main_menu:
     cmp #GAME_MODE_PUZZLE
     bne @done
+
+    lda #UP
+    jsr check_move_delay
+    beq @done
+
     jsr go_up_editor
     lda #$08
     sta smooth_up
@@ -1353,6 +1368,11 @@ go_down:
 @not_main_menu
     cmp #GAME_MODE_PUZZLE
     bne @done
+
+    lda #DOWN
+    jsr check_move_delay
+    beq @done
+
     jsr go_down_editor
     lda #$08
     sta smooth_down

@@ -1174,6 +1174,21 @@ sprite_skel_update:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_skel_collision:
+    lda iframes
+    beq @hit
+    rts ; no hit if iframes are enabled
+
+@hit:
+    ldx player_hp
+    beq @reload
+
+    ; if player still has hp, damage but no relaod
+    dec player_hp
+    lda #$01 ; iframes
+    sta iframes
+    rts 
+@reload:
+
     ; set up delay timer to play death animation
     lda #<empty_sub
     sta delay_update

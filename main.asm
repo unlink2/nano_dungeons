@@ -47,6 +47,8 @@
 .define MAIN_MENU_SLOT_3 3
 .define MAIN_MENU_EDITOR 4
 
+.define MAX_HP $02
+
 ; start and end of non-collision tiles
 .define START_TILE $60
 .define CLEARABLE_TILES_START $60
@@ -203,6 +205,9 @@ last_move 1 ; 0 = up, 1 = down, 2 = left, 3 = right
 weapon_x 1 ; players weapon x and y location
 weapon_y 1
 weapon_type 1 ; id of weapon 0 = sword
+iframes 1 ; frames of invincibility after hit
+player_hp 1 ; how much hp has player still got
+move_timer 1 ; timer for movemnt
 
 start_x 1 ; x and y value of start location
 start_y 1 ; values are populated during decompression
@@ -429,6 +434,10 @@ nmi_flag_not_set:
     bne @no_new_turn
     lda #ACTIONS_PER_TURN
     sta actions ; refresh actions
+    ; check if iframes are set, dec every action
+    ldx iframes
+    beq @no_new_turn
+    dec iframes
 @no_new_turn
 
 

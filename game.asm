@@ -19,11 +19,16 @@ init_game:
     lda #GAME_MODE_PUZZLE
     sta game_mode
 
+    lda #MAX_HP ; hp
+    sta player_hp
+
     lda #$00
     sta map_flags ; reset all map flags
     sta key_count ; no keys when map begins
     sta player_timer ; no timer for player
     sta weapon_type
+    sta iframes ; no iframes
+    sta move_timer ; reset move timer
 
     lda #<update_game
     sta update_sub
@@ -73,6 +78,25 @@ init_game:
     sta sprite_data_1+3
     sta sprite_data_2
     sta sprite_data_2+3
+
+    ; move hp sprites to correct
+    ; location and init them
+    lda #2 * 8 ; x positions
+    sta sprite_data_8+3
+    lda #3 * 8
+    sta sprite_data_9+3
+    lda #4 * 8
+    sta sprite_data_A+3
+
+    lda #25 * 8 ; y position
+    sta sprite_data_8
+    sta sprite_data_9
+    sta sprite_data_A
+
+    lda #$02 ; palette
+    sta sprite_data_8+2
+    sta sprite_data_9+2
+    sta sprite_data_A+2
 
     jsr init_test_song
 
@@ -182,6 +206,43 @@ update_game:
     jsr init_test_song
 @no_audio_reset:
 
+    ; test for movement inputs, if non occured reset
+    ; timer
+    lda last_inputs
+    and #%11110000
+    bne @no_move_timer_reset
+    sta move_timer
+@no_move_timer_reset:
+
+    ; update hp display
+    lda #$3A ; heart sprite
+    sta sprite_data_8+1
+    sta sprite_data_9+1
+    sta sprite_data_A+1
+
+    ldx player_hp
+    cpx #MAX_HP
+    beq @no_damage
+    ldy #$0A
+@damage_display_loop:
+    lda obj_index_to_addr, y
+    sta sprite_ptr
+    tya
+    pha
+
+    ldy #$01
+    lda #$24 ; empty tile
+    sta (sprite_ptr), y
+
+    pla
+    tay
+
+    inx
+    dey
+    cpx #MAX_HP
+    bne @damage_display_loop
+@no_damage
+
     ; test victory condition
     ; if only one tile is left to clear the player must be on it
     lda tiles_to_clear+1
@@ -229,7 +290,7 @@ update_game:
 @done:
     jmp update_done
 
-; this sub routine is called when win condition 
+; this sub rout01e is called when win condition
 ; animation finishes
 init_win_condition:
     lda #$00
@@ -472,3 +533,30 @@ sword_done:
     sta sprite_data_1+2
 
     rts
+
+; this sub routine checks if
+; a move input should actually mvoe the player
+; inputs:
+;   move_timer
+;   a -> last_move value
+; side effect:
+;   move_timer is incremented every call until check succeeds
+;   stores value of A in last_move
+;   removes move dlay if no move can go ahead that frame
+; returns:
+;   a -> 0 for no move
+;   a -> 1 for move
+check_move_delay:
+    sta last_move
+
+    lda move_timer
+    cmp #$04
+    bne @no_move
+    lda #$01
+    rts
+@no_move:
+    inc move_timer
+    lda #$00
+    sta move_delay
+    rts
+
