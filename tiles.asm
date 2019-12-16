@@ -20,6 +20,17 @@ collision:
     lda #$01 
     rts 
 
+; exit tile
+; sets victory condition
+; returns:
+;   a = 0 always
+exit_collision:
+    lda #$01
+    sta tiles_to_clear
+    lda #$00
+    sta tiles_to_clear+1
+    rts 
+    
 
 ; this routine only returns 
 ; 0 when the direction value is nonzero

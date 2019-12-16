@@ -90,12 +90,17 @@ Blocks:
 - Bat AI moves left, until wall then right until wall
 - Scorpion AI moves up, until wall then down until wall
 - Block that changes solid every time player moves
+- Staircase tile as "goal" (sets tiles to clear to 0)
+
 
 - Add weapon damage pickup
 - Add health bar 3 hearts
 - Add health pickup
 - Add hp to enemies
 - Randomly generate dungeons??
+- Make rendering so it only renders a few tiles around the player
+  when the map first loads. Then on every move load
+  a row of tiles (6 or so) in the direction the player went.
 
 - Fix movement, quick tap in direction changes facing direction, long press starts move
   this will allow better combat

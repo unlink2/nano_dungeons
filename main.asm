@@ -60,7 +60,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $7A
+.define SPRITE_TILES_END $7B
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -927,7 +927,7 @@ tile_sub_lo:
 .db #<jump_down ; down jump tile 
 .db #<jump_left ; right jump tile
 
-.db #<no_collision ; start tile 
+.db #<no_collision ; start tile
 .db #<no_collision ; end tile
 .db #<no_collision ; floor tile 1
 .db #<no_collision ; floor tile 2
@@ -936,7 +936,7 @@ tile_sub_lo:
 .db #<one_way_down ; down one way
 .db #<one_way_left ; left one way
 
-.db #<no_collision
+.db #<exit_collision ; exit collision
 .db #<no_collision
 .db #<no_collision
 .db #<no_collision ; unused as of now
@@ -956,9 +956,10 @@ tile_sub_lo:
 .db #<no_collision ; bat tile
 .db #<no_collision ; bat left tile
 .db #<no_collision ; mimic tile
+.db #<no_collision ; hp tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+26
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+27
 .db #<no_collision
 .endrep
 
@@ -972,7 +973,7 @@ tile_sub_lo:
 .db #<one_way_up ; down one way
 .db #<one_way_right ; left one way
 
-.db #<no_collision
+.db #<no_collision ; exit inverted
 .db #<no_collision
 .db #<no_collision
 .db #<no_collision ; unused as of now
@@ -992,6 +993,7 @@ tile_sub_lo:
 .db #<no_collision ; bat tile
 .db #<no_collision ; bat left tile
 .db #<no_collision ; mimic tile
+.db #<no_collision ; hp tile
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -1012,7 +1014,7 @@ tile_sub_hi:
 .db #>one_way_down ; down one way
 .db #>one_way_left ; left one way
 
-.db #>no_collision
+.db #>exit_collision ; staircase
 .db #>no_collision
 .db #>no_collision
 .db #>no_collision ; unused as of now
@@ -1032,9 +1034,10 @@ tile_sub_hi:
 .db #>no_collision ; bat tile
 .db #>no_collision ; bat left tile
 .db #>no_collision ; mimic tile
+.db #>no_collision ; hp tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+26
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+27
 .db #>no_collision
 .endrep
 
@@ -1048,7 +1051,7 @@ tile_sub_hi:
 .db #>one_way_up ; down one way
 .db #>one_way_right ; left one way
 
-.db #>no_collision
+.db #>no_collision ; exit inverted
 .db #>no_collision
 .db #>no_collision
 .db #>no_collision ; unused as of now
@@ -1068,6 +1071,7 @@ tile_sub_hi:
 .db #>no_collision ; bat tile
 .db #>no_collision ; bat left tile
 .db #>no_collision ; mimic tile
+.db #>no_collision ; hp tile
 
 ; error handlers
 error_lo:
@@ -1089,11 +1093,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; bat tile
 .db #<sprite_init_default ; bat left tile
 .db #<sprite_init_default ; mimic tile
+.db #<sprite_init_default ; hp tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1113,6 +1119,7 @@ sprite_ai_lo:
 .db #<sprite_skel_update
 .db #<sprite_skel_update
 .db #<sprite_skel_update
+.db #<sprite_hp_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1125,6 +1132,7 @@ sprite_ai_hi:
 .db #>sprite_skel_update
 .db #>sprite_skel_update
 .db #>sprite_skel_update
+.db #>sprite_hp_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1137,6 +1145,7 @@ sprite_collision_lo:
 .db #<sprite_skel_collision
 .db #<sprite_skel_collision
 .db #<sprite_skel_collision
+.db #<sprite_hp_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1149,6 +1158,7 @@ sprite_collision_hi:
 .db #>sprite_skel_collision
 .db #>sprite_skel_collision
 .db #>sprite_skel_collision
+.db #>sprite_hp_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
