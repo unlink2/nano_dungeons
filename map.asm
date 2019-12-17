@@ -483,23 +483,39 @@ load_level_part:
     sta draw_buffer_y
     sta get_tile_y
 
+    ; decide how many tiles to load
+    lda #31 ; max tiles in x
+    sec
+    sbc get_tile_x ; if above VISIBILITY_RADIUS*2-1 adjust
+    cmp #VISIBILITY_RADIUS*2
+    bcc @no_adjust
+    lda #VISIBILITY_RADIUS*2-1
+@no_adjust:
+    sta temp ; store in temp
+
     ldy #VISIBILITY_RADIUS*2
 @draw_loop:
     tya
     pha
     ; first find out what address offset is needed to start
-    ldy #VISIBILITY_RADIUS*2-1
+    ldy temp ; holds max x-coordinate
     jsr get_row
 
     jsr draw_row
     inc draw_buffer_y
     inc get_tile_y
 
+    ldy #30
+    cpy get_tile_y
+    beq @done ; out of bounds
+
     pla
     tay
-    dey 
+    dey
     bne @draw_loop
-
+    rts
+@done:
+    pla
     rts
 
 ; gets a row of tiles from level_data
