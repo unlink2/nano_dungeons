@@ -687,6 +687,7 @@ a_input_main_menu:
     sta get_tile_x
     lda player_y
     sta get_tile_y
+    ldx #$00 ; nametable 0
     jsr load_level_part
 @no_part_load:
     vblank_wait

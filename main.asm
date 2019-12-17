@@ -248,6 +248,8 @@ attr_ptr_bac 2
 
 draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
 draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw will happen
+draw_buffer_x 1 ; start locations for buffer updates
+draw_buffer_y 1
 .ende
 
 ; start of prg ram

@@ -460,9 +460,46 @@ load_level:
 ;   x -> decides start address for nametable
 ;   get_x and get_y -> initial position
 load_level_part:
+    lda get_tile_x
+    sec
+    sbc #VISIBILITY_RADIUS
+
+    cmp #30
+    bcc @no_oob_x
+    lda #$00
+@no_oob_x:
+    sta draw_buffer_x
+    sta get_tile_x
+
+    lda get_tile_y
+    sec
+    sbc #VISIBILITY_RADIUS
+
+
+    cmp #32
+    bcc @no_oob_y
+    lda #$00
+@no_oob_y:
+    sta draw_buffer_y
+    sta get_tile_y
+
+    ldy #VISIBILITY_RADIUS*2
+@draw_loop:
+    tya
+    pha
     ; first find out what address offset is needed to start
     ldy #VISIBILITY_RADIUS*2-1
-    jsr get_col
+    jsr get_row
+
+    jsr draw_row
+    inc draw_buffer_y
+    inc get_tile_y
+
+    pla
+    tay
+    dey 
+    bne @draw_loop
+
     rts
 
 ; gets a row of tiles from level_data
@@ -483,7 +520,7 @@ get_row:
     dey
     cpy #$FF
     bne @load_loop
-
+    inc draw_buffer_len
     rts
 
 ; gets a col of tiles from level_data
@@ -523,7 +560,7 @@ get_col:
 
     pla ; restore x value
     tax
-
+    inc draw_buffer_len
     rts
 
 ; this sub routine simply sets up
@@ -545,20 +582,63 @@ set_up_get_tile_address:
     sta src_ptr+1
     rts
 
-; drawsa row of tiles
+; this sub routine sets up ppu for
+; row/col updates
+; inputs:
+;   draw_buffer_x, _y
+; side effects:
+;   sets ppu address to corresponding values
+set_up_get_tile_ppu:
+    lda $2002 ; read PPU status to reset the high/low latch
+
+    lda #$20  ; $2000 = start of ppu address
+    cpx #$01
+    bne @no_add
+    ; if nt is 0 we dont need to change the address
+    clc
+    adc #$04 ; add 4 to get start address of nt1
+@no_add:
+    ldy draw_buffer_y
+    clc
+    adc tile_update_table_hi, y
+
+    sta $2006
+    lda tile_update_table_lo, y
+    clc
+    adc draw_buffer_x
+    sta $2006 ; set up ppu for level transfer
+
+
+    rts
+
+; draws a row of tiles
 ; inputs:
 ;   x -> decides start address for nametable
-;   get_x and get_y -> start tile
+;   draw_buffer_x and draw_buffer_y -> start tile
 ;   draw_buffer -> the tiles to draw (size = 2*VISIBILITY_RADIUS)
 draw_row:
+    jsr set_up_get_tile_ppu
+
+    ldy #$00
+@draw_loop:
+    lda draw_buffer, y
+    sta $2007
+    iny
+    cpy draw_buffer_len
+    bne @draw_loop
     rts
 
 ; draws a col of tiles
 ; inputs:
 ;   x -> decides start address for nametable
-;   get_x and get_y -> start tile
+;   draw_buffer_x and draw_buffer_y -> start tile
 ;   draw_buffer -> the tiles to draw (size = 2*VISIBILITY_RADIUS)
 draw_col:
+    lda #%00000100 ; col mode
+    sta $2000
+    jsr draw_row
+    lda #$00
+    sta $2000
     rts
 
 ; loads menu background into nametable 1
