@@ -453,6 +453,49 @@ load_level:
 
     rts
 
+; loads the level only in the visible radius around the player
+; the remainder of the level will remain undiscovered
+; inputs:
+;   level_ptr -> pointing to level data
+;   x -> decides start address for nametable
+;   get_x and get_y -> initial position
+load_level_part:
+    ; first find out what address offset is needed to start
+
+    rts
+
+; gets a row of tiles from level_data
+; inputs:
+;   get_x and get_y -> start tile
+; returns:
+;   fills draw_buffer with a row of tiles
+get_row:
+    rts
+
+; gets a col of tiles from level_data
+; inputs:
+;   get_x and get_y -> start tile
+; returns:
+;   fills draw_buffer with a col of tiles
+get_col:
+    rts 
+
+; draws a row of tiles
+; inputs:
+;   x -> decides start address for nametable
+;   get_x and get_y -> start tile
+;   draw_buffer -> the tiles to draw (size = 2*VISIBILITY_RADIUS)
+draw_row:
+    rts
+
+; draws a col of tiles
+; inputs:
+;   x -> decides start address for nametable
+;   get_x and get_y -> start tile
+;   draw_buffer -> the tiles to draw (size = 2*VISIBILITY_RADIUS)
+draw_col:
+    rts
+
 ; loads menu background into nametable 1
 ; inputs:
 ;   x -> menu type (same as game mode), sets up level_ptr

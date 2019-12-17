@@ -72,6 +72,11 @@ Part 5: Notes (To be removed):
 ===============================
 
 TODO init save data (magic number?)
+TODO implement low visiblity mode.
+    - Move sprites off-screen if out of range
+    - reveal map when player moves
+    - init routine for initial visiblity
+
 
 Blocks:
 - Wall blocks (cannot be walked on)

@@ -79,6 +79,8 @@
 .define RIGHT $02
 .define DOWN $03
 
+.define VISIBILITY_RADIUS $03 ; raiduis for in-game map loading
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
@@ -88,6 +90,8 @@ nmi_flags 1
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 map_flags 1
+; 6th bit = 1 -> enable low visibility mode in gameplay
+load_flags 1
 key_count 1 ; amount of keys collected
 ; editor flags, mostly used for menu select
 ; 7th bit = 1 -> tile select mode, = 0 -> menu mode
@@ -241,6 +245,8 @@ sprite_tile_size 1 ; amount of tiles currently used
 level_data_ptr_bac 2
 palette_ptr_bac 2
 attr_ptr_bac 2
+
+draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
 .ende
 
 ; start of prg ram

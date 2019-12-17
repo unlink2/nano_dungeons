@@ -572,7 +572,9 @@ a_input_main_menu:
 @not_slot2:
 
     cmp #MAIN_MENU_SLOT_3
-    bne @no_slot
+    beq @slot3
+    jmp @no_slot
+@slot3:
 
     lda #<save_3
     sta level_data_ptr
@@ -616,6 +618,12 @@ a_input_main_menu:
     ldx #$00
     stx $2001 ; disable rendering
 
+    ; load an empty map first
+    lda #<empty_map
+    sta level_data_ptr
+    lda #>empty_map
+    sta level_data_ptr+1
+
     lda #<level_data
     sta level_ptr
     lda #>level_data
@@ -625,10 +633,31 @@ a_input_main_menu:
     set_nmi_flag
 
     jsr decompress_level
-
-
-    ldx $00 ; nametable 0
+    ldx #$00 ; nt 0
     jsr load_level
+
+    ; load actual map
+    lda level_data_ptr_bac
+    sta level_data_ptr
+    lda level_data_ptr_bac+1
+    sta level_data_ptr+1
+
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
+    sta level_ptr+1
+
+    jsr decompress_level
+    ldx #$00 ; nametable 0
+
+    ; test which load needs to be done
+    lda load_flags
+    and #%01000000 ; flag for partial load
+    bne @load_part
+    jsr load_level
+    ; partial load depends on start tile
+    ; therefore it will happen after init_game is called
+@load_part:
     jsr load_attr
 
 
@@ -649,6 +678,17 @@ a_input_main_menu:
     ; sta $2005 ; no scrolling
     jsr init_game
 
+    ; test if partial load is needed now
+    ; if so we have start location and can go ahead
+    lda load_flags
+    and #%01000000 ; flag for partial load
+    beq @no_part_load
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
+    jsr load_level_part
+@no_part_load:
     vblank_wait
 @no_slot:
 @done:
