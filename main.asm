@@ -109,7 +109,7 @@ move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
 actions 1 ; player's action until "turn" ends. Turn is considered ended when this has a non-zero value
 
-level_ptr 2 ; points to the current level in ram
+level_ptr 2 ; points to the current level in ram, lo byte always needs to be $00
 level_data_ptr 2 ; pointer to rom/sram of level
 attr_ptr 2 ; points to the attributes for the current level
 map_sub_ptr 2 ; pointing to an update routine for levels, if FFFF -> ignore. only runs duinrg gameplay
@@ -247,6 +247,7 @@ palette_ptr_bac 2
 attr_ptr_bac 2
 
 draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
+draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw will happen
 .ende
 
 ; start of prg ram

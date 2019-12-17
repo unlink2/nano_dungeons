@@ -461,26 +461,91 @@ load_level:
 ;   get_x and get_y -> initial position
 load_level_part:
     ; first find out what address offset is needed to start
-
+    ldy #VISIBILITY_RADIUS*2-1
+    jsr get_col
     rts
 
 ; gets a row of tiles from level_data
 ; inputs:
 ;   get_x and get_y -> start tile
+;   y -> amount of bytes to load
 ; returns:
 ;   fills draw_buffer with a row of tiles
 get_row:
+    sty draw_buffer_len
+
+    jsr set_up_get_tile_address
+
+    ldy draw_buffer_len
+@load_loop:
+    lda (src_ptr), y
+    sta draw_buffer, y
+    dey
+    cpy #$FF
+    bne @load_loop
+
     rts
 
 ; gets a col of tiles from level_data
 ; inputs:
 ;   get_x and get_y -> start tile
+;   y -> amount of bytes to load into buffer
 ; returns:
 ;   fills draw_buffer with a col of tiles
 get_col:
-    rts 
+    sty draw_buffer_len
+    iny
+    sty temp ; needed for loop comparison
 
-; draws a row of tiles
+    jsr set_up_get_tile_address
+
+    txa
+    pha ; save x value
+
+    ldx #$00
+    ldy #$00
+@load_loop:
+    lda (src_ptr), y
+    sta draw_buffer, x
+
+    ; 16 bit add for next address
+    lda src_ptr
+    clc
+    adc #32 ; 32 tiles per row
+    sta src_ptr
+    lda src_ptr+1
+    adc #$00 ; carry
+    sta src_ptr+1
+
+    inx
+    cpx temp
+    bne @load_loop
+
+    pla ; restore x value
+    tax
+
+    rts
+
+; this sub routine simply sets up
+; the pointers for get_col and get_row
+; inputs:
+;   get_tile_y and _x
+; returns:
+;   src_ptr pointing to level_data + x and y coordinates
+set_up_get_tile_address:
+    ; get the address at x, y
+    ldy get_tile_y
+    lda tile_update_table_lo, y
+    clc
+    adc get_tile_x
+    sta src_ptr ; src ptr is used as ptr buffer
+
+    lda tile_update_table_hi, y
+    adc level_ptr+1
+    sta src_ptr+1
+    rts
+
+; drawsa row of tiles
 ; inputs:
 ;   x -> decides start address for nametable
 ;   get_x and get_y -> start tile
@@ -754,6 +819,7 @@ update_tile:
     lda #$20
     sta temp+1
 
+    ; low byte of level_ptr is alwasy $00, no need to add it
     ldx player_y
     lda tile_update_table_lo, x
     clc
@@ -768,6 +834,7 @@ update_tile:
     lda tile_update_table_lo, x
     clc
     adc player_x
+    adc temp ; add ppu address
     sta temp
 
     lda tile_update_table_hi, x
