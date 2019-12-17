@@ -209,6 +209,19 @@ random:
 	sta rand8
 	rts
 
+; this sub routine generates
+; an 8 bit random number
+; inputs:
+;   a -> nonzero value
+; returns:
+;   new random number in a
+random_reg:
+	lsr
+	bcc @noeor
+	eor #$B4
+@noeor
+    rts 
+
 ; this sub routine reloads a room
 ; inputs:
 ;   level_data_ptr_bac
