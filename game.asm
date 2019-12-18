@@ -106,6 +106,8 @@ init_game:
 ; it updates the game state
 ; critical game update
 update_game_crit:
+    jsr render_tile_updates
+
     jsr check_player_move
     cmp #$01
     bne @player_not_moved
@@ -183,6 +185,8 @@ update_game:
     and #%11111110
     ora temp
     sta game_flags ; store this frames collision result in game_flags
+
+    jsr setup_tile_updates
 @player_not_moved:
 
     ; run custom update routine unless ptr is FF FF
@@ -560,3 +564,147 @@ check_move_delay:
     sta move_delay
     rts
 
+; this sub routine renders
+; a tile buffer based on the last move direction
+; inputs:
+;   last_inputs
+;   last_move
+;   draw_buffer, _len, _x, _y
+; side effects:
+;   sets draw_buffer_len to 0
+render_tile_updates:
+    lda load_flags
+    and #%01000000
+    beq @done ; only load if flag is set
+
+    ldy draw_buffer_len
+    beq @done ; if 0 lenght no update is required
+
+    lda last_move
+    cmp #UP
+    bne @not_up
+
+    jsr draw_row
+    jmp @draw_finished
+@not_up:
+    cmp #DOWN
+    bne @not_down
+
+    jsr draw_row
+    jmp @draw_finished
+@not_down:
+    cmp #LEFT
+    bne @not_left
+
+    jsr draw_col
+    jmp @draw_finished
+@not_left:
+    cmp #RIGHT
+    bne @not_right
+
+    jsr draw_col
+@not_right:
+@draw_finished:
+    lda #$00
+    sta draw_buffer_len
+@done:
+    rts
+
+; this sub routine sets up
+; the next draw buffer
+;
+; inputs:
+;   last_inputs
+;   last_move
+;   player_x, player_y
+; side_effcts:
+;   modifies draw_buffer
+setup_tile_updates:
+    lda load_flags
+    and #%01000000
+    bne @start_setup ; only load if flag is set
+    jmp @done
+@start_setup:
+    lda last_move
+    cmp #UP
+    bne @not_up
+
+    ; set up coordinates
+    lda player_x
+    sec
+    sbc #VISIBILITY_RADIUS
+    sta get_tile_x
+    sta draw_buffer_x
+
+    lda player_y
+    sec
+    sbc #VISIBILITY_RADIUS-1
+    sta get_tile_y
+    sta draw_buffer_y
+
+    ldy #VISIBILITY_RADIUS*2-1
+    jsr get_row
+    rts
+@not_up:
+    cmp #DOWN
+    bne @not_down
+
+    ; set up coordinates
+    lda player_x
+    sec
+    sbc #VISIBILITY_RADIUS
+    sta get_tile_x
+    sta draw_buffer_x
+
+    lda player_y
+    clc
+    adc #VISIBILITY_RADIUS-1
+    sta get_tile_y
+    sta draw_buffer_y
+
+    ldy #VISIBILITY_RADIUS*2-1
+    jsr get_row
+    rts
+@not_down:
+    cmp #LEFT
+    beq @not_left
+
+    ; set up coordinates
+    lda player_x
+    clc
+    adc #VISIBILITY_RADIUS-1
+    sta get_tile_x
+    sta draw_buffer_x
+
+    lda player_y
+    sec
+    sbc #VISIBILITY_RADIUS
+    sta get_tile_y
+    sta draw_buffer_y
+
+    ldy #VISIBILITY_RADIUS*2-1
+    jsr get_col
+    rts
+@not_left:
+    cmp #RIGHT
+    beq @not_right
+
+    ; set up coordinates
+    lda player_x
+    sec
+    sbc #VISIBILITY_RADIUS-1
+    sta get_tile_x
+    sta draw_buffer_x
+
+    lda player_y
+    sec
+    sbc #VISIBILITY_RADIUS
+    sta get_tile_y
+    sta draw_buffer_y
+
+    ldy #VISIBILITY_RADIUS*2-1
+    jsr get_col
+    rts
+@not_right:
+@done:
+    rts

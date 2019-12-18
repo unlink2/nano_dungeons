@@ -248,6 +248,13 @@ reload_room:
     ldx #$00
     stx $2001 ; disable rendering
 
+
+    ; load an empty map first
+    lda #<empty_map
+    sta level_data_ptr
+    lda #>empty_map
+    sta level_data_ptr+1
+
     lda #<level_data
     sta level_ptr
     lda #>level_data
@@ -257,10 +264,23 @@ reload_room:
     set_nmi_flag
 
     jsr decompress_level
-
-
-    ldx $00 ; nametable 0
+    ldx #$00 ; nt 0
     jsr load_level
+
+    ; load actual map
+    lda level_data_ptr_bac
+    sta level_data_ptr
+    lda level_data_ptr_bac+1
+    sta level_data_ptr+1
+
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
+    sta level_ptr+1
+
+
+    jsr decompress_level
+
     jsr load_attr
 
 
@@ -281,6 +301,23 @@ reload_room:
     ; sta $2005 ; no scrolling
     jsr init_game
 
+
+    ; test if partial load is needed now
+    ; if so we have start location and can go ahead
+    lda load_flags
+    and #%01000000 ; flag for partial load
+    beq @no_part_load
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
+    ldx #$00 ; nametable 0
+    jsr load_level_part
+    jmp @done
+@no_part_load:
+    ldx #$00 ; nametable 0
+    jsr load_level
+@done:
     vblank_wait
     rts
 

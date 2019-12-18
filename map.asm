@@ -505,6 +505,9 @@ load_level_part:
     inc draw_buffer_y
     inc get_tile_y
 
+    lda #$00
+    sta draw_buffer_len
+
     ldy #30
     cpy get_tile_y
     beq @done ; out of bounds

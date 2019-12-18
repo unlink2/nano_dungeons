@@ -618,6 +618,10 @@ a_input_main_menu:
     ldx #$00
     stx $2001 ; disable rendering
 
+    ; enable low visiblity mode
+    lda #%01000000
+    sta load_flags
+
     ; load an empty map first
     lda #<empty_map
     sta level_data_ptr
@@ -690,6 +694,7 @@ a_input_main_menu:
     ldx #$00 ; nametable 0
     jsr load_level_part
 @no_part_load:
+
     vblank_wait
 @no_slot:
 @done:
