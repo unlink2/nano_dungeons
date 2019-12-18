@@ -79,7 +79,7 @@
 .define RIGHT $02
 .define DOWN $03
 
-.define VISIBILITY_RADIUS $03 ; raiduis for in-game map loading
+.define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
 .enum $00
 frame_count 1

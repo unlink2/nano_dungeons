@@ -642,7 +642,11 @@ setup_tile_updates:
     sta get_tile_y
     sta draw_buffer_y
 
-    ldy #VISIBILITY_RADIUS*2-1
+    ldy #31
+    lda get_tile_x
+    jsr verify_draw_buffer
+    tay
+
     jsr get_row
     rts
 @not_up:
@@ -662,32 +666,19 @@ setup_tile_updates:
     sta get_tile_y
     sta draw_buffer_y
 
-    ldy #VISIBILITY_RADIUS*2-1
+    cmp #30
+    bcs @done
+
+    ldy #31
+    lda get_tile_x
+    jsr verify_draw_buffer
+    tay
+
     jsr get_row
     rts
 @not_down:
     cmp #LEFT
-    beq @not_left
-
-    ; set up coordinates
-    lda player_x
-    clc
-    adc #VISIBILITY_RADIUS-1
-    sta get_tile_x
-    sta draw_buffer_x
-
-    lda player_y
-    sec
-    sbc #VISIBILITY_RADIUS
-    sta get_tile_y
-    sta draw_buffer_y
-
-    ldy #VISIBILITY_RADIUS*2-1
-    jsr get_col
-    rts
-@not_left:
-    cmp #RIGHT
-    beq @not_right
+    bne @not_left
 
     ; set up coordinates
     lda player_x
@@ -702,7 +693,39 @@ setup_tile_updates:
     sta get_tile_y
     sta draw_buffer_y
 
-    ldy #VISIBILITY_RADIUS*2-1
+    ldy #29
+    lda get_tile_y
+    jsr verify_draw_buffer
+    tay
+
+    jsr get_col
+    rts
+@not_left:
+    cmp #RIGHT
+    bne @not_right
+
+    ; set up coordinates
+    lda player_x
+    clc
+    adc #VISIBILITY_RADIUS-1
+    sta get_tile_x
+    sta draw_buffer_x
+
+
+    cmp #31
+    bcs @done
+
+    lda player_y
+    sec
+    sbc #VISIBILITY_RADIUS
+    sta get_tile_y
+    sta draw_buffer_y 
+
+    ldy #29
+    lda get_tile_y
+    jsr verify_draw_buffer
+    tay
+
     jsr get_col
     rts
 @not_right:

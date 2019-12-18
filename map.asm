@@ -453,6 +453,54 @@ load_level:
 
     rts
 
+; verifies draw coordinates
+; inputs:
+;   get_tile_x, _y, draw_buffer_x, _y
+;   a -> get_tile coordinate, either x or y
+;   y -> max tile coordinates, either #31 for X or #29 for Y
+; returns:
+;   a -> tiles to load
+;   y = %11000000 -> did overflow, x, y
+; side effects:
+;   uses temp to store temporary y value
+verify_draw_buffer:
+    sta temp+1 ; store coordinate
+    lda #$00
+    sta temp
+
+    lda get_tile_x
+    cmp #32
+    bcc @no_oob_x
+    lda #$00
+    sta get_tile_x
+    sta draw_buffer_x
+    lda #%10000000
+    sta temp ; y return value
+@no_oob_x:
+
+    lda get_tile_y
+    cmp #30
+    bcc @no_oob_y
+    lda #$00
+    sta get_tile_y
+    sta draw_buffer_y
+    lda temp
+    ora #%01000000
+    sta temp ; y return value
+@no_oob_y:
+
+    ; decide how many tiles to load
+    tya ; max tiles in x
+    sec
+    sbc temp+1 ; if above VISIBILITY_RADIUS*2-1 adjust
+    cmp #VISIBILITY_RADIUS*2
+    bcc @no_adjust
+    lda #VISIBILITY_RADIUS*2-1
+@no_adjust:
+    ldy temp ; y return value
+
+    rts
+
 ; loads the level only in the visible radius around the player
 ; the remainder of the level will remain undiscovered
 ; inputs:
@@ -483,14 +531,9 @@ load_level_part:
     sta draw_buffer_y
     sta get_tile_y
 
-    ; decide how many tiles to load
-    lda #31 ; max tiles in x
-    sec
-    sbc get_tile_x ; if above VISIBILITY_RADIUS*2-1 adjust
-    cmp #VISIBILITY_RADIUS*2
-    bcc @no_adjust
-    lda #VISIBILITY_RADIUS*2-1
-@no_adjust:
+    ldy #31 ; max tiles in x
+    lda get_tile_x
+    jsr verify_draw_buffer
     sta temp ; store in temp
 
     ldy #VISIBILITY_RADIUS*2
