@@ -76,6 +76,9 @@ TODO implement low visiblity mode.
     - Move sprites off-screen if out of range
     - reveal map when player moves
     - init routine for initial visiblity
+TODO make inital map loading code and reset code the same for gameplay
+TODO map loading in low visibility mode does not work correclty when using jump tiles
+TODO do not render sprites that are outside of vield of view in low visiblity mode
 
 
 Blocks:
@@ -89,6 +92,7 @@ Blocks:
 - Red door, opens when Red door key is collected
 - Blue door, opens when Blue door key is collected
 - Green door, opens when Green door key is collected
+- Bombable block
 
 - Mimmic AI that copies player can interact with switches (inverted sprite of player?)
 - Skel AI moves randomly
@@ -96,7 +100,7 @@ Blocks:
 - Scorpion AI moves up, until wall then down until wall
 - Block that changes solid every time player moves
 - Staircase tile as "goal" (sets tiles to clear to 0)
-
+- Bomb pickup 
 
 - Add weapon damage pickup
 - Add health bar 3 hearts

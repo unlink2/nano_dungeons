@@ -613,89 +613,92 @@ a_input_main_menu:
     sta palette_ptr_bac
     lda src_ptr+1
     sta palette_ptr_bac+1
-    ; now all pointers are backed up 
-
-    ldx #$00
-    stx $2001 ; disable rendering
+    ; now all pointers are backed up
 
     ; enable low visiblity mode
     lda #%01000000
     sta load_flags
 
-    ; load an empty map first
-    lda #<empty_map
-    sta level_data_ptr
-    lda #>empty_map
-    sta level_data_ptr+1
+    jsr reload_room
 
-    lda #<level_data
-    sta level_ptr
-    lda #>level_data
-    sta level_ptr+1
+    ;ldx #$00
+    ;stx $2001 ; disable rendering
+
+
+    ; load an empty map first
+    ;lda #<empty_map
+    ;sta level_data_ptr
+    ;lda #>empty_map
+    ;sta level_data_ptr+1
+
+    ;lda #<level_data
+    ;sta level_ptr
+    ;lda #>level_data
+    ;sta level_ptr+1
 
     ; disable NMI until load is complete
-    set_nmi_flag
+    ;set_nmi_flag
 
-    jsr decompress_level
-    ldx #$00 ; nt 0
-    jsr load_level
+    ;jsr decompress_level
+    ;ldx #$00 ; nt 0
+    ;jsr load_level
 
     ; load actual map
-    lda level_data_ptr_bac
-    sta level_data_ptr
-    lda level_data_ptr_bac+1
-    sta level_data_ptr+1
+    ;lda level_data_ptr_bac
+    ;sta level_data_ptr
+    ;lda level_data_ptr_bac+1
+    ;sta level_data_ptr+1
 
-    lda #<level_data
-    sta level_ptr
-    lda #>level_data
-    sta level_ptr+1
+    ;lda #<level_data
+    ;sta level_ptr
+    ;lda #>level_data
+    ;sta level_ptr+1
 
-    jsr decompress_level
-    ldx #$00 ; nametable 0
+    ;jsr decompress_level
+    ;ldx #$00 ; nametable 0
 
     ; test which load needs to be done
-    lda load_flags
-    and #%01000000 ; flag for partial load
-    bne @load_part
-    jsr load_level
+    ;lda load_flags
+    ;and #%01000000 ; flag for partial load
+    ;bne @load_part
+    ;jsr load_level
     ; partial load depends on start tile
     ; therefore it will happen after init_game is called
-@load_part:
-    jsr load_attr
+;@load_part:
+    ;jsr load_attr
 
 
     ; copy palette
-    lda #<level_palette
-    sta dest_ptr
-    lda #>level_palette
-    sta dest_ptr+1
-    ldy #PALETTE_SIZE
-    jsr memcpy
+    ;lda #<level_palette
+    ;sta dest_ptr
+    ;lda #>level_palette
+    ;sta dest_ptr+1
+    ;ldy #PALETTE_SIZE
+    ;jsr memcpy
 
-    lda #$00
-    sta nametable
+    ;lda #$00
+    ;sta nametable
 
-    vblank_wait
+    ;vblank_wait
     ; lda #$00
     ; sta $2005
     ; sta $2005 ; no scrolling
-    jsr init_game
+    ;jsr init_game
 
     ; test if partial load is needed now
     ; if so we have start location and can go ahead
-    lda load_flags
-    and #%01000000 ; flag for partial load
-    beq @no_part_load
-    lda player_x
-    sta get_tile_x
-    lda player_y
-    sta get_tile_y
-    ldx #$00 ; nametable 0
-    jsr load_level_part
-@no_part_load:
+    ;lda load_flags
+    ;and #%01000000 ; flag for partial load
+    ;beq @no_part_load
+    ;lda player_x
+    ;sta get_tile_x
+    ;lda player_y
+    ;sta get_tile_y
+    ;ldx #$00 ; nametable 0
+    ;jsr load_level_part
+;@no_part_load:
 
-    vblank_wait
+    ;vblank_wait
 @no_slot:
 @done:
     rts

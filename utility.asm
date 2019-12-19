@@ -378,6 +378,18 @@ init_sram:
 magic_bytes:
 .db $0e ,$94 ,$3f ,$76 ,$9c ,$dd ,$f0 ,$ba ,$5c ,$ba ,$72 ,$36 ,$f8 ,$2d ,$d3, $46
 
+; this sub routine calculates the
+; absolute distance between 2 numbers
+; inputs:
+;   a -> x1
+;   x -> x2
+; returns:
+;   absolute distance between x1 and x2
+; side effects:
+;   uses temp for subtraction
+calc_distance:
+    rts 
+
 ; this sub routine is called when
 ; a brk occurs
 ; or any other IRQ is called
