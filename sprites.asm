@@ -155,6 +155,46 @@ sprite_pos_adjust:
 @no_adjust:
     rts
 
+; this sub routine hides a sprite if it is outside of
+; the players visible range
+; in low visiblity mode
+; inputs:
+;   load_flags -> to test for low visibility mode
+;   sprite_ptr -> pointing to the sprite in question
+;   player_x and player_y -> player position
+;   get_tile_x and get_tile_y -> sprites positon
+; returns:
+;   a = 0 -> was offscreen
+;   a = 1 -> was onscreen
+; side effects:
+;   changes sprites graphics to $24 (empty) if out of range
+sprite_offscreen:
+    lda load_flags
+    and #%01000000
+    beq @done ; if not in low mode skip
+
+    ; check if x and y are offscreen
+    lda player_x
+    ldx get_tile_x
+    jsr calc_distance
+    cmp #VISIBILITY_RADIUS+1
+    bcs @offscreen ; if greater it is offscreen
+
+    lda player_y
+    ldx get_tile_y
+    jsr calc_distance
+    cmp #VISIBILITY_RADIUS+1
+    bcc @done
+@offscreen:
+    ldy #$01
+    lda #$24
+    sta (sprite_ptr), y
+    lda #$00
+    rts
+@done:
+    lda #$01
+    rts
+
 ; this sub routine verifies a sprite move
 ; handles general collision
 ; inputs:
@@ -365,6 +405,7 @@ sprite_init_default:
 ; updates a barrier sprite
 ; inputs:
 ;   y -> pointing to sprite data offset
+;   stores if it was already onscreen once in sprite_tile_temp
 sprite_update_default:
     pha
     tya
@@ -372,14 +413,18 @@ sprite_update_default:
     txa
     pha
 
+    tya
+    pha ; push y value for later
 
     ; load x position
     ldx sprite_tile_x, y
+    stx get_tile_x
     lda tile_convert_table, x
     sta temp
 
     ; load y position
     ldx sprite_tile_y, y
+    stx get_tile_y
     lda tile_convert_table, x
     sta temp+1
 
@@ -427,6 +472,18 @@ sprite_update_default:
     lda temp
     sta (sprite_ptr), y
 
+    ; avoid moving offscreen if
+    ; it was alrady onscreen once before
+    pla
+    tay
+    lda sprite_tile_temp, y
+    bne @no_offscreen
+    sty temp+1 ; need it again
+    jsr sprite_offscreen
+    ldy temp+1
+    sta sprite_tile_temp, y
+@no_offscreen:
+
     pla
     tax
     pla
@@ -442,14 +499,18 @@ sprite_update_barrier_invert:
     txa
     pha
 
+    tya
+    pha ; keep y for later
 
     ; load x position
     ldx sprite_tile_x, y
+    stx get_tile_x
     lda tile_convert_table, x
     sta temp
 
     ; load y position
     ldx sprite_tile_y, y
+    stx get_tile_y
     lda tile_convert_table, x
     sta temp+1
 
@@ -491,6 +552,18 @@ sprite_update_barrier_invert:
     lda #$00
     ldy #$02
     sta (sprite_ptr), y
+
+    ; avoid moving offscreen if
+    ; it was alrady onscreen once before
+    pla
+    tay
+    lda sprite_tile_temp, y
+    bne @no_offscreen
+    sty temp+1 ; need it again
+    jsr sprite_offscreen
+    ldy temp+1
+    sta sprite_tile_temp, y
+@no_offscreen:
 
 
     pla
@@ -544,6 +617,8 @@ sprite_init_push:
 ;   7th bit = 1 -> sbc; = 0 -> adc
 ;   6th bit = 1 -> x position; = 0 -> y position
 ;   5th bit = 1 -> inits falling animation, if lower 4 bits are 0 hides sprite
+;   stores if object was on-screen before in sprite_tile_temp:
+;   0th bit = 1 -> was oncreen before
 sprite_update_push:
     pha
     tya
@@ -578,6 +653,15 @@ sprite_update_push:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    tya
+    pha ; need y again later
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
@@ -595,6 +679,15 @@ sprite_update_push:
     lda temp
     sta (sprite_ptr), y
 
+    pla
+    tay
+    lda sprite_tile_temp, y
+    bne @no_offscreen
+    sty temp+1 ; need it again
+    jsr sprite_offscreen
+    ldy temp+1
+    sta sprite_tile_temp, y
+@no_offscreen:
     pla
     tax
     pla
@@ -743,6 +836,12 @@ sprite_key_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
@@ -755,7 +854,7 @@ sprite_key_update:
     lda temp
     sta (sprite_ptr), y
 
-    jmp @done
+    jmp @offscreen_check
 @collected:
     ; enable sprite for no collision
     lda #$00
@@ -766,6 +865,12 @@ sprite_key_update:
     tax
     lda obj_index_to_addr, x
     sta sprite_ptr
+
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
 
     ; if it was collected we display the key in the bottom left
     ; corner to indicate a key is in players posession unless key count is 0
@@ -795,7 +900,9 @@ sprite_key_update:
     ldy #$01
     lda #$24
     sta (sprite_ptr), y
-
+    jmp @done
+@offscreen_check:
+    jsr sprite_offscreen
 @done:
     pla
     tax
@@ -834,12 +941,16 @@ sprite_door_collision:
 ; this sub routine handles door sprite updates
 ; inputs:
 ;   y -> pointing to sprite data offset
+;   keep on-screen results in sprite_tile_temp
 sprite_door_update:
     pha
     tya
     pha
     txa
     pha
+
+    tya
+    pha ; need y for later
 
     ; load x position
     ldx sprite_tile_x, y
@@ -877,6 +988,12 @@ sprite_door_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
@@ -893,6 +1010,19 @@ sprite_door_update:
     lda #$00
     ldy #$02
     sta (sprite_ptr), y
+
+
+    ; avoid moving offscreen if
+    ; it was alrady onscreen once before
+    pla
+    tay
+    lda sprite_tile_temp, y
+    bne @no_offscreen
+    sty temp+1 ; need it again
+    jsr sprite_offscreen
+    ldy temp+1
+    sta sprite_tile_temp, y
+@no_offscreen:
 
     pla
     tax
@@ -1172,6 +1302,12 @@ sprite_skel_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
@@ -1188,6 +1324,9 @@ sprite_skel_update:
     ldy #$01
     lda temp+2 ; sprite to load
     sta (sprite_ptr), y
+
+    ; oov check
+    jsr sprite_offscreen
 
 @done:
     pla
@@ -1274,6 +1413,7 @@ sprite_sword_update:
 
     lda #$00
     sta sprite_tile_flags, y
+    sta temp+2
 
     ; store position in UI
     lda #3*8
@@ -1286,6 +1426,7 @@ sprite_sword_update:
 @enabled:
     lda #%10000000
     sta sprite_tile_flags, y
+    sta temp+2
 
     ; load x position
     ldx sprite_tile_x, y
@@ -1299,6 +1440,11 @@ sprite_sword_update:
 
 @done:
 
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
 
     ; set up pointer
     lda sprite_tile_obj, y
@@ -1323,6 +1469,11 @@ sprite_sword_update:
     ldy #$02
     sta (sprite_ptr), y
 
+    lda temp+2 ; holds enable flag
+    beq @no_offscreen
+    jsr sprite_offscreen
+
+@no_offscreen:
     pla
     tax
     pla
@@ -1403,6 +1554,12 @@ sprite_hp_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
@@ -1418,6 +1575,8 @@ sprite_hp_update:
     ldy #$03
     lda temp
     sta (sprite_ptr), y
+
+    jsr sprite_offscreen
 
     pla
     tax

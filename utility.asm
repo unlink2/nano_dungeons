@@ -185,7 +185,7 @@ empty_sub:
 hide_objs:
     lda #$00
     ldx #$00
-@loop:
+@loop: 
     sta sprite_data, x 
     inx
     cpx #$FF
@@ -388,6 +388,18 @@ magic_bytes:
 ; side effects:
 ;   uses temp for subtraction
 calc_distance:
+    stx temp
+    sec
+    sbc temp
+    ; if overflow flag is set we got a negative result
+    bpl @no_negative
+
+    ; to convert, invert all bits and add 1
+    eor #%11111111
+    clc
+    adc #$01
+@no_negative
+
     rts 
 
 ; this sub routine is called when
