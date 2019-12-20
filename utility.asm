@@ -185,10 +185,18 @@ empty_sub:
 hide_objs:
     lda #$00
     ldx #$00
-@loop: 
-    sta sprite_data, x 
+@loop:
+    lda #$24
+    sta sprite_data+1, x
+    lda #$00
+    sta sprite_data, x
+    sta sprite_data+2, x
+    sta sprite_data+3, x
     inx
-    cpx #$FF
+    inx 
+    inx 
+    inx 
+    cpx #$00
     bne @loop 
     rts
 
