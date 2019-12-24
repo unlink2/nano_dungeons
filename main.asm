@@ -103,7 +103,8 @@ gfx_flags 1
 
 errno 1 ; error number, nonzero values are errors
 
-rand8 1
+rand8 1 ; 8 bit random number
+rand16 1 ; 16 bit random number
 game_mode 1
 move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
@@ -340,7 +341,7 @@ clear_mem:
 
     lda #$01
     sta rand8 ; rand8 must be nonzero
-
+    sta rand16 ; rand16 must not be zero
 
     ; set up palette pointer
     ldx #$00
@@ -542,6 +543,9 @@ nmi_flag_set:
     jsr update_audio
 
     jsr random ; tick rng
+    lda rand8 ; tick the second byte
+    jsr random_reg
+    sta rand16
 
     pla
     tay
