@@ -110,6 +110,8 @@ move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
 actions 1 ; player's action until "turn" ends. Turn is considered ended when this has a non-zero value
 
+seed 2 ; 16 bit random number for map generator
+
 level_ptr 2 ; points to the current level in ram, lo byte always needs to be $00
 level_data_ptr 2 ; pointer to rom/sram of level
 attr_ptr 2 ; points to the attributes for the current level
@@ -581,6 +583,7 @@ irq:
 .include "./title.asm"
 
 .include "./map.asm"
+.include "./genmap.asm"
 .include "./tiles.asm"
 .include "./delay.asm"
 .include "./sprites.asm"
