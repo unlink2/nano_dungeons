@@ -12,6 +12,9 @@ init_main_menu:
     lda #$00
     sta gfx_flags
 
+    lda #$01
+    sta level_select
+
     lda #<update_main_menu
     sta update_sub
     lda #>update_main_menu
