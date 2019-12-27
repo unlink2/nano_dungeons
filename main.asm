@@ -49,6 +49,8 @@
 
 .define MAX_HP $02
 
+.define GENERATE_NEW_MAP $00
+
 ; start and end of non-collision tiles
 .define START_TILE $60
 .define CLEARABLE_TILES_START $60

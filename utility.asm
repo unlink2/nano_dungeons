@@ -287,7 +287,17 @@ reload_room:
     sta level_ptr+1
 
 
+    ; if level select is #$00 we generate a map, otherwise decompress
+    lda #GENERATE_NEW_MAP
+    cmp level_select
+    bne @decompress
+
+    jsr generate_map
+
+    jmp @map_in_buffer
+@decompress:
     jsr decompress_level
+@map_in_buffer:
 
     jsr load_attr
 

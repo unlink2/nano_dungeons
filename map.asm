@@ -16,7 +16,7 @@ decompress_level:
     ; clear tile position
     lda #$00 
     sta tiles_to_clear
-    sta tiles_to_clear
+    sta tiles_to_clear+1
 
     lda game_flags 
     and #%10111111
