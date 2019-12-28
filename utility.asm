@@ -288,9 +288,9 @@ reload_room:
 
 
     ; if level select is #$00 we generate a map, otherwise decompress
-    lda #GENERATE_NEW_MAP
-    cmp level_select
-    bne @decompress
+    lda load_flags
+    and #%10000000
+    beq @decompress
 
     jsr generate_map
 

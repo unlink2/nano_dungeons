@@ -46,6 +46,7 @@
 .define MAIN_MENU_SLOT_2 2
 .define MAIN_MENU_SLOT_3 3
 .define MAIN_MENU_EDITOR 4
+.define MAIN_MENU_RANDOM 5
 
 .define MAX_HP $02
 
@@ -92,6 +93,7 @@ nmi_flags 1
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 map_flags 1
+; 7th bit = 1 -> enable random map generator in load
 ; 6th bit = 1 -> enable low visibility mode in gameplay
 load_flags 1
 key_count 1 ; amount of keys collected
@@ -688,6 +690,7 @@ main_menu_cursor_x:
 .db $01 ; slot 2
 .db $01 ; slot 3
 .db $01 ; edit menu
+.db $01 ; new map
 
 main_menu_cursor_y:
 .db $08
@@ -695,8 +698,10 @@ main_menu_cursor_y:
 .db $0B
 .db $0C
 .db $0E
+.db $0F
 
 main_menu_cursor_attr:
+.db $00
 .db $00
 .db $00
 .db $00

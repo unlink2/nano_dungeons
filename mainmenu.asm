@@ -12,6 +12,8 @@ init_main_menu:
     lda #$00
     sta gfx_flags
 
+    sta load_flags
+
     lda #$01
     sta level_select
 
@@ -86,7 +88,7 @@ init_main_menu:
 update_main_menu:
     lda menu_select
     and #MAIN_MENU_MAX_SELECT ; only 3 possible options
-    cmp #$05
+    cmp #$06
     bcc @no_overflow
     lda #$00
 @no_overflow

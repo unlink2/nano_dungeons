@@ -489,6 +489,7 @@ a_input_main_menu:
     cmp #MAIN_MENU_LEVEL
     bne @not_level_select
 
+@level_select:
     ; select the map to load
     ldx level_select ; based on tile
     lda map_table_lo, x
@@ -502,9 +503,9 @@ a_input_main_menu:
     sta attr_ptr+1
 
     ; for memcpy, copy palette
-    lda palette_table_lo, x 
-    sta src_ptr 
-    lda palette_table_hi, x 
+    lda palette_table_lo, x
+    sta src_ptr
+    lda palette_table_hi, x
     sta src_ptr+1
 
     ; load sub routine
@@ -515,6 +516,13 @@ a_input_main_menu:
 
     jmp @slot_selected
 @not_level_select:
+
+    cmp #MAIN_MENU_RANDOM
+    bne @not_random
+    lda #%10000000
+    sta load_flags
+    jmp @level_select
+@not_random:
 
     ; check which slot is selected
     cmp #MAIN_MENU_SLOT_1
@@ -616,7 +624,8 @@ a_input_main_menu:
     ; now all pointers are backed up
 
     ; enable low visiblity mode
-    lda #%01000000
+    lda load_flags
+    ora #%01000000
     sta load_flags
 
     jsr reload_room
