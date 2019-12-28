@@ -236,6 +236,7 @@ random_reg:
 ;   level_ptr_bac
 ;   attr_ptr_bac
 ;   palette_ptr_bac  (src_ptr)
+;   seed_bac for random map
 reload_room:
     ; reload the pointers
     lda level_data_ptr_bac
@@ -252,6 +253,11 @@ reload_room:
     sta src_ptr
     lda palette_ptr_bac+1
     sta src_ptr+1
+
+    lda seed_bac
+    sta seed
+    lda seed_bac+1
+    sta seed+1
 
     ldx #$00
     stx $2001 ; disable rendering

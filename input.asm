@@ -621,6 +621,12 @@ a_input_main_menu:
     sta palette_ptr_bac
     lda src_ptr+1
     sta palette_ptr_bac+1
+
+    lda seed
+    sta seed_bac
+    lda seed+1
+    sta seed_bac+1
+
     ; now all pointers are backed up
 
     ; enable low visiblity mode

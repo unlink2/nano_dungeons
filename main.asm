@@ -252,6 +252,7 @@ sprite_tile_size 1 ; amount of tiles currently used
 level_data_ptr_bac 2
 palette_ptr_bac 2
 attr_ptr_bac 2
+seed_bac 2
 
 draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
 draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw will happen
