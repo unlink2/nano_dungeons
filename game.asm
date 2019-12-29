@@ -22,6 +22,9 @@ init_game:
     lda #MAX_HP ; hp
     sta player_hp
 
+    lda #START_DAMAGE
+    sta player_damage
+
     lda #START_ARMOR ; base armor
     sta player_armor_base
     sta player_armor

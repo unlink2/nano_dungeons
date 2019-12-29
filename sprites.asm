@@ -1383,6 +1383,8 @@ sprite_sword_collision:
     ora #%10000000
     sta sprite_tile_data, y
 
+    inc player_damage
+
     lda #$01 ; sword value
     sta weapon_type
 @done:
