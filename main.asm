@@ -49,6 +49,7 @@
 .define MAIN_MENU_RANDOM 5
 
 .define MAX_HP $02
+.define START_ARMOR $00
 
 .define GENERATE_NEW_MAP $00
 
@@ -218,6 +219,8 @@ weapon_y 1
 weapon_type 1 ; id of weapon 0 = sword
 iframes 1 ; frames of invincibility after hit
 player_hp 1 ; how much hp has player still got
+player_armor 1 ; armor value, when 0 hp decs
+player_armor_base 1 ; base armor, is added to by armor pickups
 move_timer 1 ; timer for movemnt
 
 start_x 1 ; x and y value of start location

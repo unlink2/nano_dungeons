@@ -101,6 +101,7 @@ Blocks:
 - Block that changes solid every time player moves
 - Staircase tile as "goal" (sets tiles to clear to 0)
 - Bomb pickup 
+- Armor Pickup, +1 hp pickup
 
 - Add weapon damage pickup
 - Add health bar 3 hearts

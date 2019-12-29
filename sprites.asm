@@ -1346,13 +1346,8 @@ sprite_skel_collision:
     rts ; no hit if iframes are enabled
 
 @hit:
-    ldx player_hp
+    jsr take_damage
     beq @reload
-
-    ; if player still has hp, damage but no relaod
-    dec player_hp
-    lda #$01 ; iframes
-    sta iframes
     rts 
 @reload:
 

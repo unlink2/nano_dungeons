@@ -22,6 +22,10 @@ init_game:
     lda #MAX_HP ; hp
     sta player_hp
 
+    lda #START_ARMOR ; base armor
+    sta player_armor_base
+    sta player_armor
+
     lda #$00
     sta map_flags ; reset all map flags
     sta key_count ; no keys when map begins
@@ -729,5 +733,34 @@ setup_tile_updates:
     jsr get_col
     rts
 @not_right:
+@done:
+    rts
+
+; this sub routine makes the player take damage
+; decs armor, if underflow decs hp
+; sets iframes
+; returns:
+;   x == $00 if no hp left
+;   x != 00 if hp left
+;   ensures zero flag is set/unset at the end
+take_damage:
+    lda player_armor
+    beq @damage
+    dec player_armor
+    ldx #$01
+    stx iframes ; set iframe
+    rts
+@damage:
+    ldx player_hp
+    beq @done
+
+    lda player_armor_base
+    sta player_armor ; reset armor value
+    ; if player still has hp, damage but no relaod
+    dec player_hp
+    lda #$01 ; iframes
+    sta iframes
+
+    ldx #$01
 @done:
     rts
