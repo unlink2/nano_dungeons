@@ -742,14 +742,27 @@ setup_tile_updates:
 ; this sub routine makes the player take damage
 ; decs armor, if underflow decs hp
 ; sets iframes
+; inputs:
+;   a = amount of armor damage inflicted
 ; returns:
 ;   x == $00 if no hp left
 ;   x != 00 if hp left
 ;   ensures zero flag is set/unset at the end
 take_damage:
-    lda player_armor
+    ldx player_armor
     beq @damage
-    dec player_armor
+
+    ; swap armor and damage value for sub
+    tax
+    lda player_armor
+    stx player_armor
+    sec
+    sbc player_armor
+    bcs @no_carry
+    lda #$00 ; set to 0 if carry
+@no_carry:
+    sta player_armor
+
     ldx #$01
     stx iframes ; set iframe
     rts
