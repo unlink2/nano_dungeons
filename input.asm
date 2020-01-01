@@ -916,6 +916,7 @@ select_input:
 @not_editor_menu:
     cmp #GAME_MODE_PUZZLE
     bne @done
+    dec level ; level -1 to not inc level during reload
     jsr reload_room
 @done: 
     rts 

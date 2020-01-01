@@ -1370,6 +1370,7 @@ sprite_skel_collision:
 
 @reload_map:
     vblank_wait
+    dec level ; dec leve to avoid a level increase on reload
     jsr reload_room ; on collision reload area
     jsr init_hit_noise
     rts
