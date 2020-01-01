@@ -10,6 +10,8 @@ init_game:
     lda #$00
     sta gfx_flags
 
+    inc level
+
     ; re-enable input just in case player died
     ; during sword animation
     lda nmi_flags

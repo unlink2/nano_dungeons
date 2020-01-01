@@ -1346,7 +1346,7 @@ sprite_skel_collision:
     rts ; no hit if iframes are enabled
 
 @hit:
-    lda #$01
+    lda level ; 1 damage per level
     jsr take_damage
     beq @reload
     rts 

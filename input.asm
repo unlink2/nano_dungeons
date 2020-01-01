@@ -629,6 +629,10 @@ a_input_main_menu:
 
     ; now all pointers are backed up
 
+    ; load level $00 because init_game increments it
+    lda #$00
+    sta level
+
     ; enable low visiblity mode
     lda load_flags
     ora #%01000000

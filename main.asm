@@ -233,6 +233,8 @@ level_select 1 ; value used to select a level
 color_select 1 ; value for color to be edited
 hex_buffer 2 ; buffer to convert hex number to be output on screen
 
+level 1 ; how many maps have been cleared, used to scale enemies
+
 smooth_up 1 ; smooht movement up
 smooth_down 1 ; smooth movement down
 smooth_left 1 ; smooth movement left
