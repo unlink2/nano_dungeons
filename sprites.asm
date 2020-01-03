@@ -366,6 +366,9 @@ sprite_init_default:
     sta sprite_tile_data, y
     sta sprite_tile_temp, y
 
+    lda level
+    sta sprite_tile_hp, y
+
     lda #%00000000 ; turn off because collision is handeled by tile in this case
     sta sprite_tile_flags, y
 

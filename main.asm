@@ -180,6 +180,20 @@ tiles_to_clear 2
 ; x and y coordinates for get_tile
 get_tile_x 1
 get_tile_y 1
+
+
+; these are backup pointers allowing
+; the user to reload a room during puzzle mode
+level_data_ptr_bac 2
+palette_ptr_bac 2
+attr_ptr_bac 2
+seed_bac 2
+
+draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
+draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw will happen
+draw_buffer_x 1 ; start locations for buffer updates
+draw_buffer_y 1
+
 .ende
 
 ; sprite memory
@@ -251,20 +265,10 @@ sprite_tile_data SPRITE_TILES ; data for sprite may be used by AI as needed
 ; 7th bit = 1 -> sprite enabled, collision will occur
 sprite_tile_flags SPRITE_TILES
 sprite_tile_temp SPRITE_TILES ; temporary storage for sprites may be used differently depending on sprite
+sprite_tile_hp SPRITE_TILES ; health of sprite tile
 sprite_tile_obj SPRITE_TILES ; object to be used for this sprite, may be set up as needed
 sprite_tile_size 1 ; amount of tiles currently used
 
-; these are backup pointers allowing
-; the user to reload a room during puzzle mode
-level_data_ptr_bac 2
-palette_ptr_bac 2
-attr_ptr_bac 2
-seed_bac 2
-
-draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
-draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw will happen
-draw_buffer_x 1 ; start locations for buffer updates
-draw_buffer_y 1
 .ende
 
 ; start of prg ram
