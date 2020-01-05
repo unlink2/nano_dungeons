@@ -546,7 +546,7 @@ sword_done:
     sta sprite_data_1+2
 
     ; disable hit flag for all sprites
-    ldx #SPRITE_TILES
+    ldx #SPRITE_TILES-1
 @disable_loop:
     lda sprite_tile_flags, x
     and #%10111111
