@@ -545,6 +545,17 @@ sword_done:
     sta sprite_data_1+3
     sta sprite_data_1+2
 
+    ; disable hit flag for all sprites
+    ldx #SPRITE_TILES
+@disable_loop:
+    lda sprite_tile_flags, x
+    and #%10111111
+    sta sprite_tile_flags, x
+    dex
+    cpx #$FF
+    bne @disable_loop
+    
+
     rts
 
 ; this sub routine checks if

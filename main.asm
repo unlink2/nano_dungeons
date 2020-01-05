@@ -263,6 +263,7 @@ sprite_tile_ai SPRITE_TILES ; ai type
 sprite_tile_data SPRITE_TILES ; data for sprite may be used by AI as needed
 ; flags for each sprite
 ; 7th bit = 1 -> sprite enabled, collision will occur
+; 6th bit = 1 -> has been hit by current attack, reset only when timer is 0
 sprite_tile_flags SPRITE_TILES
 sprite_tile_temp SPRITE_TILES ; temporary storage for sprites may be used differently depending on sprite
 sprite_tile_hp SPRITE_TILES ; health of sprite tile

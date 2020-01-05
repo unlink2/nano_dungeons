@@ -80,6 +80,7 @@ TODO make inital map loading code and reset code the same for gameplay
 TODO map loading in low visibility mode does not work correclty when using jump tiles
 TODO do not render sprites that are outside of vield of view in low visiblity mode
 TODO UI that displays current armor/damage values
+TODO delay sprite move after hit to give player time to dodge
 
 Blocks:
 - Wall blocks (cannot be walked on)

@@ -1060,6 +1060,7 @@ sprite_skel_update:
     pha
 
     lda #%10000000 ; enable collison
+    ora sprite_tile_flags, y
     sta sprite_tile_flags, y
 
     ; check if new position is the same as player
@@ -1073,6 +1074,11 @@ sprite_skel_update:
     jsr sprite_skel_collision
 @no_collision
 
+    ; test hit flag fisrt
+    lda sprite_tile_flags, y
+    and #%01000000
+    bne @no_weapon_hit
+
     ; if position is the same as
     ; the player's weapon
     ; we move this sprite 0/0
@@ -1084,14 +1090,30 @@ sprite_skel_update:
     bne @no_weapon_hit
 
     ; only play noise if location is not already 0/0
-    and sprite_tile_x, y
-    beq @no_noise
+    lda sprite_tile_hp, y
+    beq @no_weapon_hit
     jsr init_hit_noise
 @no_noise:
+    ; set hit flag, this flag is reset at the end of attack animation only
+    lda sprite_tile_flags, y
+    ora #%01000000
+    sta sprite_tile_flags, y
+
+    ; first reduce hp, if hp 0 then move offscreen
+    tya
+    tax ; need y -> x for dec
+    dec sprite_tile_hp, x
+    bne @no_move_hit
+
     lda #$00
     sta sprite_tile_x, y
     sta sprite_tile_y, y
+@no_move_hit:
+    ; after hit do not move
+    jmp @no_move
 @no_weapon_hit:
+
+    ; movement code
 
     lda sprite_tile_ai, y
     cmp #$05 ; skel AI
@@ -1140,7 +1162,7 @@ sprite_skel_update:
     beq @bat_up_move_logic
     cmp #$08 ; bat left AI
     beq @bat_left_move_logic
-    cmp  #$09 ; mimic move AI 
+    cmp  #$09 ; mimic move AI
     beq @mimic_move_logic
     ; skel move logic, random
 @skel_move_logic:
