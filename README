@@ -4,29 +4,11 @@ Part 1: Gameplay
 =================
 
 The gameplay of nesblox is going to be pretty simple.
-The objective of the game is to move the player character throuhg a maze 
-made of of blocks with certain rules (like one way blocks) without crossing its own path.
-There will be several obsticle blocks.
-The game should have a built in map editor with which maps can be designed. 
-Maps will be saved to sram.
-All maps will fit on one screen.
-There will be at least 32 built in maps and 4-6 slots for player defined maps.
-The map editor needs to be able to compress maps. 
-The map loader will be able to uncompress them. 
-All maps will be stored somewhere in ram as well as in screen ram.
-Map updates will take place both in ram and screen ram to keep copies consistent.
-The map editor will allow placing any available tile anywhere on the screen.
-The main menu will simply consist of a map picker.
-The map editor will have a save menu where a map slot will be picked.
+The objective of the game is to move the player character throguh a dungeon.
+The dungeon contains enemies, power-ups and an exit.
 
 Part 2: Other features
 =======================
-The game should be available for free and as a payed version on steam distributed using an open source 
-nes emulator. 
-The steam release should have a launcher that allows users to pick sram files downloaded from the steam workshop.
-It should also allow uploading the users sram file to the workshop.
-This will be the main feature of them game: Shareable maps over the internet.
-The sram will not contain anything but map files.
 The game should use a mapper with as little features as possible.
 Generally a few banks of rom should do to contain the game.
 One bank of sram should also be enough depending on how well compression works.
@@ -38,7 +20,7 @@ Part 3: Level Compression:
 ==========================
 Level compression is implemented using a very simple format.
 It is simply stores a number of repeates followed by the tile to be repeated.
-A repeate sequence is indicated with a value of $FF consequently making $FF an invalid 
+A repeate sequence is indicated with a value of $FF consequently making $FF an invalid
 tile not to be used. If an FF does not preceede a value it simply means it is a single occurance of a tile.
 The end of data is indicated by $FF $00
 Example:
@@ -46,7 +28,7 @@ Example:
 $01 $02 $02 $03 $FF $09 $FA $FF $00
 
 This will expand to:
-$01 $02 $02 $03 $FA $FA $FA $FA $FA $FA $FA $FA $FA 
+$01 $02 $02 $03 $FA $FA $FA $FA $FA $FA $FA $FA $FA
 
 This simple example saved 3 bytes in total.
 
