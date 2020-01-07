@@ -1103,13 +1103,17 @@ sprite_skel_update:
     tya
     tax ; need y -> x for dec
     dec sprite_tile_hp, x
-    bne @no_move_hit
+    bne @not_zero_hp
 
     lda #$00
     sta sprite_tile_x, y
     sta sprite_tile_y, y
-@no_move_hit:
-    ; after hit do not move
+@not_zero_hp:
+    ; after hit move away from player
+    ; by setting player's direction as last direction
+    lda last_move
+    sta sprite_tile_temp, y
+
     jmp @no_move
 @no_weapon_hit:
 
