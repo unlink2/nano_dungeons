@@ -965,11 +965,41 @@ sprite_door_update:
     lda tile_convert_table, x
     sta temp+1
 
+
+    ; if hp is 0 door is open
+    lda sprite_tile_hp, y
+    beq @door_open
+
+    ; check sword collision
+    lda weapon_x
+    cmp sprite_tile_x, y
+    bne @no_weapon_hit
+    lda weapon_y
+    cmp sprite_tile_y, y
+    bne @no_weapon_hit
+
+    ; test if hit already occured once this attack cycle
+    lda sprite_tile_flags, y
+    and #%01000000
+    bne @no_weapon_hit
+
+    ; need to transfer y -> x
+    tya
+    tax
+    dec sprite_tile_hp, x ; dec hp
+
+    lda sprite_tile_flags, y
+    ora #%01000000
+    sta sprite_tile_flags, y
+
+@no_weapon_hit:
+
     ; load tile
     lda sprite_tile_data, y
     and #%10000000
     beq @door_locked
 
+@door_open:
     lda #$24
     sta temp+2
     lda #$00
@@ -980,7 +1010,8 @@ sprite_door_update:
     lda #$5A
     sta temp+2
     ; enable sprite for collision
-    lda #$F0
+    lda #%10000000
+    ora sprite_tile_flags, y
     sta sprite_tile_flags, y
 
 @tile_found:
