@@ -524,6 +524,15 @@ a_input_main_menu:
     jmp @level_select
 @not_random:
 
+    cmp #MAIN_MENU_RESUME
+    bne @no_resume
+
+    lda #%10100000
+    sta load_flags
+    jmp @level_select
+
+@no_resume:
+
     ; check which slot is selected
     cmp #MAIN_MENU_SLOT_1
     bne @not_slot_1

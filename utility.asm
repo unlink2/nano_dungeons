@@ -292,6 +292,12 @@ reload_room:
     lda #>level_data
     sta level_ptr+1
 
+    ; load sram values before generating map
+    lda load_flags
+    and #%00100000
+    bne @no_load
+    jsr load_save
+@no_load:
 
     ; if level select is #$00 we generate a map, otherwise decompress
     lda load_flags

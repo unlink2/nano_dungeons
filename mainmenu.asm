@@ -88,7 +88,7 @@ init_main_menu:
 update_main_menu:
     lda menu_select
     and #MAIN_MENU_MAX_SELECT ; only 3 possible options
-    cmp #$06
+    cmp #$07
     bcc @no_overflow
     lda #$00
 @no_overflow

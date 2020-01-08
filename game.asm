@@ -109,6 +109,13 @@ init_game:
 
     jsr init_test_song
 
+    ; reload game state if flag is set
+    lda load_flags
+    and #%00100000
+    beq @no_load
+    jsr load_save
+@no_load
+
     rts
 
 ; this routine is called every frame
@@ -308,6 +315,14 @@ update_game:
 init_win_condition:
     lda #$00
     sta $2001 ; no rendering
+
+    ; store gamestate
+    jsr store_save
+
+    ; set flag to reload values from sram
+    lda load_flags
+    ora #%00100000
+    sta load_flags
 
     lda #$01 
     sta nametable
@@ -792,4 +807,90 @@ take_damage:
 
     ldx #$01
 @done:
+    rts
+
+; cacl_checksum
+; calculates save data sum
+; returns:
+;   a = checksum
+calc_checksum:
+    ; validate checksum
+    lda #$00
+    sec
+    sbc sav_player_armor_base
+    sbc sav_player_armor
+    sbc sav_player_hp
+    sbc sav_player_damage
+    sbc sav_level
+    sbc sav_weapon_type
+    sbc sav_key_count
+    sbc sav_seed
+    sbc sav_seed+1
+    rts
+
+; this sub rotuine copies all game state variables to sram
+load_save:
+    jsr calc_checksum
+    cmp sav_checksum
+    bne @invalid
+
+    lda sav_player_armor_base
+    sta player_armor_base
+
+    lda sav_player_armor
+    sta player_armor
+
+    lda sav_player_hp
+    sta player_hp
+
+    lda sav_player_damage
+    sta player_damage
+
+    lda sav_level
+    sta level
+
+    lda sav_weapon_type
+    sta weapon_type
+
+    lda sav_key_count
+    sta key_count
+
+    lda sav_seed
+    sta seed
+    lda sav_seed+1
+    sta seed+1
+@invalid:
+    rts
+
+; this sub routine restores all game state variables from stram
+store_save:
+    lda player_armor_base
+    sta sav_player_armor_base
+
+    lda player_armor
+    sta sav_player_armor
+
+    lda player_hp
+    sta sav_player_hp
+
+    lda player_damage
+    sta sav_player_damage
+
+    lda level
+    sta sav_level
+
+    lda weapon_type
+    sta sav_weapon_type
+
+    lda key_count
+    sta sav_key_count
+
+    lda seed
+    sta sav_seed
+    lda seed+1
+    sta sav_seed+1
+
+    jsr calc_checksum
+    sta sav_checksum
+
     rts

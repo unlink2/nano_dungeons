@@ -47,6 +47,7 @@
 .define MAIN_MENU_SLOT_3 3
 .define MAIN_MENU_EDITOR 4
 .define MAIN_MENU_RANDOM 5
+.define MAIN_MENU_RESUME 6
 
 .define MAX_HP $02
 .define START_ARMOR $00
@@ -97,6 +98,7 @@ game_flags 1
 map_flags 1
 ; 7th bit = 1 -> enable random map generator in load
 ; 6th bit = 1 -> enable low visibility mode in gameplay
+; 5th but = 1 -> enable save game restore
 load_flags 1
 key_count 1 ; amount of keys collected
 ; editor flags, mostly used for menu select
@@ -302,12 +304,15 @@ magic 16 ; hard-coded sequence of sram magic values, if they are not present run
 ; this should save anything the game will need
 ; to restore a state
 ; TODO write values duing map clear transition
-sav_weapon_damage 1
+sav_player_damage 1
 sav_weapon_type 1
 sav_player_hp 1
 sav_player_armor 1
+sav_player_armor_base 1
 sav_level 1
+sav_key_count 1
 sav_seed 2
+sav_checksum 1 ; 'checksum'
 .ende
 
 .macro vblank_wait
@@ -715,6 +720,7 @@ main_menu_cursor_x:
 .db $01 ; slot 3
 .db $01 ; edit menu
 .db $01 ; new map
+.db $01 ; resume
 
 main_menu_cursor_y:
 .db $08
@@ -723,8 +729,10 @@ main_menu_cursor_y:
 .db $0C
 .db $0E
 .db $0F
+.db $10
 
 main_menu_cursor_attr:
+.db $00
 .db $00
 .db $00
 .db $00
