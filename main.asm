@@ -297,6 +297,17 @@ save_sub_1 32 ; 32 bytes of custom code
 save_sub_2 32 ; 32 bytes of custom code
 save_sub_3 32 ; 32 bytes of custom code
 magic 16 ; hard-coded sequence of sram magic values, if they are not present run init
+
+; save game for current seed
+; this should save anything the game will need
+; to restore a state
+; TODO write values duing map clear transition
+sav_weapon_damage 1
+sav_weapon_type 1
+sav_player_hp 1
+sav_player_armor 1
+sav_level 1
+sav_seed 2
 .ende
 
 .macro vblank_wait
