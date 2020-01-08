@@ -295,7 +295,7 @@ reload_room:
     ; load sram values before generating map
     lda load_flags
     and #%00100000
-    bne @no_load
+    beq @no_load
     jsr load_save
 @no_load:
 
