@@ -820,11 +820,11 @@ take_damage:
 calc_checksum:
     ; validate checksum
     ldy #$01 ; offset starting at 1. 0 is checksum
-    lda #$00
+    lda #$FF
     sec
-
 @loop:
     sbc (save_ptr), y
+    eor (save_ptr), y
     iny
     cpy #SAVE_DATA_SIZE
     bne @loop
