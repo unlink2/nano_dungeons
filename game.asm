@@ -811,86 +811,116 @@ take_damage:
 
 ; cacl_checksum
 ; calculates save data sum
+; inputs:
+;   save_ptr pointing to save game location
+; side effects:
+;   uses a and y registers
 ; returns:
 ;   a = checksum
 calc_checksum:
     ; validate checksum
+    ldy #$01 ; offset starting at 1. 0 is checksum
     lda #$00
     sec
-    sbc sav_player_armor_base
-    sbc sav_player_armor
-    sbc sav_player_hp
-    sbc sav_player_damage
-    sbc sav_level
-    sbc sav_weapon_type
-    sbc sav_key_count
-    sbc sav_seed
-    sbc sav_seed+1
+
+@loop:
+    sbc (save_ptr), y
+    iny
+    cpy #SAVE_DATA_SIZE
+    bne @loop
     rts
 
 ; this sub rotuine copies all game state variables to sram
+; inputs:
+;   save_ptr pointing to save game location
+; side effects:
+;   uses a and y registers
 load_save:
     jsr calc_checksum
-    cmp sav_checksum
+    ldy #$00 ; offset
+    cmp (save_ptr), y
     bne @invalid
 
-    lda sav_player_armor_base
-    sta player_armor_base
-
-    lda sav_player_armor
-    sta player_armor
-
-    lda sav_player_hp
-    sta player_hp
-
-    lda sav_player_damage
+    iny
+    lda (save_ptr), y
     sta player_damage
 
-    lda sav_level
-    sta level
-
-    lda sav_weapon_type
+    iny
+    lda (save_ptr), y
     sta weapon_type
 
-    lda sav_key_count
+    iny
+    lda (save_ptr), y
+    sta player_hp
+
+    iny
+    lda (save_ptr), y
+    sta player_armor
+
+    iny
+    lda (save_ptr), y
+    sta player_armor_base
+
+    iny
+    lda (save_ptr), y
+    sta level
+
+    iny
+    lda (save_ptr), y
     sta key_count
 
-    lda sav_seed
+    iny
+    lda (save_ptr), y
     sta seed
-    lda sav_seed+1
+    iny
+    lda (save_ptr), y
     sta seed+1
 @invalid:
     rts
 
 ; this sub routine restores all game state variables from stram
+; inputs:
+;   save_ptr pointing to save game location
+; side effects:
+;   uses a and y registers
 store_save:
-    lda player_armor_base
-    sta sav_player_armor_base
-
-    lda player_armor
-    sta sav_player_armor
-
-    lda player_hp
-    sta sav_player_hp
-
-    lda player_damage
-    sta sav_player_damage
-
-    lda level
-    sta sav_level
-
-    lda weapon_type
-    sta sav_weapon_type
-
-    lda key_count
-    sta sav_key_count
-
+    ldy #SAVE_DATA_SIZE-1
     lda seed
-    sta sav_seed
+    sta (save_ptr), y
+    dey
     lda seed+1
-    sta sav_seed+1
+    sta (save_ptr), y
+
+    dey
+    lda key_count
+    sta (save_ptr), y
+
+    dey
+    lda level
+    sta (save_ptr), y
+
+    dey
+    lda player_armor_base
+    sta (save_ptr), y
+
+    dey
+    lda player_armor
+    sta (save_ptr), y
+
+    dey
+    lda player_hp
+    sta (save_ptr), y
+
+    dey
+    lda weapon_type
+    sta (save_ptr), y
+
+    dey
+    lda player_damage
+    sta (save_ptr), y
 
     jsr calc_checksum
-    sta sav_checksum
+    ldy #$00
+    sta (save_ptr), y
 
     rts

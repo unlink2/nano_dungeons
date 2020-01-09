@@ -87,6 +87,8 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
+.define SAVE_DATA_SIZE 10 ; 10 bytes including checksum
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
@@ -142,6 +144,8 @@ palette_ptr 2 ; pointer to current palette
 
 src_ptr 2 ; source pointer for various subs
 dest_ptr 2 ; destination pointer
+
+save_ptr 2 ; pointer to currently used savegame
 
 ; thse pointers are incremented every time the timer reached 0
 ; as long as the next timer value is not already 0
@@ -303,16 +307,17 @@ magic 16 ; hard-coded sequence of sram magic values, if they are not present run
 ; save game for current seed
 ; this should save anything the game will need
 ; to restore a state
-; TODO write values duing map clear transition
-sav_player_damage 1
-sav_weapon_type 1
-sav_player_hp 1
-sav_player_armor 1
-sav_player_armor_base 1
-sav_level 1
-sav_key_count 1
-sav_seed 2
-sav_checksum 1 ; 'checksum'
+; savegame layout:
+;   checksum 1
+;   player_damage 1,
+;   weapon_type 1,
+;   player_hp 1,
+;   player_armor 1,
+;   player_armor_base 1,
+;   level 1,
+;   key_count 1,
+;   seed 2
+sav_checksum SAVE_DATA_SIZE
 .ende
 
 .macro vblank_wait
@@ -435,6 +440,13 @@ clear_mem:
     ; sta game_mode
 
     jsr init_audio_channels
+
+    ; save pointer always points at a fixed location
+    ; on boot
+    lda #<sav_checksum
+    sta save_ptr
+    lda #>sav_checksum
+    sta save_ptr+1
 
 start:
     ; load user defined patterns
