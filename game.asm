@@ -885,10 +885,10 @@ load_save:
 ;   uses a and y registers
 store_save:
     ldy #SAVE_DATA_SIZE-1
-    lda seed
+    lda seed+1
     sta (save_ptr), y
     dey
-    lda seed+1
+    lda seed
     sta (save_ptr), y
 
     dey
