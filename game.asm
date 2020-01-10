@@ -92,10 +92,13 @@ init_game:
     ; location and init them
     lda #2 * 8 ; x positions
     sta sprite_data_8+3
+    sta sprite_data_B+3
     lda #3 * 8
     sta sprite_data_9+3
+    sta sprite_data_C+3
     lda #4 * 8
     sta sprite_data_A+3
+    sta sprite_data_D+3
 
     lda #25 * 8 ; y position
     sta sprite_data_8
@@ -106,6 +109,12 @@ init_game:
     sta sprite_data_8+2
     sta sprite_data_9+2
     sta sprite_data_A+2
+
+    ; move other UI sprites onscreen
+    lda #26 * 8 ; y position
+    sta sprite_data_B
+    sta sprite_data_C
+    sta sprite_data_D
 
     jsr init_test_song
 
@@ -262,6 +271,25 @@ update_game:
     cpx #MAX_HP
     bne @damage_display_loop
 @no_damage
+
+    ; update other UI elements
+    ldy #$24 ; empty sprite
+    lda key_count
+    beq @no_keys
+    ldy #$59 ; key sprite
+@no_keys:
+    sty sprite_data_B+1
+
+    ldy weapon_type
+    lda weapon_sprite, y
+    sta sprite_data_C+1
+
+    ldy #$24 ; empty sprite
+    lda player_armor_base
+    beq @no_armor
+    ldy #$3C
+@no_armor:
+    sty sprite_data_D+1
 
     ; test victory condition
     ; if only one tile is left to clear the player must be on it

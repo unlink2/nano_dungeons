@@ -1447,7 +1447,18 @@ sprite_sword_collision:
 
     inc player_damage
 
+    ; test which weapon type to give
+    lda sprite_tile_ai, y
+    cmp #$06
+    bne @not_sword
     lda #$01 ; sword value
+    bne @store_type
+@not_sword:
+    cmp #$0C
+    bne @not_arrow
+    lda #$02 ; arrow value
+@not_arrow:
+@store_type:
     sta weapon_type
 @done:
     lda #$00 ; never return a collision value
@@ -1475,10 +1486,10 @@ sprite_sword_update:
     sta temp+2
 
     ; store position in UI
-    lda #3*8
+    lda #0*8
     sta temp
 
-    lda #26*8
+    lda #0*8
     sta temp+1
 
     jmp @done
@@ -1499,6 +1510,22 @@ sprite_sword_update:
 
 @done:
 
+    ; decide what sprite to use
+    lda sprite_tile_ai, y
+    cmp #$06
+    bne @not_sword
+    lda #$33
+    sta temp+3
+    bne @sprite_picked
+@not_sword:
+    cmp #$0C
+    bne @not_arrow
+    lda #$3D
+    sta temp+3
+    bne @sprite_picked
+@not_arrow:
+@sprite_picked:
+
     ; set up sprite values for oov check
     lda sprite_tile_x, y
     sta get_tile_x
@@ -1516,7 +1543,7 @@ sprite_sword_update:
     sta (sprite_ptr), y
 
     iny
-    lda #$33
+    lda temp+3
     sta (sprite_ptr), y
 
     ldy #$03
@@ -1684,10 +1711,10 @@ sprite_armor_update:
     sta temp+2
 
     ; store position in UI
-    lda #4*8
+    lda #0*8
     sta temp
 
-    lda #26*8
+    lda #0*8
     sta temp+1
 
     jmp @done

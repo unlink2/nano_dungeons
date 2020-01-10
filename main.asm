@@ -66,7 +66,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $7C
+.define SPRITE_TILES_END $7D
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 
@@ -1025,9 +1025,10 @@ tile_sub_lo:
 .db #<no_collision ; mimic tile
 .db #<no_collision ; hp tile
 .db #<no_collision ; armor tile
+.db #<no_collision ; arrow tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+28
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+29
 .db #<no_collision
 .endrep
 
@@ -1063,6 +1064,7 @@ tile_sub_lo:
 .db #<no_collision ; mimic tile
 .db #<no_collision ; hp tile
 .db #<no_collision ; armor tile
+.db #<no_collision ; arrow tile
 
 tile_sub_hi:
 .mrep CLEARABLE_TILES_START-4
@@ -1105,9 +1107,10 @@ tile_sub_hi:
 .db #>no_collision ; mimic tile
 .db #>no_collision ; hp tile
 .db #>no_collision ; armor tile
+.db #>no_collision ; arrow tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+28
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+29
 .db #>no_collision
 .endrep
 
@@ -1143,6 +1146,7 @@ tile_sub_hi:
 .db #>no_collision ; mimic tile
 .db #>no_collision ; hp tile
 .db #>no_collision ; armor tile
+.db #>no_collision ; arrow tile
 
 ; error handlers
 error_lo:
@@ -1166,11 +1170,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; mimic tile
 .db #<sprite_init_default ; hp tile
 .db #<sprite_init_default ; armor tile
+.db #<sprite_init_default ; arrow tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1194,6 +1200,7 @@ sprite_ai_lo:
 .db #<sprite_skel_update
 .db #<sprite_hp_update
 .db #<sprite_armor_update
+.db #<sprite_sword_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1208,6 +1215,7 @@ sprite_ai_hi:
 .db #>sprite_skel_update
 .db #>sprite_hp_update
 .db #>sprite_armor_update
+.db #>sprite_sword_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1222,6 +1230,7 @@ sprite_collision_lo:
 .db #<sprite_skel_collision
 .db #<sprite_hp_collision
 .db #<sprite_armor_collision
+.db #<sprite_sword_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1236,21 +1245,26 @@ sprite_collision_hi:
 .db #>sprite_skel_collision
 .db #>sprite_hp_collision
 .db #>sprite_armor_collision
+.db #>sprite_sword_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
 .db #<empty_sub
 .db #<sword_update
+.db #<sword_update
 
 weapon_update_hi:
 .db #>empty_sub
+.db #>sword_update
 .db #>sword_update
 
 weapon_done_lo:
 .db #<sword_done
 .db #<sword_done
+.db #<sword_done
 
 weapon_done_hi:
+.db #>sword_done
 .db #>sword_done
 .db #>sword_done
 
@@ -1260,6 +1274,7 @@ weapon_done_hi:
 weapon_sprite:
 .db #$24
 .db #$33
+.db #$3D
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:
