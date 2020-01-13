@@ -598,7 +598,7 @@ sword_done:
     cpx #$FF
     bne @disable_loop
     
-
+    jsr hide_damage_animation
     rts
 
 ; decs weapon damage unless it is 1

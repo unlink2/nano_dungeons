@@ -1136,6 +1136,13 @@ sprite_skel_update:
     dec sprite_tile_hp, x
     bne @not_zero_hp
 
+    ; call damage animation
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+    jsr init_damage_animation
+
     lda #$00
     sta sprite_tile_x, y
     sta sprite_tile_y, y
@@ -1777,4 +1784,71 @@ sprite_armor_update:
 
     rts
 
+; this sub routine inits the damage animation
+; uses sprites 04 05 06 07
+; inputs:
+;   get_tile_x
+;   get_tile_y -> location of animation
+; side effects:
+;   overwrites x and a register
+init_damage_animation:
+    ldx get_tile_x
+    ; set up x coordinate
+    dex
+    lda tile_convert_table, x
+    clc
+    adc #$04 ; move half a tile
+    sta sprite_data_4+3
+    sta sprite_data_5+3
 
+    inx
+    inx
+    lda tile_convert_table, x
+    sec
+    sbc #$04 ; move half a tile
+    sta sprite_data_6+3
+    sta sprite_data_7+3
+
+    ldx get_tile_y
+    ; set up x coordinates
+    dex
+    lda tile_convert_table, x
+    clc
+    adc #$04 ; move half a tile
+    sta sprite_data_4
+    sta sprite_data_6
+
+    inx
+    inx
+    lda tile_convert_table, x
+    sec
+    sbc #$04 ; move half a tile
+    sta sprite_data_5
+    sta sprite_data_7
+
+    lda #$4B ; tile to use
+    sta sprite_data_4+1
+    sta sprite_data_5+1
+    sta sprite_data_6+1
+    sta sprite_data_7+1 
+
+    rts
+
+; moves damage animation off-screen
+hide_damage_animation:
+    lda #$00
+    sta sprite_data_4
+    sta sprite_data_4+3
+    sta sprite_data_5
+    sta sprite_data_5+3
+    sta sprite_data_6
+    sta sprite_data_6+3
+    sta sprite_data_7
+    sta sprite_data_7+3
+
+    rts
+
+; updates damage animation
+; currently unused
+update_damage_animation:
+    rts 
