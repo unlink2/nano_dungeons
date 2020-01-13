@@ -601,6 +601,17 @@ sword_done:
 
     rts
 
+; decs weapon damage unless it is 1
+; then calls sword_done
+arrow_done:
+    lda player_damage
+    cmp #$01
+    beq @no_dec
+    dec player_damage
+@no_dec:
+    jsr sword_done
+    rts 
+
 ; this sub routine checks if
 ; a move input should actually mvoe the player
 ; inputs:

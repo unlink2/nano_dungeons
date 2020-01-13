@@ -1261,12 +1261,12 @@ weapon_update_hi:
 weapon_done_lo:
 .db #<sword_done
 .db #<sword_done
-.db #<sword_done
+.db #<arrow_done
 
 weapon_done_hi:
 .db #>sword_done
 .db #>sword_done
-.db #>sword_done
+.db #>arrow_done
 
 ; sprites based on tile
 ; this number is the vertical sprite
