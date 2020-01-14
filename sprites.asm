@@ -56,9 +56,6 @@ update_sprites:
     cpy #$FF
     bne @loop
 @done:
-
-
-
     rts
 
 ; this sub routine adjusts sprite positon
@@ -1851,4 +1848,10 @@ hide_damage_animation:
 ; updates damage animation
 ; currently unused
 update_damage_animation:
+    lda sprite_data_4+2
+    eor #%00100000
+    sta sprite_data_4+2
+    sta sprite_data_5+2
+    sta sprite_data_6+2
+    sta sprite_data_7+2
     rts 

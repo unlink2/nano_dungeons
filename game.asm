@@ -291,6 +291,9 @@ update_game:
 @no_armor:
     sty sprite_data_D+1
 
+    ; update damage animation
+    jsr update_damage_animation
+
     ; test victory condition
     ; if only one tile is left to clear the player must be on it
     lda tiles_to_clear+1
