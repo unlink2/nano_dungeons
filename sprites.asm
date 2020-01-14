@@ -1849,7 +1849,7 @@ hide_damage_animation:
 ; currently unused
 update_damage_animation:
     lda sprite_data_4+2
-    eor #%00100000
+    eor #%00100000 ; front/background bit
     sta sprite_data_4+2
     sta sprite_data_5+2
     sta sprite_data_6+2
