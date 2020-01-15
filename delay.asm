@@ -29,14 +29,36 @@ update_delay:
     lda delay_done+1
     sta src_ptr+1
     jsr jsr_indirect
-    rts 
+    rts
 @not_done:
     ; otherwise call update routine
     lda delay_update
-    sta src_ptr 
+    sta src_ptr
     lda delay_update+1
     sta src_ptr+1
     jsr jsr_indirect
 @done:
     lda #$00
+    rts
+
+; this sub routine aborts a delay timer
+; calling delay_done
+; and setting the remaining time to 0
+abort_delay:
+    ; don't do anything if timer is already 0
+    lda delay_timer
+    ora delay_timer+1
+    beq @no_abort
+
+    lda #$00
+    sta delay_timer
+    sta delay_timer+1
+
+    lda delay_done
+    sta src_ptr
+    lda delay_done+1
+    sta src_ptr+1
+    jsr jsr_indirect
+
+@no_abort:
     rts 

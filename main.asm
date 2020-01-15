@@ -1042,7 +1042,7 @@ tile_sub_lo:
 .db #<one_way_up ; down one way
 .db #<one_way_right ; left one way
 
-.db #<no_collision ; exit inverted
+.db #<exit_collision ; exit inverted
 .db #<no_collision
 .db #<no_collision
 .db #<no_collision ; unused as of now
@@ -1124,7 +1124,7 @@ tile_sub_hi:
 .db #>one_way_up ; down one way
 .db #>one_way_right ; left one way
 
-.db #>no_collision ; exit inverted
+.db #>exit_collision ; exit inverted
 .db #>no_collision
 .db #>no_collision
 .db #>no_collision ; unused as of now
