@@ -1251,12 +1251,12 @@ sprite_collision_hi:
 weapon_update_lo:
 .db #<empty_sub
 .db #<sword_update
-.db #<sword_update
+.db #<arrow_update
 
 weapon_update_hi:
 .db #>empty_sub
 .db #>sword_update
-.db #>sword_update
+.db #>arrow_update
 
 weapon_done_lo:
 .db #<sword_done
@@ -1275,6 +1275,12 @@ weapon_sprite:
 .db #$24
 .db #$33
 .db #$3D
+
+; delay timer for each weapon type
+weapon_timer:
+.db #$00
+.db #$0F
+.db #$1F
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:

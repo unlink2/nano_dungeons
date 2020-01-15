@@ -116,7 +116,7 @@ init_game:
     sta sprite_data_C
     sta sprite_data_D
 
-    jsr init_test_song
+    ; jsr init_test_song
 
     ; reload game state if flag is set
     lda load_flags
@@ -603,6 +603,34 @@ sword_done:
     
     jsr hide_damage_animation
     rts
+
+; updates arrow moving it one tile until it
+; collides with a wall
+arrow_update:
+    lda delay_timer
+    and #$07
+    bne @no_move
+
+    lda last_move
+    cmp #DOWN
+    bne @not_down
+    inc weapon_y
+@not_down:
+    cmp #UP
+    bne @not_up
+    dec weapon_y
+@not_up:
+    cmp #RIGHT
+    bne @not_right
+    inc weapon_x
+@not_right:
+    cmp #LEFT
+    bne @not_left
+    dec weapon_x
+@not_left:
+@no_move:
+    jsr sword_update
+    rts 
 
 ; decs weapon damage unless it is 1
 ; then calls sword_done

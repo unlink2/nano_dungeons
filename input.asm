@@ -185,7 +185,7 @@ a_input_game:
 
     lda #$00
     sta delay_timer+1
-    lda #$0F
+    lda weapon_timer, y
     sta delay_timer
 
     ; disable inputs
