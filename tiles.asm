@@ -25,6 +25,8 @@ collision:
 ; returns:
 ;   a = 0 always
 exit_collision:
+    jsr abort_delay ; abort possible weapon
+
     lda #$01
     sta tiles_to_clear
     lda #$00
