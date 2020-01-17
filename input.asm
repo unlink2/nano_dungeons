@@ -171,6 +171,11 @@ a_input_game:
     rts
 @init:
 
+    ; disable blinking animation
+    lda sprite_data+1
+    and #%01111111
+    sta sprite_data+1
+
     jsr init_sword_noise
 
     lda weapon_update_lo, y
