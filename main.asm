@@ -51,7 +51,8 @@
 
 .define MAX_HP $02
 .define START_ARMOR $00
-.define START_DAMAGE $00
+.define START_DAMAGE $01
+.define START_WEAPON $01
 
 .define GENERATE_NEW_MAP $00
 

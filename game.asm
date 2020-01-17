@@ -27,6 +27,9 @@ init_game:
     lda #START_DAMAGE
     sta player_damage
 
+    lda #START_WEAPON
+    sta weapon_type
+
     lda #START_ARMOR ; base armor
     sta player_armor_base
     sta player_armor
@@ -34,8 +37,7 @@ init_game:
     lda #$00
     sta map_flags ; reset all map flags
     sta key_count ; no keys when map begins
-    sta player_timer ; no timer for player
-    sta weapon_type
+    sta player_timer ; no timer for player 
     sta iframes ; no iframes
     sta move_timer ; reset move timer
 
