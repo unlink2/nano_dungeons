@@ -210,10 +210,7 @@ hide_objs:
 ;   rand8 changes
 random:
 	lda rand8
-	lsr
-	bcc @noeor
-	eor #$B4
-@noeor
+    jsr random_reg
 	sta rand8
 	rts
 
@@ -224,12 +221,40 @@ random:
 ; returns:
 ;   new random number in a
 random_reg:
-    ; sta temp_rand
     lsr
 	bcc @noeor
-    ;eor temp_rand
     eor #$B4
 @noeor
+    rts
+
+; 8 bit xorshift random number
+; used only for seed
+; slow but more random
+; inputs:
+;   a -> seed
+;   x -> seed+1
+; returns:
+;   new random number in a and x
+random_xor:
+    pha ; push seed
+    and #$B8
+
+    ldx #$05
+    ldy #$00
+@loop:
+    asl
+    bcc @bit_clear ; branch until bit = 0
+
+    iny ; count amount of bits shifted off
+@bit_clear:
+    dex
+    bne @loop
+
+    tya ; feedback count
+    lsr ; bit 0 is in carry
+    pla ; get seed
+    rol ; rotate carry in
+
     rts
 
 ; this sub routine reloads a room

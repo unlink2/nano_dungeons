@@ -119,7 +119,7 @@ errno 1 ; error number, nonzero values are errors
 
 rand8 1 ; 8 bit random number
 rand16 1 ; 16 bit random number
-temp_rand 1 ; temp storage only for rand calculation
+temp_rand 2 ; temp storage only for rand calculation
 game_mode 1
 move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select

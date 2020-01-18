@@ -25,22 +25,23 @@ generate_map:
     sty get_tile_y
     jsr insert_room
 
-    ldx #$FF ; generate rooms x  more times
+    ldx #$30 ; generate rooms x  more times
 @gen_loop:
     txa
     pha ; loop counter
 
     ; advance seed
     lda seed
-    jsr random_reg
+    jsr random_xor
     sta seed
     lda seed+1
-    jsr random_reg
+    jsr random_xor
     sta seed+1
 
     ; TODO this is bad improve
     ; TODO prevent writes out of bounds
     ; TODO maps are too small rooms overlap
+    ; TODO unreachable spots
     ; which direction do we move
 
 
@@ -48,7 +49,7 @@ generate_map:
     lda seed
     eor seed+1
     and #ROOM_HEADERS
-    tax
+    tax 
     sta temp
     ; set up ptr to read room size
     lda rooms_lo, x
@@ -58,11 +59,10 @@ generate_map:
 
     ; pick random coordinate
     lda seed
-    eor seed+1
     and #$1F
     sta get_tile_x
+
     lda seed+1
-    eor seed
     and #$1F
     sta get_tile_y
 
@@ -72,6 +72,7 @@ generate_map:
     sbc (temp+1), y
     sta get_tile_x
     lda get_tile_y
+    iny
     sec
     sbc (temp+1), y
     sta get_tile_y
@@ -236,7 +237,7 @@ rooms_lo:
 .db <room8x2
 .db <room8x2
 .db <room2x8
-.db <room2x8
+.db <room4x4
 
 rooms_hi:
 .db >room6x6
@@ -246,10 +247,10 @@ rooms_hi:
 .db >room8x2
 .db >room8x2
 .db >room2x8
-.db >room2x8
+.db >room4x4
 
 room6x6:
-.db $06, $06, $62
+.db $05, $05, $62
 room6x3:
 .db $06, $03, $62
 room3x6:
@@ -260,3 +261,5 @@ room8x2:
 .db $08, $02, $62
 room2x8:
 .db $02, $08, $62
+room4x4:
+.db $04, $04, $62
