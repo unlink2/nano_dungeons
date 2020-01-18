@@ -16,11 +16,90 @@
 ;   level_ptr -> pointing to buffer
 ;   seed -> rng seed for map
 generate_map:
+    ; start out center-ish
     ldx #$0A
     ldy #$0A
     lda #$00
+    ; backup coordinates for later
+    stx get_tile_x
+    sty get_tile_y
+    jsr insert_room
 
-    jsr insert_room 
+    ; just place a start tile for testing purposes
+    lda #$60
+    ldy #$00
+    sta (dest_ptr), y
+
+    ldx #$20 ; generate rooms x  more times
+@gen_loop:
+    txa
+    pha ; loop counter
+
+    ; advance seed
+    lda seed
+    jsr random_reg
+    sta seed
+    lda seed+1
+    jsr random_reg
+    sta seed+1
+
+    ; TODO this is bad improve
+    ; which direction do we move
+    lda seed
+    eor seed+1
+    and #$03
+    cmp #UP
+    bne @not_up:
+
+    dec get_tile_y
+    dec get_tile_y
+    dec get_tile_y
+    dec get_tile_y
+    inc get_tile_x
+    inc get_tile_x
+    jmp @done
+@not_up:
+    cmp #DOWN
+    bne @not_down
+    ; down
+    inc get_tile_y
+    inc get_tile_y
+    inc get_tile_y
+    inc get_tile_y
+    dec get_tile_x
+    dec get_tile_x
+    jmp @done
+@not_down:
+    cmp #LEFT
+    bne @not_left
+    dec get_tile_x
+    dec get_tile_x
+    dec get_tile_x
+    dec get_tile_x
+    inc get_tile_y
+    inc get_tile_y
+    jmp @done
+@not_left:
+    cmp #RIGHT
+    bne @not_right
+    inc get_tile_x
+    inc get_tile_x
+    inc get_tile_x
+    inc get_tile_x
+    dec get_tile_y
+    dec get_tile_y
+    jmp @done
+@not_right:
+@done:
+
+    ldx get_tile_x
+    ldy get_tile_y
+    lda #$00
+    jsr insert_room
+    pla
+    tax  ; loop counter
+    dex
+    bne @gen_loop
 
     rts
 
@@ -96,11 +175,6 @@ insert_room:
     dex
     cpx #$FF ; underflow
     bne @y_loop
-
-    ; just place a start tile for testing purposes
-    lda #$60
-    ldy #$00
-    sta (dest_ptr), y
 
     rts
 

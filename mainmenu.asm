@@ -117,5 +117,11 @@ update_main_menu:
     lsr 
     sta sprite_data_2+1
 
+    ; seed = rand16 in main menu
+    lda rand8
+    sta seed
+    lda rand16
+    sta seed+1
+
 @done:
     jmp update_done
