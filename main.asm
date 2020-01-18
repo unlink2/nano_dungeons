@@ -90,6 +90,8 @@
 
 .define SAVE_DATA_SIZE 10 ; 10 bytes including checksum
 
+.define ROOM_HEADERS $03 ; max room header offset
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
@@ -116,6 +118,7 @@ errno 1 ; error number, nonzero values are errors
 
 rand8 1 ; 8 bit random number
 rand16 1 ; 16 bit random number
+temp_rand 1 ; temp storage only for rand calculation
 game_mode 1
 move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select

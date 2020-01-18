@@ -224,11 +224,13 @@ random:
 ; returns:
 ;   new random number in a
 random_reg:
-	lsr
+    sta temp_rand
+    lsr
 	bcc @noeor
-	eor #$B4
+	eor temp_rand
+    eor #$B4
 @noeor
-    rts 
+    rts
 
 ; this sub routine reloads a room
 ; inputs:

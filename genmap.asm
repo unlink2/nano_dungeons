@@ -25,12 +25,7 @@ generate_map:
     sty get_tile_y
     jsr insert_room
 
-    ; just place a start tile for testing purposes
-    lda #$60
-    ldy #$00
-    sta (dest_ptr), y
-
-    ldx #$20 ; generate rooms x  more times
+    ldx #$FF ; generate rooms x  more times
 @gen_loop:
     txa
     pha ; loop counter
@@ -44,62 +39,69 @@ generate_map:
     sta seed+1
 
     ; TODO this is bad improve
+    ; TODO prevent writes out of bounds
+    ; TODO maps are too small rooms overlap
     ; which direction do we move
+
+    ; pick random coordinate
     lda seed
     eor seed+1
-    and #$03
-    cmp #UP
-    bne @not_up:
+    and #$1F
+    sta get_tile_x
+    lda seed+1
+    eor seed
+    and #$1F
+    sta get_tile_y
 
-    dec get_tile_y
-    dec get_tile_y
-    dec get_tile_y
-    dec get_tile_y
-    inc get_tile_x
-    inc get_tile_x
-    jmp @done
-@not_up:
-    cmp #DOWN
-    bne @not_down
-    ; down
-    inc get_tile_y
-    inc get_tile_y
-    inc get_tile_y
-    inc get_tile_y
-    dec get_tile_x
-    dec get_tile_x
-    jmp @done
-@not_down:
-    cmp #LEFT
-    bne @not_left
-    dec get_tile_x
-    dec get_tile_x
-    dec get_tile_x
-    dec get_tile_x
-    inc get_tile_y
-    inc get_tile_y
-    jmp @done
-@not_left:
-    cmp #RIGHT
-    bne @not_right
-    inc get_tile_x
-    inc get_tile_x
-    inc get_tile_x
-    inc get_tile_x
-    dec get_tile_y
-    dec get_tile_y
-    jmp @done
-@not_right:
-@done:
+
+    ; check oob coodrinates x
+    lda get_tile_x
+    cmp #31-5
+    bcc @less_x
+    lda #$0A
+    sta get_tile_x
+    pla
+    tax
+    jmp @gen_loop
+@less_x:
+
+    ; check oob coordinates y
+    lda get_tile_y
+    cmp #29-5
+    bcc @less_y
+    lda #$0A
+    sta get_tile_y
+    pla
+    tax
+    jmp @gen_loop
+@less_y:
+    ; get the tile
+    jsr get_tile
+    cmp #$24 ; if not empty tile generate room
+    bne @good_tile
+    ; if bad tile try again
+    pla
+    tax
+    jmp @gen_loop
+@good_tile:
 
     ldx get_tile_x
     ldy get_tile_y
-    lda #$00
+
+    ; pick room from seed
+    lda seed
+    eor seed+1
+    and #ROOM_HEADERS
     jsr insert_room
     pla
     tax  ; loop counter
     dex
     bne @gen_loop
+
+    ; just place a start tile for testing purposes
+    lda #$60
+    ldy #$00
+    sta (dest_ptr), y
 
     rts
 
@@ -186,10 +188,22 @@ insert_room:
 ;   Byte 1: Y Size
 ;   Byte 0: Fill Tile
 rooms_lo:
-.db <test_room
+.db <room4x4
+.db <room4x2
+.db <room2x4
+.db <room2x2
 
 rooms_hi:
-.db >test_room
+.db >room4x4
+.db >room4x2
+.db >room2x4
+.db >room2x2
 
-test_room:
+room4x4:
 .db $04, $04, $62
+room4x2:
+.db $04, $02, $62
+room2x4:
+.db $02, $04, $62
+room2x2:
+.db $02, $02, $62
