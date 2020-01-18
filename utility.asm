@@ -227,7 +227,7 @@ random_reg:
     sta temp_rand
     lsr
 	bcc @noeor
-	eor temp_rand
+    eor temp_rand
     eor #$B4
 @noeor
     rts
