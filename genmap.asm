@@ -17,8 +17,8 @@
 ;   seed -> rng seed for map
 generate_map:
     ; start out center-ish
-    ldx #$0A
-    ldy #$0A
+    ldx #$04
+    ldy #$04
     lda #$00
     ; backup coordinates for later
     stx get_tile_x
@@ -43,6 +43,19 @@ generate_map:
     ; TODO maps are too small rooms overlap
     ; which direction do we move
 
+
+    ; pick room from seed
+    lda seed
+    eor seed+1
+    and #ROOM_HEADERS
+    tax
+    sta temp
+    ; set up ptr to read room size
+    lda rooms_lo, x
+    sta temp+1
+    lda rooms_hi, x
+    sta temp+2 ; ptr to rooms
+
     ; pick random coordinate
     lda seed
     eor seed+1
@@ -53,28 +66,25 @@ generate_map:
     and #$1F
     sta get_tile_y
 
-
-    ; check oob coodrinates x
+    ldy #$00
     lda get_tile_x
-    cmp #31-5
-    bcc @less_x
-    lda #$0A
+    sec
+    sbc (temp+1), y
     sta get_tile_x
-    pla
-    tax
-    jmp @gen_loop
-@less_x:
-
-    ; check oob coordinates y
     lda get_tile_y
-    cmp #29-5
-    bcc @less_y
-    lda #$0A
+    sec
+    sbc (temp+1), y
     sta get_tile_y
+
+    ; oob check
+    jsr check_oob_coordinates
+    cmp #$01
+    bne @not_oob
     pla
-    tax
-    jmp @gen_loop
-@less_y:
+    tax ; pull x
+    jmp @gen_loop ; back to loop
+@not_oob:
+
     ; get the tile
     jsr get_tile
     cmp #$24 ; if not empty tile generate room
@@ -85,14 +95,12 @@ generate_map:
     jmp @gen_loop
 @good_tile:
 
+    ; offset coordinates
     ldx get_tile_x
     ldy get_tile_y
-
-    ; pick room from seed
-    lda seed
-    eor seed+1
-    and #ROOM_HEADERS
+    lda temp ; room header ptr
     jsr insert_room
+
     pla
     tax  ; loop counter
     dex
@@ -103,6 +111,39 @@ generate_map:
     ldy #$00
     sta (dest_ptr), y
 
+    rts
+
+; checks if coordinates will reach out of bounds
+; inputs:
+;   get_tile_x
+;   get_tile_y
+; returns:
+;   a = 1 if oob
+;   a = 0 if not oob
+; side effects:
+;   overwrites get_tile_x and _y
+check_oob_coordinates:
+    ; check oob coodrinates x
+    lda get_tile_x
+    cmp #31-MAX_ROOM_SIZE+1
+    bcc @less_x
+    lda #$0A
+    sta get_tile_x
+    lda #$01
+    rts
+@less_x:
+
+    ; check oob coordinates y
+    lda get_tile_y
+    cmp #29-MAX_ROOM_SIZE+1
+    bcc @less_y
+    lda #$0A
+    sta get_tile_y
+    lda #$01
+    rts
+@less_y:
+
+    lda #$00
     rts
 
 ; this sub routine copies a room of a certain id
@@ -188,22 +229,34 @@ insert_room:
 ;   Byte 1: Y Size
 ;   Byte 0: Fill Tile
 rooms_lo:
-.db <room4x4
-.db <room4x2
-.db <room2x4
-.db <room2x2
+.db <room6x6
+.db <room6x3
+.db <room3x6
+.db <room3x3
+.db <room8x2
+.db <room8x2
+.db <room2x8
+.db <room2x8
 
 rooms_hi:
-.db >room4x4
-.db >room4x2
-.db >room2x4
-.db >room2x2
+.db >room6x6
+.db >room6x3
+.db >room3x6
+.db >room3x3
+.db >room8x2
+.db >room8x2
+.db >room2x8
+.db >room2x8
 
-room4x4:
-.db $04, $04, $62
-room4x2:
-.db $04, $02, $62
-room2x4:
-.db $02, $04, $62
-room2x2:
-.db $02, $02, $62
+room6x6:
+.db $06, $06, $62
+room6x3:
+.db $06, $03, $62
+room3x6:
+.db $03, $06, $62
+room3x3:
+.db $03, $03, $62
+room8x2:
+.db $08, $02, $62
+room2x8:
+.db $02, $08, $62

@@ -224,10 +224,10 @@ random:
 ; returns:
 ;   new random number in a
 random_reg:
-    sta temp_rand
+    ; sta temp_rand
     lsr
 	bcc @noeor
-    eor temp_rand
+    ;eor temp_rand
     eor #$B4
 @noeor
     rts
