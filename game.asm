@@ -18,7 +18,7 @@ init_game:
     and #%11011111 ; enables input
     sta nmi_flags
 
-    lda #GAME_MODE_PUZZLE
+    lda #GAME_MODE_GAME
     sta game_mode
 
     lda #MAX_HP ; hp
@@ -37,7 +37,7 @@ init_game:
     lda #$00
     sta map_flags ; reset all map flags
     sta key_count ; no keys when map begins
-    sta player_timer ; no timer for player 
+    sta player_timer ; no timer for player
     sta iframes ; no iframes
     sta move_timer ; reset move timer
 
@@ -234,7 +234,7 @@ update_game:
     lda (pulse_ptr_1), y
     cmp #$FF
     bne @no_audio_reset
-    jsr init_test_song
+    ; jsr init_test_song
 @no_audio_reset:
 
     ; test for movement inputs, if non occured reset
@@ -337,7 +337,7 @@ update_game:
     sta update_sub_crit+1
 
     lda #<init_win_condition
-    sta delay_done 
+    sta delay_done
     lda #>init_win_condition
     sta delay_done+1
 @done:
@@ -357,12 +357,12 @@ init_win_condition:
     ora #%00100000
     sta load_flags
 
-    lda #$01 
+    lda #$01
     sta nametable
 
     set_nmi_flag
 
-    ldx #GAME_MODE_MESSAGE 
+    ldx #GAME_MODE_MESSAGE
     stx game_mode
     jsr load_menu
     jsr init_message
@@ -371,10 +371,10 @@ init_win_condition:
 
     vblank_wait
 
-    rts 
+    rts
 
 
-; this sub routine updates the player's animation based on 
+; this sub routine updates the player's animation based on
 ; the movement offset
 ; inputs:
 ;   smooth up, down, left, right
@@ -405,16 +405,16 @@ update_player_animation:
 @short_timer:
     lda #08
     sta player_timer
-    rts 
+    rts
 @done:
     dec player_timer
     rts
 
 ; checks for player collision based on the currently occupied tile
 ; inputs:
-;   player_x, y and respective _bac 
+;   player_x, y and respective _bac
 ; side effects:
-;   if tile does collide, player position is restored 
+;   if tile does collide, player position is restored
 ;   to values in _bac
 ;   overwrites src_ptr
 ; returns:
@@ -433,15 +433,15 @@ collision_check:
     lda player_y
     sta get_tile_y
     jsr get_tile
-    tax 
-    ; get routine for current tile 
-    lda tile_sub_lo, x 
-    sta src_ptr 
-    lda tile_sub_hi, x 
+    tax
+    ; get routine for current tile
+    lda tile_sub_lo, x
+    sta src_ptr
+    lda tile_sub_hi, x
     sta src_ptr+1
 
     jsr jsr_indirect
-    cmp #$01 
+    cmp #$01
     bne @no_collision_tile
     beq @collision_tile
 @no_collision_tile:
@@ -468,7 +468,7 @@ collision_check:
     rts
 @no_collision:
 
-    rts 
+    rts
 
 ; this sub routine updates the tiles to clear counter
 ; it does this based on the negative flag
@@ -480,30 +480,30 @@ collision_check:
 ;   flags may be changed
 ;   registers are preserved
 update_tiles_to_clear:
-    pha 
+    pha
     ; eor sets the negative flag when bit 7 is set
     ; since that is exactly the bit we set we can use it to
     ; decide wheter to inc or dec
     bmi @negative_flag
     lda tiles_to_clear
-    clc    
-    adc #$01 
+    clc
+    adc #$01
     sta tiles_to_clear
     lda tiles_to_clear+1
-    adc #$00 
+    adc #$00
     sta tiles_to_clear+1
     jmp @done
 @negative_flag:
     lda tiles_to_clear
-    sec 
-    sbc #$01 
+    sec
+    sbc #$01
     sta tiles_to_clear
     lda tiles_to_clear+1
-    sbc #$00 
+    sbc #$00
     sta tiles_to_clear+1
 @done:
-    pla 
-    rts 
+    pla
+    rts
 
 ; this sub routine loads the win screen
 ; inputs:
@@ -514,12 +514,12 @@ init_message:
     lda #$00 ; move player offscreen
     sta sprite_data
     sta sprite_data+3
-    sta player_x 
+    sta player_x
     sta player_y
     sta player_x_bac
     sta player_y_bac
 
-    lda #<update_message 
+    lda #<update_message
     sta update_sub
     lda #>update_message
     sta update_sub+1
@@ -529,7 +529,7 @@ init_message:
     lda #>update_crit_none
     sta update_sub_crit+1
 
-    rts 
+    rts
 
 ; update routine for the win screen
 update_message:
@@ -602,7 +602,7 @@ sword_done:
     dex
     cpx #$FF
     bne @disable_loop
-    
+
     jsr hide_damage_animation
     rts
 
@@ -632,7 +632,7 @@ arrow_update:
 @not_left:
 @no_move:
     jsr sword_update
-    rts 
+    rts
 
 ; decs weapon damage unless it is 1
 ; then calls sword_done
@@ -643,7 +643,7 @@ arrow_done:
     dec player_damage
 @no_dec:
     jsr sword_done
-    rts 
+    rts
 
 ; this sub routine checks if
 ; a move input should actually mvoe the player
@@ -826,7 +826,7 @@ setup_tile_updates:
     sec
     sbc #VISIBILITY_RADIUS
     sta get_tile_y
-    sta draw_buffer_y 
+    sta draw_buffer_y
 
     ldy #29
     lda get_tile_y

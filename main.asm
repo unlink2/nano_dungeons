@@ -1,17 +1,17 @@
 ; header
 .db $4E, $45, $53, $1A, ; NES + MS-DOS EOF
-.db $01 ; prg rom size in 16kb 
+.db $01 ; prg rom size in 16kb
 .db $01 ; chr rom in 8k bits
 .db $03 ; mapper 0 contains sram at $6000-$7FFF
 .db $00 ; mirroring
-.db $00 ; no prg ram 
-.db $00, $00, $00, $00, $00, $00, $00 ; rest is unused 
+.db $00 ; no prg ram
+.db $00, $00, $00, $00, $00, $00, $00 ; rest is unused
 
 .include "charmap.asm"
 
 .define MOVE_DELAY_FRAMES 10
 .define GAME_MODE_MENU 0
-.define GAME_MODE_PUZZLE 1
+.define GAME_MODE_GAME 1
 .define GAME_MODE_EDITOR 2
 .define GAME_MODE_EDITOR_MENU 3
 .define GAME_MODE_MESSAGE 4
@@ -41,7 +41,7 @@
 .define EDITOR_MENU_ADDR 13
 .define EDITOR_MENU_MEMVALUE 14
 
-.define MAIN_MENU_LEVEL 0 
+.define MAIN_MENU_LEVEL 0
 .define MAIN_MENU_SLOT_1 1
 .define MAIN_MENU_SLOT_2 2
 .define MAIN_MENU_SLOT_3 3
@@ -60,7 +60,7 @@
 .define START_TILE $60
 .define CLEARABLE_TILES_START $60
 .define CLEARABLE_TILES_END $7f
-.define CLEARABLE_MIRROR_START $E0 
+.define CLEARABLE_MIRROR_START $E0
 .define CLEARABLE_MIRROR_END $FF
 
 .define ERROR_NO_START_TILE 1
@@ -790,18 +790,18 @@ attr_convert_table:
 .db (.ri.*4)
 .endrep
 
-; lookup table of the low byte 
+; lookup table of the low byte
 ; for ppu updates for all possible player positions
 ; this is for every possible y position
 tile_update_table_lo:
-.mrep 32 
+.mrep 32
 .db <(.ri.)*32
-.endrep 
+.endrep
 
-; counts the amounts of carrys that occur 
+; counts the amounts of carrys that occur
 ; when calculating the tile's address
 tile_update_table_hi:
-.mrep 32 
+.mrep 32
 .db >((.ri.)*32)
 .endrep
 
@@ -813,7 +813,7 @@ attr_update_table_y:
 .db (.ri.*8)
 .db (.ri.*8)
 .db (.ri.*8)
-.endrep 
+.endrep
 
 attr_update_table_x:
 .mrep 8
@@ -821,7 +821,7 @@ attr_update_table_x:
 .db (.ri.)
 .db (.ri.)
 .db (.ri.)
-.endrep 
+.endrep
 
 ; table of pointers to map entries
 map_table_lo:
@@ -912,7 +912,7 @@ player_animation_right:
 .db $35 ; rotation start again
 
 player_attr_right:
-.db %00000000 
+.db %00000000
 .db %00000000
 .db %00000000
 .db %00000000
@@ -923,18 +923,18 @@ player_attr_right:
 .db %01000000
 
 player_animation_left:
-.db $32 ; idle 
-.db $32 ; idle 
-.db $35 
-.db $34 
-.db $33 
-.db $33 
+.db $32 ; idle
+.db $32 ; idle
+.db $35
+.db $34
+.db $33
+.db $33
 .db $34
 .db $35
 .db $35 ; rotation start again
 
 player_attr_left:
-.db %01000000 
+.db %01000000
 .db %01000000
 .db %01000000
 .db %01000000
@@ -945,18 +945,18 @@ player_attr_left:
 .db %00000000
 
 player_animation_up:
-.db $32 ; idle 
-.db $32 ; idle 
-.db $35 
-.db $34 
-.db $33 
-.db $33 
+.db $32 ; idle
+.db $32 ; idle
+.db $35
+.db $34
+.db $33
+.db $33
 .db $34
 .db $35
 .db $35 ; rotation start again
 
 player_attr_up:
-.db %00000000 
+.db %00000000
 .db %00000000
 .db %00000000
 .db %00000000
@@ -967,18 +967,18 @@ player_attr_up:
 .db %01000000
 
 player_animation_down:
-.db $32 ; idle 
-.db $32 ; idle 
-.db $35 
-.db $34 
-.db $33 
-.db $33 
+.db $32 ; idle
+.db $32 ; idle
+.db $35
+.db $34
+.db $33
+.db $33
 .db $34
 .db $35
 .db $35 ; rotation start again
 
 player_attr_down:
-.db %00000000 
+.db %00000000
 .db %00000000
 .db %00000000
 .db %00000000
@@ -995,8 +995,8 @@ tile_sub_lo:
 .endrep
 
 .db #<jump_right ; left jump tile
-.db #<jump_up ; up jump tile 
-.db #<jump_down ; down jump tile 
+.db #<jump_up ; up jump tile
+.db #<jump_down ; down jump tile
 .db #<jump_left ; right jump tile
 
 .db #<no_collision ; start tile
@@ -1355,7 +1355,7 @@ period_table_hi:
 .error ($FFFA-$) & $80000000, "Error: Interrupt vector out of range."
 .pad $FFFA
 .dw nmi ; nmi
-.dw init ; reset 
+.dw init ; reset
 .dw irq ; irq
 
 ; chr bank 8k
