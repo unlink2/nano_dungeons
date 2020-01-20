@@ -66,7 +66,7 @@ init_game:
 
     lda game_flags
     ora #%01000000
-    sta game_flags ; enable sprite updating
+    sta game_flags ; enable sprite updating, disable tile updating
 
     jsr init_ai_tiles
     jsr find_start
@@ -156,6 +156,11 @@ update_game_crit:
     ; to 0. a move ends the turn
     lda #$00
     sta actions
+
+    ; skip tile update if flag is not set
+    lda game_flags
+    and #%00000010
+    beq @skip_tile_update
 
     ; test if the current tile
     ; is already marked if so, do not update the previous tile but rather unmark the current

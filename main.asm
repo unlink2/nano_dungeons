@@ -98,6 +98,7 @@ frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
 nmi_flags 1
 ; 7th bit = 1 -> switch disabled, barries can be passed, 6th bit = 1 -> sprite update enabled
+; 1st bit = 1 -> enable tile updating when passing
 ; 0th bit = 1 -> collision check failed
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
