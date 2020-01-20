@@ -993,8 +993,8 @@ update_tile:
     lda temp
     sta $2006 ; set up ppu for tile transfer
 
-    lda game_mode
-    cmp #GAME_MODE_EDITOR
+    lda editor_flags
+    and #%01000000
     bne @not_editor
 
     lda sprite_data+1

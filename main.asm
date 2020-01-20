@@ -109,6 +109,7 @@ load_flags 1
 key_count 1 ; amount of keys collected
 ; editor flags, mostly used for menu select
 ; 7th bit = 1 -> tile select mode, = 0 -> menu mode
+; 6th bit = 1 -> update tile 7th bit; = 0 -> update tile based in player sprite
 editor_flags 1
 
 ; 5th bit = 1 -> sprite pattent table

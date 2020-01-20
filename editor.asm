@@ -161,7 +161,12 @@ init_editor_menu:
     lda #$00
     sta level_data_ptr_bac
     lda #$01
-    sta level_data_ptr_bac+1 
+    sta level_data_ptr_bac+1
+
+    ; tile replace mode
+    lda editor_flags
+    and #%10111111
+    sta editor_flags
 
     ; backup player's location and
     ; move to cursor position

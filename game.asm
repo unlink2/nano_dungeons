@@ -10,6 +10,10 @@ init_game:
     lda #$00
     sta gfx_flags
 
+    ; tile update mode
+    lda #%01000000
+    sta editor_flags
+
     inc level
 
     ; re-enable input just in case player died
