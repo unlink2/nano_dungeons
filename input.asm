@@ -156,6 +156,7 @@ a_input:
     cmp #GAME_MODE_MENU
     bne @not_main_menu
     jsr a_input_main_menu
+    rts
 @not_main_menu:
     cmp #GAME_MODE_GAME
     bne @done
