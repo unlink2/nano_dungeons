@@ -25,7 +25,8 @@ generate_map:
     sty get_tile_y
     jsr insert_room
 
-    ldx #$30 ; generate rooms x  more times
+    ldx #$30
+    ;ldx #$24 ; generate rooms x  more times
 @gen_loop:
     txa
     pha ; loop counter
@@ -38,9 +39,6 @@ generate_map:
     jsr random_xor
     sta seed+1
 
-    ; TODO this is bad improve
-    ; TODO prevent writes out of bounds
-    ; TODO maps are too small rooms overlap
     ; TODO unreachable spots
     ; which direction do we move
 
@@ -164,7 +162,7 @@ insert_room:
     sta dest_ptr+1
 
     ; low byte of level_ptr is alwasy $00, no need to add it
-    lda tile_update_table_lo, x
+    lda tile_update_table_lo, y
     clc
     stx temp
     adc temp
