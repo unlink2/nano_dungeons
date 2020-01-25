@@ -39,7 +39,6 @@ generate_map:
     jsr random_xor
     sta seed+1
 
-    ; TODO unreachable spots
     ; which direction do we move
 
 
@@ -105,10 +104,77 @@ generate_map:
     dex
     bne @gen_loop
 
+    jsr place_sprites
+
     ; just place a start tile for testing purposes
     lda #$60
     ldy #$00
     sta (dest_ptr), y
+
+    rts
+
+; this sub routine places sprite spawns
+; on the map by selecting a location
+; checking if it is in bounds
+; and then placing a sprite spawner tile
+place_sprites:
+    ; TODO load more sprites per level
+    lda #SPRITE_TILES
+    tax ; loop counter
+@loop:
+    ; save x
+    txa
+    pha
+
+    ; advance seed
+    lda seed
+    jsr random_xor
+    sta seed
+    lda seed+1
+    jsr random_xor
+    sta seed+1
+
+    ; pick random coordinate
+    lda seed
+    and #$1F
+    sta get_tile_x
+
+    lda seed+1
+    and #$1F
+    sta get_tile_y
+
+    ; oob check
+    jsr check_oob_coordinates
+    cmp #$01
+    bne @not_oob
+    pla
+    tax ; pull x
+    jmp @loop ; back to loop
+@not_oob:
+
+    jsr get_tile
+    cmp #$24 ; empty tile
+    bne @good_tile
+    ; pull
+    pla
+    tax
+    jmp @loop
+@good_tile
+
+    ; place a sprite tile at this location
+    lda seed
+    eor seed+1
+    tax
+    lda sprite_tile_rng, x 
+    ldx get_tile_x
+    ldy get_tile_y
+    jsr place_tile
+
+    ; restore x
+    pla
+    tax
+    dex
+    bne @loop
 
     rts
 
@@ -228,6 +294,49 @@ insert_room:
 
     rts
 
+
+; places a tile in the map data
+; inputs:
+;   x -> x location
+;   y -> y location
+;   a = tile to place
+place_tile:
+    pha ; store tile
+
+    lda level_ptr
+    sta dest_ptr
+    lda level_ptr+1
+    sta dest_ptr+1
+
+    ; low byte of level_ptr is alwasy $00, no need to add it
+    lda tile_update_table_lo, y
+    clc
+    stx temp
+    adc temp
+    sta dest_ptr
+
+    lda tile_update_table_hi, y
+    adc dest_ptr+1
+    sta dest_ptr+1
+
+    pla
+    ldy #$00
+    sta (dest_ptr), y
+
+    rts
+
+; tabel of 256 possible
+; tile to number mappings
+; for easy placement on the map
+sprite_tile_rng:
+.mrep 13
+.db $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri.
+.db $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri.
+.db $70+.ri., $70+.ri.
+.endrep
+.mrep 21
+.db $72
+.endrep
 
 ; a list of room headers
 ; Room header doc:

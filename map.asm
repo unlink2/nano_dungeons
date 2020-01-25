@@ -913,6 +913,7 @@ load_level_iter:
 ;   player_y -> y position
 ;   sprite_data+1 -> the tile to place
 ;   game_mode -> decides the effect of the update
+;   game_flags -> decides the effect of update (update vs relace)
 ; side effects:
 ;   updates level_data and nametable
 ;   changes registers and flags
