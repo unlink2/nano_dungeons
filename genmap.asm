@@ -126,21 +126,29 @@ check_oob_coordinates:
     lda get_tile_x
     cmp #31-MAX_ROOM_SIZE+1
     bcc @less_x
+@ret_x
     lda #$0A
     sta get_tile_x
     lda #$01
     rts
 @less_x:
+    ; check up oob x
+    cmp #$03 ; 3 tiles over at least
+    bcc @ret_x
 
     ; check oob coordinates y
     lda get_tile_y
     cmp #29-MAX_ROOM_SIZE+1
     bcc @less_y
+@ret_y
     lda #$0A
     sta get_tile_y
     lda #$01
     rts
 @less_y:
+    ; check up oob y
+    cmp #$03 ; 3 tiles down at least
+    bcc @ret_y
 
     lda #$00
     rts
