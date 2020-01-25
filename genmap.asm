@@ -343,7 +343,9 @@ sprite_tile_rng:
 ;   Each room header consists of 3 bytes
 ;   Byte 2: X Size
 ;   Byte 1: Y Size
-;   Byte 0: Fill Tile
+;   Byte 0: Fill Tile. TODO if the fill tile is 24 (empty tile) it is instead
+;   A pre-defined room of X*Y tiles and the header contains the remaining
+;   tiles pre-defined
 rooms_lo:
 .db <room6x6
 .db <room6x3
