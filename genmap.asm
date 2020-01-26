@@ -104,6 +104,12 @@ generate_map:
     dex
     bne @gen_loop
 
+    ; TODO place walls with doors or spaces
+    ; in random spots
+    jsr place_walls
+
+    ; TODO pretty draw walls
+
     jsr place_sprites
 
     ; just place a start tile for testing purposes
@@ -111,6 +117,13 @@ generate_map:
     ldy #$00
     sta (dest_ptr), y
 
+    rts
+
+; this sub routine places walls
+; in random locations
+; the walls will always have one door
+; that is either open or locked
+place_walls:
     rts
 
 ; this sub routine places sprite spawns
@@ -134,32 +147,12 @@ place_sprites:
     jsr random_xor
     sta seed+1
 
-    ; pick random coordinate
-    lda seed
-    and #$1F
-    sta get_tile_x
-
-    lda seed+1
-    and #$1F
-    sta get_tile_y
-
-    ; oob check
-    jsr check_oob_coordinates
-    cmp #$01
-    bne @not_oob
-    pla
-    tax ; pull x
-    jmp @loop ; back to loop
-@not_oob:
-
-    jsr get_tile
-    cmp #$24 ; empty tile
+    jsr get_random_coordinate
     bne @good_tile
-    ; pull
     pla
-    tax
+    tax ; pull values
     jmp @loop
-@good_tile
+@good_tile:
 
     ; place a sprite tile at this location
     lda seed
@@ -177,6 +170,43 @@ place_sprites:
     bne @loop
 
     rts
+
+; selects a random coordinate
+; inputs:
+;   seed
+; returns:
+;   get_tile_x
+;   get_tile_y
+;   a != 0 if ok
+get_random_coordinate:
+    ; pick random coordinate
+    lda seed
+    and #$1F
+    sta get_tile_x
+
+    lda seed+1
+    and #$1F
+    sta get_tile_y
+
+    ; oob check
+    jsr check_oob_coordinates
+    cmp #$01
+    bne @not_oob
+    lda #$00
+    rts
+    ; jmp @loop ; back to loop
+@not_oob:
+
+    jsr get_tile
+    cmp #$24 ; empty tile
+    bne @good_tile
+    ; pull
+    lda #$00 
+    rts 
+    ; jmp @loop
+@good_tile:
+    lda #$01 
+    rts 
 
 ; checks if coordinates will reach out of bounds
 ; inputs:
