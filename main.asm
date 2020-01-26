@@ -90,7 +90,7 @@
 
 .define SAVE_DATA_SIZE 10 ; 10 bytes including checksum
 
-.define ROOM_HEADERS $07 ; max room header offset
+.define ROOM_HEADERS $0F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
 
 .enum $00

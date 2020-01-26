@@ -383,10 +383,7 @@ sprite_tile_rng:
 ;   Byte 1: Y Size
 ;   Byte 2: Fill Tile
 ;   Byte 3: Options
-;       7th bit = 1 -> top wall
-;       6th bit = 1 -> bottom wall
-;       5th bit = 1 -> left wall
-;       4th bit = 1 -> right wall
+;       7th bit = 1 ->
 ;   TODO implement byte 3
 rooms_lo:
 .db <room6x6
@@ -394,9 +391,17 @@ rooms_lo:
 .db <room3x6
 .db <room3x3
 .db <room8x2
-.db <room4x4empty
+.db <room4x4
 .db <room2x8
 .db <room4x4
+.db <room1x4wall
+.db <room4x1wall
+.db <room6x6
+.db <room6x6
+.db <room3x6
+.db <room3x3
+.db <room8x2
+
 
 rooms_hi:
 .db >room6x6
@@ -404,9 +409,17 @@ rooms_hi:
 .db >room3x6
 .db >room3x3
 .db >room8x2
-.db >room4x4empty
+.db >room4x4
 .db >room2x8
 .db >room4x4
+.db >room1x4wall
+.db >room4x1wall
+.db >room6x6
+.db >room6x6
+.db >room3x6
+.db >room3x3
+.db >room8x2
+
 
 room6x6:
 .db $05, $05, $62, $00
@@ -422,5 +435,7 @@ room2x8:
 .db $02, $08, $62, $00
 room4x4:
 .db $04, $04, $62, $00
-room4x4empty
-.db $04, $04, $24, $00
+room1x4wall
+.db $01, $05, $62, $00
+room4x1wall
+.db $05, $01, $62, $00
