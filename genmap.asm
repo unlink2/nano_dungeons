@@ -401,7 +401,7 @@ rooms_lo:
 .db <room3x6
 .db <room3x3
 .db <room8x2
-
+.db <room6x6
 
 rooms_hi:
 .db >room6x6
@@ -419,10 +419,10 @@ rooms_hi:
 .db >room3x6
 .db >room3x3
 .db >room8x2
-
+.db >room6x6
 
 room6x6:
-.db $05, $05, $62, $00
+.db $08, $08, $62, $00
 room6x3:
 .db $06, $03, $62, $00
 room3x6:
