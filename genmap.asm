@@ -266,8 +266,13 @@ insert_room:
 
     iny
     lda (temp), y ; tile to place
-    sta temp ; don't need pointer anymore
+    pha ; store for now
 
+    iny
+    lda (temp), y ; options
+    sta temp+1 ; don't need pointer anymore
+    pla
+    sta temp ; fill tile
 
 @y_loop:
     ldy temp+2 ; load x value
@@ -344,10 +349,15 @@ sprite_tile_rng:
 ; a list of room headers
 ; Room header doc:
 ;   Each room header consists of 3 bytes
-;   Byte 2: X Size
+;   Byte 0: X Size
 ;   Byte 1: Y Size
-;   Byte 0: Fill Tile.
-;   TODO add more properties, like walls on one side etc
+;   Byte 2: Fill Tile
+;   Byte 3: Options
+;       7th bit = 1 -> top wall
+;       6th bit = 1 -> bottom wall
+;       5th bit = 1 -> left wall
+;       4th bit = 1 -> right wall
+;   TODO implement byte 3
 rooms_lo:
 .db <room6x6
 .db <room6x3
@@ -369,16 +379,16 @@ rooms_hi:
 .db >room4x4
 
 room6x6:
-.db $05, $05, $62
+.db $05, $05, $62, $00
 room6x3:
-.db $06, $03, $62
+.db $06, $03, $62, $00
 room3x6:
-.db $03, $06, $62
+.db $03, $06, $62, $00
 room3x3:
-.db $03, $03, $62
+.db $03, $03, $62, $00
 room8x2:
-.db $08, $02, $62
+.db $08, $02, $62, $00
 room2x8:
-.db $02, $08, $62
+.db $02, $08, $62, $00
 room4x4:
-.db $04, $04, $62
+.db $04, $04, $62, $00
