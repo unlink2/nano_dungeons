@@ -334,7 +334,10 @@ sprite_tile_rng:
 .db $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri.
 .db $70+.ri., $70+.ri.
 .endrep
-.mrep 21
+.db $5C, $5D, $5E, $5F ; one way tiles
+.db $6C ; switch tile
+.db $68 ; end tile, more than one allowed
+.mrep 15
 .db $72
 .endrep
 
@@ -343,9 +346,8 @@ sprite_tile_rng:
 ;   Each room header consists of 3 bytes
 ;   Byte 2: X Size
 ;   Byte 1: Y Size
-;   Byte 0: Fill Tile. TODO if the fill tile is 24 (empty tile) it is instead
-;   A pre-defined room of X*Y tiles and the header contains the remaining
-;   tiles pre-defined
+;   Byte 0: Fill Tile.
+;   TODO add more properties, like walls on one side etc
 rooms_lo:
 .db <room6x6
 .db <room6x3
