@@ -24,7 +24,7 @@ generate_map:
     stx get_tile_x
     sty get_tile_y
     jsr insert_room
-
+    ; jmp @gen_done
     ldx #$30
     ;ldx #$24 ; generate rooms x  more times
 @gen_loop:
@@ -46,7 +46,7 @@ generate_map:
     lda seed
     eor seed+1
     and #ROOM_HEADERS
-    tax 
+    tax
     sta temp
     ; set up ptr to read room size
     lda rooms_lo, x
@@ -112,6 +112,7 @@ generate_map:
 
     jsr place_sprites
 
+@gen_done:
     ; just place a start tile for testing purposes
     lda #$60
     ldy #$00
@@ -256,7 +257,7 @@ check_oob_coordinates:
 ;   y -> y location
 ;   a -> room id from room table
 ; side effects:
-;   uses temp, temp+1, temp+2, and dst_ptr
+;   uses temp, temp+1, temp+2, temp1_ptr, temp2_ptr and dst_ptr
 insert_room:
     pha ; store room id for now
 
@@ -280,34 +281,53 @@ insert_room:
     tay
 
     lda rooms_lo, y
-    sta temp ; ptr
+    sta temp1_ptr ; ptr
     lda rooms_hi, y
-    sta temp+1 ; temp now is the pointer to data
+    sta temp1_ptr+1 ; temp now is the pointer to data
 
     ldy #$00 ; get room x size
-    lda (temp), y
+    lda (temp1_ptr), y
     sta temp+2 ; store x, we need it Y times
     dec temp+2 ; -1 to get actual size for loop
 
     iny
-    lda (temp), y
+    lda (temp1_ptr), y
     tax ; move y positon to X
     dex ; -1 to get actual size for loop
 
     iny
-    lda (temp), y ; tile to place
+    lda (temp1_ptr), y ; tile to place
     pha ; store for now
 
     iny
-    lda (temp), y ; options
+    lda (temp1_ptr), y ; options
     sta temp+1 ; don't need pointer anymore
     pla
     sta temp ; fill tile
 
+    ; ptr index for tile loading if required
+    lda #$04
+    sta temp1_index
 @y_loop:
     ldy temp+2 ; load x value
     lda temp ; load tile value
 @x_loop:
+    lda temp+1 ; options
+    and #%10000000 ; is room pre-defined
+    beq @not_pre_defined
+
+    tya
+    pha ; store y for a moment
+    ldy temp1_index
+    lda (temp1_ptr), y
+    iny
+    sty temp1_index ; next index
+    sta temp ; store tile value
+    pla
+    tay ; original y restored
+
+@not_pre_defined:
+    lda temp ; load tile value 
     sta (dest_ptr), y
 
     dey
@@ -383,7 +403,8 @@ sprite_tile_rng:
 ;   Byte 1: Y Size
 ;   Byte 2: Fill Tile
 ;   Byte 3: Options
-;       7th bit = 1 ->
+;       7th bit = 1 -> pre-defined room, tiles follow the header (tiles are mirrored horizontally)
+;   Byte 4-N: Raw room tiles
 ;   TODO implement byte 3
 rooms_lo:
 .db <room6x6
@@ -422,7 +443,15 @@ rooms_hi:
 .db >room6x6
 
 room6x6:
-.db $08, $08, $62, $00
+.db $08, $08, $62, $80
+.db $37, $37, $37, $62, $37, $37, $37, $37
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
 room6x3:
 .db $06, $03, $62, $00
 room3x6:

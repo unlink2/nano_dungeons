@@ -207,6 +207,11 @@ draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw wil
 draw_buffer_x 1 ; start locations for buffer updates
 draw_buffer_y 1
 
+; 2 temp ptrs. not preserved accross calls
+temp1_ptr 2
+temp2_ptr 2
+temp1_index 1 ; index for temp1_ptr
+temp2_index 2 ; index for temp2_ptr
 .ende
 
 ; sprite memory
