@@ -1420,7 +1420,7 @@ game_over:
     lda #<empty_sub
     sta delay_update
     lda #>empty_sub
-    sta delay_update
+    sta delay_update+1
 
     lda #<@reload_map
     sta delay_done

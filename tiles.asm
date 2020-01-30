@@ -21,7 +21,6 @@ collision:
     rts 
 
 ; space tile collision
-; TODO make player "fall"
 ; and then spawn back at previous good location
 ; reduces hp by 1
 space_collision:
@@ -29,9 +28,72 @@ space_collision:
     jsr take_damage
     bne @no_game_over
     jsr game_over
+    rts
 @no_game_over:
+
+    ; init animation
+    ; set up delay timer to play falling animation
+    lda #<@fall_update
+    sta delay_update
+    lda #>@fall_update
+    sta delay_update+1
+
+    lda #<@fall_done
+    sta delay_done
+    lda #>@fall_done
+    sta delay_done+1
+
+    lda #$00
+    sta delay_timer+1
+    lda #$1F ; 32 frames
+    sta delay_timer
+
+    ; disable inputs until fall is done
+    lda nmi_flags
+    ora #%00100000
+    sta nmi_flags
+
     lda #$01
-    rts 
+    rts
+@fall_done:
+    ; enable inputs
+    lda nmi_flags
+    and #%11011111
+    sta nmi_flags
+
+    ; player normal sprite
+    lda #$32
+    sta sprite_data+1
+
+    rts
+
+@fall_update:
+    ; player small sprite
+    lda #$C2
+    sta sprite_data+1
+
+    ; TODO make smooth offset
+    ldx #$08 ; 8 pixel offset
+    ; check last move and place player above hole
+    lda last_move
+    cmp #UP
+    bne @not_up
+    stx smooth_down
+@not_up:
+    cmp #DOWN
+    bne @not_down
+    stx smooth_up
+@not_down:
+    cmp #LEFT
+    bne @not_left
+    stx smooth_right
+@not_left:
+    cmp #RIGHT
+    bne @not_right
+    stx smooth_left
+@not_right:
+    rts
+
 
 ; exit tile
 ; sets victory condition
