@@ -1415,7 +1415,7 @@ sprite_skel_collision:
     beq @reload
     rts 
 @reload:
-
+game_over:
     ; set up delay timer to play death animation
     lda #<empty_sub
     sta delay_update

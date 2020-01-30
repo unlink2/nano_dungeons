@@ -20,6 +20,19 @@ collision:
     lda #$01 
     rts 
 
+; space tile collision
+; TODO make player "fall"
+; and then spawn back at previous good location
+; reduces hp by 1
+space_collision:
+    lda #$01
+    jsr take_damage
+    bne @no_game_over
+    jsr game_over
+@no_game_over:
+    lda #$01
+    rts 
+
 ; exit tile
 ; sets victory condition
 ; returns:

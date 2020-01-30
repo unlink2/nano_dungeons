@@ -997,7 +997,13 @@ player_attr_down:
 
 ; sub routine for tiles, based on tile index
 tile_sub_lo:
-.mrep CLEARABLE_TILES_START-4
+.mrep $24
+.db #<collision ; numbers and letters
+.endrep
+
+.db #<space_collision ; space tile
+
+.mrep CLEARABLE_TILES_START-4+$25
 .db #<collision
 .endrep
 
@@ -1079,7 +1085,13 @@ tile_sub_lo:
 .db #<no_collision ; arrow tile
 
 tile_sub_hi:
-.mrep CLEARABLE_TILES_START-4
+.mrep $24
+.db #>collision ; numbers and letters
+.endrep
+
+.db #>space_collision ; space tile
+
+.mrep CLEARABLE_TILES_START-4+$25
 .db #>collision
 .endrep
 
