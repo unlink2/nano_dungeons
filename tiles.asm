@@ -72,8 +72,19 @@ space_collision:
     lda #$C2
     sta sprite_data+1
 
-    ; TODO make smooth offset
+
     ldx #$08 ; 8 pixel offset
+
+    lda delay_timer
+    cmp #$17 ; if smaller than 8
+    bcc @no_smooth
+    ; smooth offset
+    lda #$1F
+    sec
+    sbc delay_timer
+    tax
+@no_smooth:
+
     ; check last move and place player above hole
     lda last_move
     cmp #UP
