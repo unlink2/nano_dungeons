@@ -112,11 +112,13 @@ generate_map:
 
     jsr place_sprites
 
+    jsr insert_other
+
 @gen_done:
     ; just place a start tile for testing purposes
-    lda #$60
-    ldy #$00
-    sta (dest_ptr), y
+    ; lda #$60
+    ; ldy #$00
+    ; sta (dest_ptr), y
 
     rts
 
@@ -132,7 +134,6 @@ place_walls:
 ; checking if it is in bounds
 ; and then placing a sprite spawner tile
 place_sprites:
-    ; TODO load more sprites per level
     lda #SPRITE_TILES
     tax ; loop counter
 @loop:
@@ -159,7 +160,7 @@ place_sprites:
     lda seed
     eor seed+1
     tax
-    lda sprite_tile_rng, x 
+    lda sprite_tile_rng, x
     ldx get_tile_x
     ldy get_tile_y
     jsr place_tile
@@ -169,6 +170,53 @@ place_sprites:
     tax
     dex
     bne @loop
+
+    rts
+
+; inserts exit and start at random location
+insert_other:
+    lda #$68 ; exit tile
+    jsr insert_singe
+
+    lda #$60 ; start tile
+    jsr insert_singe
+
+    rts
+
+; inserts a single tile at a random location
+; insert single cannot replace start or end tile id
+; inputs:
+;   a = tile id
+; returns:
+;   none
+insert_singe:
+    pha ; store tile id
+; insert tile
+@loop:
+    ; advance seed
+    lda seed
+    jsr random_xor
+    sta seed
+    lda seed+1
+    jsr random_xor
+    sta seed+1
+
+    jsr get_random_coordinate
+    bne @good_tile
+    jmp @loop
+@good_tile:
+    jsr get_tile
+    cmp #$60 ; start tile
+    beq @loop
+    cmp #$58 ; exit tile
+    beq @loop
+
+
+    pla ; get tile id
+    ldx get_tile_x
+    ldy get_tile_y
+    jsr place_tile
+
 
     rts
 

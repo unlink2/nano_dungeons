@@ -394,6 +394,9 @@ clear_mem:
     lda #$01
     sta rand8 ; rand8 must be nonzero
     sta rand16 ; rand16 must not be zero
+    sta seed
+    lda #$02
+    sta seed+1
 
     ; set up palette pointer
     ldx #$00
