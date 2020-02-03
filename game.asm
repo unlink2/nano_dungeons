@@ -358,8 +358,21 @@ init_win_condition:
     lda #$00
     sta $2001 ; no rendering
 
+    ; advance seed
+    lda seed
+    jsr random_reg
+    sta seed
+    lda seed+1
+    jsr random_reg
+    sta seed+1
+
     ; store gamestate
     jsr store_save
+
+    ; if random flag is set load next map
+    lda #%10000000
+    and load_flags
+    bne @next_map
 
     ; set flag to reload values from sram
     lda load_flags
@@ -381,7 +394,12 @@ init_win_condition:
     vblank_wait
 
     rts
-
+@next_map:
+    lda #MAIN_MENU_RANDOM
+    sta menu_select
+    ; load next map
+    jsr a_input_main_menu 
+    rts
 
 ; this sub routine updates the player's animation based on
 ; the movement offset
