@@ -366,6 +366,8 @@ init_win_condition:
     jsr random_reg
     sta seed+1
 
+    inc level
+
     ; store gamestate
     jsr store_save
 
@@ -395,10 +397,17 @@ init_win_condition:
 
     rts
 @next_map:
-    lda #MAIN_MENU_RANDOM
-    sta menu_select
+    ; lda #MAIN_MENU_RANDOM
+    ; sta menu_select
     ; load next map
-    jsr a_input_main_menu 
+    ; make it load the next seed
+    lda seed
+    sta seed_bac
+    lda seed+1
+    sta seed_bac+1
+
+    jsr reload_room
+    ; jsr a_input_main_menu 
     rts
 
 ; this sub routine updates the player's animation based on
