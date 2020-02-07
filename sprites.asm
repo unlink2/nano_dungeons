@@ -1128,11 +1128,18 @@ sprite_skel_update:
     sta sprite_tile_flags, y
 
     ; first reduce hp, if hp 0 then move offscreen
-    tya
-    tax ; need y -> x for dec
-    dec sprite_tile_hp, x
-    bne @not_zero_hp
+    ; tya
+    ; tax ; need y -> x for dec
+    ; apply weapon damage
+    lda sprite_tile_hp, y
+    sec
+    sbc player_damage
+    sta sprite_tile_hp, y
+    ; dec sprite_tile_hp, x
+    beq @zero_hp ; if equal 0 hp
+    bcs @not_zero_hp ; if carry less than 0 was reached
 
+@zero_hp:
     ; call damage animation
     lda sprite_tile_x, y
     sta get_tile_x
@@ -1143,6 +1150,7 @@ sprite_skel_update:
     lda #$00
     sta sprite_tile_x, y
     sta sprite_tile_y, y
+    sta sprite_tile_hp, y
 @not_zero_hp:
     ; after hit move away from player
     ; by setting player's direction as last direction

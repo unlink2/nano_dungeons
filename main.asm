@@ -755,8 +755,8 @@ main_menu_cursor_y:
 .db $0B
 .db $0C
 .db $0E
-.db $0F
 .db $10
+.db $11
 
 main_menu_cursor_attr:
 .db $00

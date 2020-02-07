@@ -437,8 +437,8 @@ sprite_tile_rng:
 .db $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri.
 .db $70+.ri., $70+.ri.
 .endrep
-.db $5C, $5D, $5E, $5F ; one way tiles
-.db $6C ; switch tile
+; .db $5C, $5D, $5E, $5F ; jump tiles
+.db $6C, $6C, $6C, $6C, $6C ; switch tile
 .db $68 ; end tile, more than one allowed
 .mrep 15
 .db $72
@@ -466,7 +466,7 @@ rooms_lo:
 .db <room1x4wall
 .db <room4x1wall
 .db <room6x6
-.db <room6x6
+.db <room6x6_one_way
 .db <room3x6
 .db <room3x3
 .db <room8x2
@@ -484,7 +484,7 @@ rooms_hi:
 .db >room1x4wall
 .db >room4x1wall
 .db >room6x6
-.db >room6x6
+.db >room6x6_one_way
 .db >room3x6
 .db >room3x3
 .db >room8x2
@@ -499,6 +499,16 @@ room6x6:
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $62, $62, $62, $62, $37, $62
 .db $62, $37, $37, $62, $62, $37, $37, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+room6x6_one_way:
+.db $08, $08, $62, $80
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $37, $37, $65, $65, $37, $37, $62
+.db $62, $37, $62, $62, $62, $62, $37, $62
+.db $62, $64, $62, $62, $62, $62, $64, $62
+.db $62, $64, $62, $62, $62, $62, $64, $62
+.db $62, $37, $62, $62, $62, $62, $37, $62
+.db $62, $37, $37, $65, $65, $37, $37, $62
 .db $62, $62, $62, $62, $62, $62, $62, $62
 room6x3:
 .db $06, $03, $62, $00
