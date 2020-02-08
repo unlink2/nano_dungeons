@@ -654,6 +654,9 @@ palette_data:
 .db $21,$0D,$20,$31,$0F,$02,$38,$3C,$0F,$1C,$15,$14,$0F,$02,$38,$3C  ;sprite palette data
 palette_data_end:
 
+dungeon_palette:
+.incbin "./graphics/dungeon.pal"
+
 ; compressed menu gfx
 editor_menu_gfx:
 .incbin "./graphics/editor.gfx"
@@ -874,7 +877,7 @@ attr_table_hi:
 ; color palette table
 palette_table_lo:
 .db #<palette_data
-.db #<palette_data
+.db #<dungeon_palette
 .db #<palette_data
 .db #<win_pal
 .db #<palette_data
@@ -883,7 +886,7 @@ palette_table_lo:
 
 palette_table_hi:
 .db #>palette_data
-.db #>palette_data
+.db #>dungeon_palette
 .db #>palette_data
 .db #>win_pal
 .db #>palette_data
