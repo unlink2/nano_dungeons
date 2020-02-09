@@ -143,6 +143,7 @@ collision_counter 1 ; counts amount of sprite collisions in a frame
 ; ptr to sub routine called for timing critical updates such as ppu updates, is called right at start of nmi
 ; must be short.
 ; must jump to update_crti_done when finished
+; guranteed runs just before input polling
 update_sub_crit 2
 update_sub 2 ; ptr to sub routine called for updates, must jmp to update_done label when finished
 attributes 1 ; colors used, index of address table
@@ -185,6 +186,7 @@ delay_update 2 ; function pointer for update animation, set to 00, 00 to disable
 delay_done 2 ; function pointer to be called when animation finishes, set to 00, 00 to disable
 
 last_inputs 1 ; inputs of controller 1
+prev_inputs 1 ; inputs of previous frame
 
 ; 16 bit count of tiles that have to be cleared, when both are $00 map is won
 ; this is populated during decompression of a map
@@ -535,7 +537,8 @@ nmi_flag_not_set:
     lda nmi_flags
     and #%00000001
     bne update_crit_done
-
+    ; always run crit just before inputs, may intercept last inputs
+    ; this way
     jmp (update_sub_crit)
 
 update_crit_done:

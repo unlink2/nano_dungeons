@@ -381,9 +381,9 @@ init_editor:
     lda #>update_editor
     sta update_sub+1
 
-    lda #<update_crit_none
+    lda #<update_crit_editor
     sta update_sub_crit
-    lda #>update_crit_none
+    lda #>update_crit_editor
     sta update_sub_crit+1
 
     ; set up other sprites used to attribute drawing
@@ -559,3 +559,12 @@ update_editor:
     sta sprite_data_5+3
 
     jmp update_done
+
+; crit update for editor
+update_crit_editor:
+    ; clear prev inputs to allow holding A and B
+    lda #$00
+    sta prev_inputs
+    sta last_inputs ; also clear last_inputs
+
+    jmp update_crit_done

@@ -14,6 +14,8 @@ input_handler:
     lda $4016
     rts
 @not_disabled:
+    lda last_inputs
+    sta prev_inputs
 
     lda #$00
     sta last_inputs
@@ -21,8 +23,13 @@ input_handler:
     lda $4016 ; p1 - A
     and #%00000001
     beq @no_a
+    lda prev_inputs
+    and #%00000001
+    bne @skip_a ; don't allow held inputs
+
     jsr a_input
 
+@skip_a:
     ; was pressed
     lda last_inputs
     ora #%00000001
@@ -33,8 +40,12 @@ input_handler:
     lda $4016 ; p1 - B
     and #%00000001
     beq @no_b
-    jsr b_input
+    lda prev_inputs
+    and #%00000010
+    bne @skip_b ; don't allow held input
 
+    jsr b_input
+@skip_b:
     ; was pressed
     lda last_inputs
     ora #%00000010
