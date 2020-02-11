@@ -416,6 +416,31 @@ sprite_update_default:
     tya
     pha ; push y value for later
 
+    ; test hit flag
+    ; this gets triggered every frame
+    ; due to the hit flag being cleared
+    ; this is fine as long as weapon timer is even
+    ; and gives a flickering effect
+    lda sprite_tile_flags, y
+    and #%01000000
+    bne @not_hit
+    ; test for sword hit
+    lda weapon_x
+    cmp sprite_tile_x, y
+    bne @not_hit
+    lda weapon_y
+    cmp sprite_tile_y, y
+    bne @not_hit
+    ; invert barrier on hit, wastes a turn
+    lda map_flags
+    eor #%10000000
+    sta map_flags
+    ; set hit flag, this flag is reset at the end of attack animation only
+    lda sprite_tile_flags, y
+    ora #%01000000
+    sta sprite_tile_flags, y
+@not_hit:
+
     ; load x position
     ldx sprite_tile_x, y
     stx get_tile_x
@@ -501,6 +526,31 @@ sprite_update_barrier_invert:
 
     tya
     pha ; keep y for later
+
+    ; test hit flag
+    ; this gets triggered every frame
+    ; due to the hit flag being cleared
+    ; this is fine as long as weapon timer is even
+    ; and gives a flickering effect
+    lda sprite_tile_flags, y
+    and #%01000000
+    bne @not_hit
+    ; test for sword hit
+    lda weapon_x
+    cmp sprite_tile_x, y
+    bne @not_hit
+    lda weapon_y
+    cmp sprite_tile_y, y
+    bne @not_hit
+    ; invert barrier on hit, wastes a turn
+    lda map_flags
+    eor #%10000000
+    sta map_flags
+    ; set hit flag, this flag is reset at the end of attack animation only
+    lda sprite_tile_flags, y
+    ora #%01000000
+    sta sprite_tile_flags, y
+@not_hit:
 
     ; load x position
     ldx sprite_tile_x, y
