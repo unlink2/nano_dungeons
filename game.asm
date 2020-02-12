@@ -406,6 +406,11 @@ init_win_condition:
     lda seed+1
     sta seed_bac+1
 
+    ; load from savegame
+    lda load_flags
+    ora #%00100000
+    sta load_flags
+
     jsr reload_room
     ; jsr a_input_main_menu 
     rts
