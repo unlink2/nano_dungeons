@@ -415,6 +415,27 @@ init_win_condition:
     ; jsr a_input_main_menu 
     rts
 
+; loads the game over message as a menu
+init_game_over:
+    lda #$00
+    sta $2001 ; no rendering
+
+    lda #$01
+    sta nametable 
+    set_nmi_flag
+
+    ldx #GAME_MODE_GAME_OVER
+    lda #GAME_MODE_MESSAGE
+    sta game_mode
+    jsr load_menu
+    jsr init_message
+
+    lda #$01 ; set flag to skip update
+
+    vblank_wait
+
+    rts
+
 ; this sub routine updates the player's animation based on
 ; the movement offset
 ; inputs:

@@ -1474,7 +1474,7 @@ sprite_skel_collision:
     rts 
 @reload:
 game_over:
-    ; set up delay timer to play death animation
+    ; TODO set up delay timer to play death animation
     lda #<empty_sub
     sta delay_update
     lda #>empty_sub
@@ -1491,10 +1491,13 @@ game_over:
     sta delay_timer
 
 @reload_map:
-    vblank_wait
-    dec level ; dec leve to avoid a level increase on reload
-    jsr reload_room ; on collision reload area
-    jsr init_hit_noise
+    ; init game over menu
+    jsr init_game_over
+
+    ; vblank_wait
+    ; dec level ; dec leve to avoid a level increase on reload
+    ; jsr reload_room ; on collision reload area
+    ; jsr init_hit_noise
     rts
 
 ; sword pikcup AI

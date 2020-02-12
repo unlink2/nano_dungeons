@@ -16,6 +16,7 @@
 .define GAME_MODE_EDITOR_MENU 3
 .define GAME_MODE_MESSAGE 4
 .define GAME_MODE_TITLE 5
+.define GAME_MODE_GAME_OVER 6
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
@@ -690,6 +691,13 @@ title_gfx:
 title_attr:
 .incbin "./graphics/title.attr"
 title_pal:
+.incbin "./graphics/title.pal"
+
+game_over_gfx:
+.incbin "./graphics/gameover.gfx"
+game_over_attr:
+.incbin "./graphics/title.attr"
+game_over_pal:
 .incbin "./graphics/title.pal"
 
 ; x and y locations for cursor in editor menu
