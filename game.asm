@@ -424,6 +424,8 @@ init_game_over:
     sta nametable 
     set_nmi_flag
 
+    vblank_wait
+
     ldx #GAME_MODE_GAME_OVER
     lda #GAME_MODE_MESSAGE
     sta game_mode

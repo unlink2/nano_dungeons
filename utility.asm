@@ -129,7 +129,24 @@ memcpy:
     dey
     cpy #$FF ; if underflow stop
     bne @loop
-    rts 
+    rts
+
+; this sub routine sets memory of size
+; to a certain value
+; inputs:
+;   y -> size
+;   dest_ptr -> destination
+; side effects:
+;   y is changed
+memset:
+    dey
+@loop:
+    sta (dest_ptr), y
+    dey
+    cpy #$FF ; if underflow stop
+    bne @loop
+    rts
+
 
 ; this sub routine converts a number to hex values
 ; that are ready to be pritned to the screen

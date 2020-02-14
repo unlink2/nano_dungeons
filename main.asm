@@ -94,6 +94,8 @@
 .define ROOM_HEADERS $0F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
 
+.define COLOR_BLACK $1E ; background clear color
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs

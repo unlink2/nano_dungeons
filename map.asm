@@ -404,6 +404,36 @@ load_palette_loop:
 
     rts
 
+; clears color pallette
+; to a certain color
+; useful to hide flickering during loads
+; by using it before load starts
+; inputs:
+;   a -> color to clear to
+clear_palette:
+    pha
+
+    bit $2002
+    lda #$3F
+    sta $2006
+    lda #$00
+    sta $2006
+
+    ldy #PALETTE_SIZE
+    pla
+@loop:
+    sta $2007 ; write to ppu
+    dey
+    bne @loop
+
+    ; no scrolling
+    lda #$00
+    sta $2005
+    sta $2005
+
+    rts
+
+
 
 ; this sub routine loads a level into NT1
 ; inputs:
@@ -764,6 +794,13 @@ load_menu:
     lda #>win_gfx
     sta level_data_ptr+1
 
+    ; copy palette early to avoid flickering
+    lda #<win_pal
+    sta palette_ptr
+    lda #>win_pal
+    sta palette_ptr+1
+    jsr load_palette
+
     ; decompress location, same as level
     lda #<level_data
     sta level_ptr
@@ -778,13 +815,6 @@ load_menu:
     jsr decompress_level
     jsr load_attr
 
-    ; copy palette
-    lda #<win_pal
-    sta palette_ptr
-    lda #>win_pal
-    sta palette_ptr+1
-    jsr load_palette
-
     ldx #$01 ; load into nametable 1
     jsr load_level
 
@@ -792,6 +822,13 @@ load_menu:
 @not_message:
     cpx #GAME_MODE_TITLE
     bne @not_title
+
+    ; copy palette early to avoid flickering
+    lda #<title_pal
+    sta palette_ptr
+    lda #>title_pal
+    sta palette_ptr+1
+    jsr load_palette
 
     ; load win menu compressed tiles
     lda #<title_gfx
@@ -813,19 +850,19 @@ load_menu:
     jsr decompress_level
     jsr load_attr
 
-    ; copy palette
-    lda #<title_pal
-    sta palette_ptr
-    lda #>title_pal
-    sta palette_ptr+1
-    jsr load_palette
-
     ldx #$01 ; load into nametable 1
     jsr load_level
     rts
 @not_title:
     cpx #GAME_MODE_GAME_OVER
     bne @invalid_menu
+
+    ; copy palette
+    lda #<game_over_pal
+    sta palette_ptr
+    lda #>game_over_pal
+    sta palette_ptr+1
+    jsr load_palette
 
     ; load win menu compressed tiles
     lda #<game_over_gfx
@@ -845,14 +882,7 @@ load_menu:
     sta attr_ptr+1
 
     jsr decompress_level
-    jsr load_attr
-
-    ; copy palette
-    lda #<game_over_pal
-    sta palette_ptr
-    lda #>game_over_pal
-    sta palette_ptr+1
-    jsr load_palette
+    jsr load_attr 
 
     ldx #$01 ; load into nametable 1
     jsr load_level
