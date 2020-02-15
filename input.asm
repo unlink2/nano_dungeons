@@ -762,10 +762,22 @@ b_input:
     rts
 @not_editor_menu:
     cmp #GAME_MODE_EDITOR
-    bne @done
+    bne @not_editor
 
     ; editor mode
     jsr update_attr
+    rts
+@not_editor:
+    cmp #GAME_MODE_GAME
+    bne @done
+    ; debug projectile spawn
+    ; TODO remove
+    lda player_x
+    sta get_tile_x
+    lda player_y
+    sta get_tile_y
+    lda last_move
+    ; jsr spawn_projectile
 @done:
     rts
 

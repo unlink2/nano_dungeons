@@ -71,6 +71,9 @@
 .define SPRITE_TILES_END $7D
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
+.define PROJECTILES 8
+.define PROJECTILES_START $30 ; start sprite slots
+
 
 .define SPACE_TILE $24 ; space tile index, required for editor
 
@@ -217,6 +220,21 @@ temp1_ptr 2
 temp2_ptr 2
 temp1_index 1 ; index for temp1_ptr
 temp2_index 2 ; index for temp2_ptr
+.ende
+
+; stack space
+; use for extra ram anyway
+.enum $0100
+; projectiles are like sprites only with less options
+projectile_x PROJECTILES
+projectile_y PROJECTILES
+projectile_obj PROJECTILES
+; flags for each projectile
+; 7th bit = 1 -> sprite enabled, collision will occur
+; lower 3 bits -> Direction
+projectile_flags PROJECTILES
+; timer
+projectile_data PROJECTILES
 .ende
 
 ; sprite memory
@@ -461,6 +479,8 @@ clear_mem:
 
     jsr init_audio_channels
 
+    jsr init_projectile_slots
+
     ; save pointer always points at a fixed location
     ; on boot
     lda #<sav_checksum
@@ -592,6 +612,7 @@ update_crit_done:
     jsr adjust_smooth
 
     jsr update_sprites
+    jsr update_projectiles
 
     jmp (update_sub) ; jump to specific update sub routine
 
@@ -653,6 +674,7 @@ irq:
 .include "./tiles.asm"
 .include "./delay.asm"
 .include "./sprites.asm"
+.include "./projectiles.asm"
 .include "./audio.asm"
 
 palette_data:

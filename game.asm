@@ -63,6 +63,7 @@ init_game:
     jsr load_palette
 
     jsr hide_objs
+    jsr init_projectile_slots ; clear projectiles
 
     lda game_flags
     ora #%01000000
