@@ -1221,6 +1221,8 @@ sprite_skel_update:
     beq @bat_sprite
     cmp #$09 ; mimic AI
     beq @mimic_sprite
+    cmp #$0D ; archer AI
+    beq @archer_sprite
 @skel_sprite:
     ; decide what sprite to use
     lda #$34
@@ -1233,7 +1235,11 @@ sprite_skel_update:
 
 @mimic_sprite:
     lda #$36
-    sta temp+2 ; mimi sprite
+    sta temp+2 ; mimic sprite
+    bne @sprite_picked
+@archer_sprite:
+    lda #$3E
+    sta temp+2
 @sprite_picked:
 
     lda actions
@@ -1261,7 +1267,7 @@ sprite_skel_update:
     beq @bat_left_move_logic
     cmp  #$09 ; mimic move AI
     beq @mimic_move_logic
-    ; skel move logic, random
+    ; skel/archer move logic, random
 @skel_move_logic:
     ; pick a direction to move in randomly
     jsr random
@@ -1415,6 +1421,61 @@ sprite_skel_update:
     lsr ; 6 shifts to get the correct number
     sta sprite_tile_temp, y ; store it
 @no_move:
+
+    ; test for archer AI
+    lda sprite_tile_ai, y
+    cmp #$0D
+    bne @not_archer
+    ; test if moves are 0
+    lda actions
+    bne @not_archer
+
+    ; special archer AI may spawn projectile if player is
+    ; in front of it
+    jsr random
+    lda rand8
+    and #$0F
+    cmp #$02
+    bcs @not_archer ; don't shoot
+
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    ; check if x position is the same
+    lda player_x
+    cmp get_tile_x
+    bne @not_x
+    ; if x test which direction to shoot
+    lda player_y
+    cmp get_tile_y
+    bcs @shoot_down
+    lda #UP
+    jsr spawn_projectile
+    jmp @not_archer
+@shoot_down:
+    lda #DOWN
+    jsr spawn_projectile
+    jmp @not_archer
+@not_x:
+
+    lda player_y
+    cmp get_tile_y
+    bne @not_y
+    ; if y test which direction to shoot
+    lda player_x
+    cmp get_tile_x
+    bcs @shoot_right
+    lda #LEFT
+    jsr spawn_projectile
+    jmp @not_archer
+@shoot_right:
+    lda #RIGHT
+    jsr spawn_projectile
+@not_y:
+
+@not_archer:
 
 
     jsr sprite_pos_adjust

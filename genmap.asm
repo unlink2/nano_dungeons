@@ -432,15 +432,15 @@ place_tile:
 ; tile to number mappings
 ; for easy placement on the map
 sprite_tile_rng:
-.mrep 13
+.mrep 14
 .db $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri.
 .db $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri., $70+.ri.
-.db $70+.ri., $70+.ri.
+.db $70+.ri.
 .endrep
 ; .db $5C, $5D, $5E, $5F ; jump tiles
 .db $6C, $6C, $6C, $6C, $6C ; switch tile
 .db $68 ; end tile, more than one allowed
-.mrep 15
+.mrep 12
 .db $72
 .endrep
 

@@ -68,7 +68,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $7D
+.define SPRITE_TILES_END $7E
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 .define PROJECTILES 8
@@ -1236,11 +1236,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; hp tile
 .db #<sprite_init_default ; armor tile
 .db #<sprite_init_default ; arrow tile
+.db #<sprite_init_default ; archer tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1266,6 +1268,7 @@ sprite_ai_lo:
 .db #<sprite_hp_update
 .db #<sprite_armor_update
 .db #<sprite_sword_update
+.db #<sprite_skel_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1281,6 +1284,7 @@ sprite_ai_hi:
 .db #>sprite_hp_update
 .db #>sprite_armor_update
 .db #>sprite_sword_update
+.db #>sprite_skel_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1296,6 +1300,7 @@ sprite_collision_lo:
 .db #<sprite_hp_collision
 .db #<sprite_armor_collision
 .db #<sprite_sword_collision
+.db #<sprite_skel_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1311,6 +1316,7 @@ sprite_collision_hi:
 .db #>sprite_hp_collision
 .db #>sprite_armor_collision
 .db #>sprite_sword_collision
+.db #>sprite_skel_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
