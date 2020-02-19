@@ -44,6 +44,7 @@ init_game:
     sta player_timer ; no timer for player
     sta iframes ; no iframes
     sta move_timer ; reset move timer
+    sta coins
 
     lda #<update_game
     sta update_sub
@@ -1012,6 +1013,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta seed+1
+
+    iny
+    lda (save_ptr), y
+    sta coins
 @invalid:
     rts
 
@@ -1022,6 +1027,11 @@ load_save:
 ;   uses a and y registers
 store_save:
     ldy #SAVE_DATA_SIZE-1
+
+    lda coins
+    sta (save_ptr), y
+
+    dey
     lda seed+1
     sta (save_ptr), y
     dey

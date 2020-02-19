@@ -1198,9 +1198,20 @@ sprite_skel_update:
     jsr init_damage_animation
 
     lda #$00
+    sta sprite_tile_hp, y ; 0 hp
+
+    ; roll rng to decide if sprite becomes a coin
+    jsr random
+    lda rand8
+    and #$01 ; if 0th bit is set turn AI into coin
+    beq @no_coin
+    lda #$0E ; coin AI
+    sta sprite_tile_ai, y
+    jmp @no_move
+@no_coin:
+    lda #$00
     sta sprite_tile_x, y
     sta sprite_tile_y, y
-    sta sprite_tile_hp, y
 @not_zero_hp:
     ; after hit move away from player
     ; by setting player's direction as last direction
@@ -1902,6 +1913,112 @@ sprite_armor_update:
     pla
 
     rts
+
+
+; coin pikcup AI
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_coin_collision:
+    lda sprite_tile_data, y
+    and #%10000000 ; disable flag
+    bne @done
+    ora #%10000000
+    sta sprite_tile_data, y
+
+    inc coins
+@done:
+    lda #$00 ; never return a collision value
+    rts
+
+; sprite pickup update
+; inputs:
+;   y -> pointing to sprite data offset
+; Data:
+;   7th bit -> collected, disable collision and draw next to key icon
+sprite_coin_update:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+
+    lda sprite_tile_data, y
+    and #%10000000
+    beq @enabled
+
+    lda #$00
+    sta sprite_tile_flags, y
+    sta temp+2
+
+    ; store position in UI
+    lda #0
+    sta temp
+
+    lda #0
+    sta temp+1
+
+    jmp @done
+@enabled:
+    lda #%10000000
+    sta sprite_tile_flags, y
+    sta temp+2
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+@done:
+
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda #$3F
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    ; attributes
+    lda #$00
+    ldy #$02
+    sta (sprite_ptr), y
+
+    lda temp+2 ; holds enable flag
+    beq @no_offscreen
+    jsr sprite_offscreen
+
+@no_offscreen:
+    pla
+    tax
+    pla
+    tay
+    pla
+
+    rts
+
+
 
 ; this sub routine inits the damage animation
 ; uses sprites 04 05 06 07

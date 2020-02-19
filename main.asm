@@ -92,7 +92,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 10 ; 10 bytes including checksum
+.define SAVE_DATA_SIZE 11 ; 11 bytes including checksum
 
 .define ROOM_HEADERS $0F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -214,6 +214,9 @@ draw_buffer VISIBILITY_RADIUS*2 ; draw buffer for screen updates
 draw_buffer_len 1 ; how many bytes are to be drawn next frame, if 00 no draw will happen
 draw_buffer_x 1 ; start locations for buffer updates
 draw_buffer_y 1
+
+; money counter
+coins 1
 
 ; 2 temp ptrs. not preserved accross calls
 temp1_ptr 2
@@ -1237,11 +1240,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; armor tile
 .db #<sprite_init_default ; arrow tile
 .db #<sprite_init_default ; archer tile
+.db #<sprite_init_default ; coin tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1269,6 +1274,7 @@ sprite_ai_lo:
 .db #<sprite_armor_update
 .db #<sprite_sword_update
 .db #<sprite_skel_update
+.db #<sprite_coin_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1285,6 +1291,7 @@ sprite_ai_hi:
 .db #>sprite_armor_update
 .db #>sprite_sword_update
 .db #>sprite_skel_update
+.db #>sprite_coin_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1301,6 +1308,7 @@ sprite_collision_lo:
 .db #<sprite_armor_collision
 .db #<sprite_sword_collision
 .db #<sprite_skel_collision
+.db #<sprite_coin_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1317,6 +1325,7 @@ sprite_collision_hi:
 .db #>sprite_armor_collision
 .db #>sprite_sword_collision
 .db #>sprite_skel_collision
+.db #>sprite_coin_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
