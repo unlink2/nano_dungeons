@@ -549,6 +549,16 @@ a_input_main_menu:
     jmp @level_select
 
 @no_resume:
+    cmp #MAIN_MENU_SET_SEED
+    bne @not_set_seed
+    lda seed_input
+    sta seed
+    lda seed_input+1
+    sta seed+1
+    lda #%10000000
+    sta load_flags
+    jmp @level_select
+@not_set_seed:
 
     ; check which slot is selected
     cmp #MAIN_MENU_SLOT_1
@@ -1210,8 +1220,20 @@ go_left_editor_menu:
 go_left_main_menu:
     lda menu_select
     cmp #MAIN_MENU_LEVEL
-    bne @done:
+    bne @not_level
     dec level_select
+    rts
+@not_level:
+    cmp #MAIN_MENU_SET_SEED
+    bne @not_seed
+    lda seed_input+1
+    sec
+    sbc #$01
+    sta seed_input+1
+    bcs @no_underflow
+    dec seed_input
+@no_underflow:
+@not_seed:
 @done:
     rts
 
@@ -1362,8 +1384,20 @@ go_right_editor_menu:
 go_right_main_menu:
     lda menu_select
     cmp #MAIN_MENU_LEVEL
-    bne @done
+    bne @not_level
     inc level_select
+    rts
+@not_level:
+    cmp #MAIN_MENU_SET_SEED
+    bne @not_seed
+    lda seed_input+1
+    clc
+    adc #$01
+    sta seed_input+1
+    bcc @no_overflow
+    inc seed_input
+@no_overflow:
+@not_seed:
 @done:
     rts
 

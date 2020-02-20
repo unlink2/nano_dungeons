@@ -78,6 +78,27 @@ init_main_menu:
     lda #$31
     sta sprite_data+1
 
+    ; seed input
+    lda seed_bac
+    sta seed_input
+    lda seed_bac+1
+    sta seed_input+1
+
+    ; seed input display
+    ldy #$97 ; y coordinate
+    sty sprite_data_3
+    sty sprite_data_4
+    sty sprite_data_5
+    sty sprite_data_6
+    ldy #$40
+    sty sprite_data_3+3
+    ldy #$40+8
+    sty sprite_data_4+3
+    ldy #$40+8*2
+    sty sprite_data_5+3
+    ldy #$40+8*3
+    sty sprite_data_6+3
+
     rts
 
 ; update sub routine for main menu
@@ -88,7 +109,7 @@ init_main_menu:
 update_main_menu:
     lda menu_select
     and #MAIN_MENU_MAX_SELECT ; only 3 possible options
-    cmp #$07
+    cmp #$08
     bcc @no_overflow
     lda #$00
 @no_overflow
@@ -116,6 +137,20 @@ update_main_menu:
     lsr 
     lsr 
     sta sprite_data_2+1
+
+    ; display seed input
+    lda seed_input
+    jsr convert_hex
+    lda hex_buffer+1
+    sta sprite_data_3+1
+    lda hex_buffer
+    sta sprite_data_4+1
+    lda seed_input+1
+    jsr convert_hex
+    lda hex_buffer+1
+    sta sprite_data_5+1
+    lda hex_buffer
+    sta sprite_data_6+1
 
     ; seed = rand16 in main menu
     lda rand8

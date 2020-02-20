@@ -24,7 +24,7 @@
 .define PALETTE_SIZE 32 ; uncompressed palette size
 
 .define EDITOR_MENU_MAX_SELECT 15
-.define MAIN_MENU_MAX_SELECT 7
+.define MAIN_MENU_MAX_SELECT $0F
 
 .define ATTRIBUTES $1
 .define PALETTES $1
@@ -49,6 +49,7 @@
 .define MAIN_MENU_EDITOR 4
 .define MAIN_MENU_RANDOM 5
 .define MAIN_MENU_RESUME 6
+.define MAIN_MENU_SET_SEED 7
 
 .define MAX_HP $02
 .define START_ARMOR $00
@@ -134,6 +135,7 @@ select_delay 1 ; same as move delay, but prevnets inputs for selection keys such
 actions 1 ; player's action until "turn" ends. Turn is considered ended when this has a non-zero value
 
 seed 2 ; 16 bit random number for map generator
+seed_input 2 ; seed cusom input
 
 level_ptr 2 ; points to the current level in ram, lo byte always needs to be $00
 level_data_ptr 2 ; pointer to rom/sram of level
@@ -421,8 +423,10 @@ clear_mem:
     sta rand8 ; rand8 must be nonzero
     sta rand16 ; rand16 must not be zero
     sta seed
+    sta seed_bac
     lda #$02
     sta seed+1
+    sta seed_bac+1
 
     ; set up palette pointer
     ldx #$00
@@ -707,11 +711,11 @@ no_start_msg_gfx:
 
 ; include all levels
 level_1_gfx:
-.incbin "./graphics/level_1.gfx"
+; .incbin "./graphics/level_1.gfx"
 level_1_attr:
-.incbin "./graphics/level_1.attr"
+; .incbin "./graphics/level_1.attr"
 level_1_pal:
-.incbin "./graphics/level_1.pal"
+; .incbin "./graphics/level_1.pal"
 
 title_gfx:
 .incbin "./graphics/title.gfx"
@@ -789,6 +793,7 @@ main_menu_cursor_x:
 .db $01 ; edit menu
 .db $01 ; new map
 .db $01 ; resume
+.db $01 ; seed input
 
 main_menu_cursor_y:
 .db $08
@@ -798,8 +803,10 @@ main_menu_cursor_y:
 .db $0E
 .db $10
 .db $11
+.db $13
 
 main_menu_cursor_attr:
+.db $00
 .db $00
 .db $00
 .db $00
@@ -822,9 +829,6 @@ test_attr:
 .db 0
 .endrep
 
-; test decompress data
-test_decompress:
-.db $01, $02, $02, $03, $FF, $09, $FA, $FF, $FF, $01, $FF, $FF, $01, $FF, $FF, $03, $FF, $B6, $04, $FF, $00
 
 ; lookup table of all possible tile conversion positions
 tile_convert_table:
@@ -950,94 +954,6 @@ map_sub_hi:
 .db #>empty_sub
 .db #>empty_sub
 
-; player animation frames for each direction
-player_animation_right:
-.db $32 ; idle
-.db $32 ; idle
-.db $35
-.db $36
-.db $34
-.db $33
-.db $34
-.db $36
-.db $35 ; rotation start again
-
-player_attr_right:
-.db %00000000
-.db %00000000
-.db %00000000
-.db %00000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
-
-player_animation_left:
-.db $32 ; idle
-.db $32 ; idle
-.db $35
-.db $34
-.db $33
-.db $33
-.db $34
-.db $35
-.db $35 ; rotation start again
-
-player_attr_left:
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %00000000
-.db %00000000
-.db %00000000
-.db %00000000
-.db %00000000
-
-player_animation_up:
-.db $32 ; idle
-.db $32 ; idle
-.db $35
-.db $34
-.db $33
-.db $33
-.db $34
-.db $35
-.db $35 ; rotation start again
-
-player_attr_up:
-.db %00000000
-.db %00000000
-.db %00000000
-.db %00000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
-
-player_animation_down:
-.db $32 ; idle
-.db $32 ; idle
-.db $35
-.db $34
-.db $33
-.db $33
-.db $34
-.db $35
-.db $35 ; rotation start again
-
-player_attr_down:
-.db %00000000
-.db %00000000
-.db %00000000
-.db %00000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
-.db %01000000
 
 ; sub routine for tiles, based on tile index
 tile_sub_lo:
@@ -1270,11 +1186,11 @@ sprite_ai_lo:
 .db #<sprite_skel_update
 .db #<sprite_skel_update
 .db #<sprite_skel_update
-.db #<sprite_hp_update
-.db #<sprite_armor_update
+.db #<sprite_pickup_update
+.db #<sprite_pickup_update
 .db #<sprite_sword_update
 .db #<sprite_skel_update
-.db #<sprite_coin_update
+.db #<sprite_pickup_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1287,11 +1203,11 @@ sprite_ai_hi:
 .db #>sprite_skel_update
 .db #>sprite_skel_update
 .db #>sprite_skel_update
-.db #>sprite_hp_update
-.db #>sprite_armor_update
+.db #>sprite_pickup_update
+.db #>sprite_pickup_update
 .db #>sprite_sword_update
 .db #>sprite_skel_update
-.db #>sprite_coin_update
+.db #>sprite_pickup_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision

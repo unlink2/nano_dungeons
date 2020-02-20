@@ -1726,90 +1726,6 @@ sprite_hp_collision:
     lda #$00 ; never return a collision value
     rts
 
-; sprite hp update
-; inputs:
-;   y -> pointing to sprite data offset
-; Data:
-;   7th bit -> collected, disable collision and draw at 0 0
-sprite_hp_update:
-    pha
-    tya
-    pha
-    txa
-    pha
-
-
-    lda sprite_tile_data, y
-    and #%10000000
-    beq @enabled
-
-    lda #$00
-    sta sprite_tile_flags, y
-
-    ; store position in UI
-    lda #00
-    sta temp
-
-    lda #00
-    sta temp+1
-
-    jmp @done
-@enabled:
-    lda #%10000000
-    sta sprite_tile_flags, y
-
-    ; load x position
-    ldx sprite_tile_x, y
-    lda tile_convert_table, x
-    sta temp
-
-    ; load y position
-    ldx sprite_tile_y, y
-    lda tile_convert_table, x
-    sta temp+1
-
-@done:
-
-
-    ; set up pointer
-    lda sprite_tile_obj, y
-    tax
-    lda obj_index_to_addr, x
-    sta sprite_ptr
-
-    ; set up sprite values for oov check
-    lda sprite_tile_x, y
-    sta get_tile_x
-    lda sprite_tile_y, y
-    sta get_tile_y
-
-    ldy #$00
-    lda temp+1
-    sta (sprite_ptr), y
-
-    iny
-    lda #$3A
-    sta (sprite_ptr), y
-
-    iny
-    lda #$02
-    sta (sprite_ptr), y
-
-    ldy #$03
-    lda temp
-    sta (sprite_ptr), y
-
-    jsr sprite_offscreen
-
-    pla
-    tax
-    pla
-    tay
-    pla
-
-    rts
-
-
 ; armor pikcup AI
 ; inputs:
 ;   y -> pointing to sprite data offset
@@ -1831,7 +1747,7 @@ sprite_armor_collision:
 ;   y -> pointing to sprite data offset
 ; Data:
 ;   7th bit -> collected, disable collision and draw next to key icon
-sprite_armor_update:
+sprite_pickup_update:
     pha
     tya
     pha
@@ -1848,10 +1764,8 @@ sprite_armor_update:
     sta temp+2
 
     ; store position in UI
-    lda #0*8
+    lda #$00
     sta temp
-
-    lda #0*8
     sta temp+1
 
     jmp @done
@@ -1884,12 +1798,15 @@ sprite_armor_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    lda sprite_tile_ai, y
+    tax ; ai
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
 
     iny
-    lda #$3C
+    lda pickup_sprite, x ; #$3C
     sta (sprite_ptr), y
 
     ldy #$03
@@ -1897,7 +1814,7 @@ sprite_armor_update:
     sta (sprite_ptr), y
 
     ; attributes
-    lda #$00
+    lda pickup_attr, x ; #$00
     ldy #$02
     sta (sprite_ptr), y
 
@@ -1930,95 +1847,14 @@ sprite_coin_collision:
     lda #$00 ; never return a collision value
     rts
 
-; sprite pickup update
-; inputs:
-;   y -> pointing to sprite data offset
-; Data:
-;   7th bit -> collected, disable collision and draw next to key icon
-sprite_coin_update:
-    pha
-    tya
-    pha
-    txa
-    pha
-
-
-    lda sprite_tile_data, y
-    and #%10000000
-    beq @enabled
-
-    lda #$00
-    sta sprite_tile_flags, y
-    sta temp+2
-
-    ; store position in UI
-    lda #0
-    sta temp
-
-    lda #0
-    sta temp+1
-
-    jmp @done
-@enabled:
-    lda #%10000000
-    sta sprite_tile_flags, y
-    sta temp+2
-
-    ; load x position
-    ldx sprite_tile_x, y
-    lda tile_convert_table, x
-    sta temp
-
-    ; load y position
-    ldx sprite_tile_y, y
-    lda tile_convert_table, x
-    sta temp+1
-
-@done:
-
-    ; set up sprite values for oov check
-    lda sprite_tile_x, y
-    sta get_tile_x
-    lda sprite_tile_y, y
-    sta get_tile_y
-
-    ; set up pointer
-    lda sprite_tile_obj, y
-    tax
-    lda obj_index_to_addr, x
-    sta sprite_ptr
-
-    ldy #$00
-    lda temp+1
-    sta (sprite_ptr), y
-
-    iny
-    lda #$3F
-    sta (sprite_ptr), y
-
-    ldy #$03
-    lda temp
-    sta (sprite_ptr), y
-
-    ; attributes
-    lda #$00
-    ldy #$02
-    sta (sprite_ptr), y
-
-    lda temp+2 ; holds enable flag
-    beq @no_offscreen
-    jsr sprite_offscreen
-
-@no_offscreen:
-    pla
-    tax
-    pla
-    tay
-    pla
-
-    rts
-
-
+; pickup sprite UI position
+; TODO make all pickup sprites use this
+pickup_sprite:
+.db $00, $00, $00, $00, $00, $00, $00, $00
+.db $00, $00, $3A, $3C, $00, $00, $3F, $00
+pickup_attr:
+.db $00, $00, $00, $00, $00, $00, $00, $00
+.db $00, $00, $02, $00, $00, $00, $00, $00
 
 ; this sub routine inits the damage animation
 ; uses sprites 04 05 06 07
