@@ -1,6 +1,6 @@
 ; header
 .db $4E, $45, $53, $1A, ; NES + MS-DOS EOF
-.db $01 ; prg rom size in 16kb
+.db $02 ; prg rom size in 16kb
 .db $01 ; chr rom in 8k bits
 .db $03 ; mapper 0 contains sram at $6000-$7FFF
 .db $00 ; mirroring
@@ -380,7 +380,7 @@ sav_checksum SAVE_DATA_SIZE
 .endm
 
 
-.org $C000 ; start of program
+.org $8000 ; start of program
 init:
     sei ; disable interrupts
     cld ; disable decimal mode
