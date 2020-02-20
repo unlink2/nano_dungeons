@@ -451,6 +451,31 @@ update_player_animation:
     lda delay_timer ; do not update during delay timer
     bne @done
 
+    lda iframes
+    beq @no_iframes
+
+    ; if iframes flash player
+    lda sprite_data+1
+    cmp #$24
+    bne @swap_invisible
+
+    lda #$32
+    sta sprite_data+1
+    rts
+@swap_invisible:
+    lda #$24
+    sta sprite_data+1
+    rts 
+
+@no_iframes:
+    ; see if player is invisible if so swap back to normal sprite
+    lda sprite_data+1
+    cmp #$24
+    bne @not_invisible
+    lda #$32
+    sta sprite_data+1
+@not_invisible:
+
     ; update player animation
     ; every 128 frames blink
     lda player_timer
