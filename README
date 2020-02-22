@@ -65,7 +65,7 @@ TODO UI that displays current armor/damage values
 TODO delay sprite move after hit to give player time to dodge
 TODO throwing knife weapon. Travels until hits a wall, an enemy. Uses 1 damage each use.
 TODO add coin drops from enemies
-TODO add shop levels
+TODO add shop levels (sell poison DOT for weapon, sell shiled)
 TODO add boss levels
 
 Blocks:
