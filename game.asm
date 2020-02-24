@@ -141,6 +141,20 @@ init_game:
 update_game_crit:
     jsr render_tile_updates
 
+    ; test if actions are to become 0
+    ; this flag may be used by some routines that
+    ; update during non-critical code, but want to waste a turn
+    ; like a trap
+    lda map_flags
+    and #%00010000
+    beq @not_actions_zero
+    lda map_flags
+    and #%11101111 ; unset flag
+    sta map_flags
+    lda #$00
+    sta actions
+@not_actions_zero:
+
     jsr check_player_move
     cmp #$01
     bne @player_not_moved
@@ -216,6 +230,38 @@ update_game:
     jsr check_player_move
     cmp #$01
     bne @player_not_moved
+
+    ; test trap flag, if trapped rng roll to become free
+    ; if bad roll skip move by failing collision check
+    ; but consume action
+    lda map_flags
+    and #%00100000
+    beq @not_trapped
+    jsr random
+    lda rand8
+    cmp #$7F
+    bcc @free ; free
+    ; if not free skip move and consume action
+    ; restore position and remove smooth movement
+    lda #$00
+    sta smooth_down
+    sta smooth_up
+    sta smooth_right
+    sta smooth_left
+    lda player_x_bac
+    sta player_x
+    lda player_y_bac
+    sta player_y
+    ; set flag to set actions to 0 on crit update
+    lda map_flags
+    ora #%00010000
+    sta map_flags
+    jmp @player_not_moved
+@free:
+    lda map_flags
+    and #%11011111
+    sta map_flags ; unset trap flag
+@not_trapped:
 
     jsr collision_check
     sta temp

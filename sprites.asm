@@ -1957,6 +1957,85 @@ pickup_attr:
 .db $00, $00, $00, $00, $00, $00, $00, $00
 .db $00, $00, $02, $00, $00, $00, $00, $00
 
+
+; sprite bear trap collision
+; inputs:
+;   y -> pointing to sprite data offset
+; returns:
+;   a -> 0. always allows move but damanges player
+sprite_bear_trap_collision:
+    jsr sprite_skel_collision
+    inc iframes ; allow one more iframe turn since move goes ahead
+    lda #%00100000 ; trapped flag
+    ora map_flags
+    sta map_flags
+    lda #$00
+    rts
+
+; sprite bear trap update
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_bear_trap_update:
+    pha
+    tya
+    pha
+    txa
+    pha
+
+
+    lda #%10000000
+    sta sprite_tile_flags, y
+
+    ; load x position
+    ldx sprite_tile_x, y
+    lda tile_convert_table, x
+    sta temp
+
+    ; load y position
+    ldx sprite_tile_y, y
+    lda tile_convert_table, x
+    sta temp+1
+
+    ; set up sprite values for oov check
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+
+    ; set up pointer
+    lda sprite_tile_obj, y
+    tax
+    lda obj_index_to_addr, x
+    sta sprite_ptr
+
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda #$4E
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    ; attributes
+    lda #$01
+    ldy #$02
+    sta (sprite_ptr), y
+
+    jsr sprite_offscreen
+@no_offscreen:
+    pla
+    tax
+    pla
+    tay
+    pla
+
+
+    rts
+
 ; this sub routine inits the damage animation
 ; uses sprites 04 05 06 07
 ; inputs:

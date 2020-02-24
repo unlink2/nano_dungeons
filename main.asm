@@ -69,7 +69,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $80
+.define SPRITE_TILES_END $81
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 .define PROJECTILES 8
@@ -109,6 +109,8 @@ nmi_flags 1
 ; 0th bit = 1 -> collision check failed
 game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
+; 5th bit = 1 -> caught in trap, rng roll to move
+; 4th bit = 1 -> set actions to 0 on next crit update
 map_flags 1
 ; 7th bit = 1 -> enable random map generator in load
 ; 6th bit = 1 -> enable low visibility mode in gameplay
@@ -1158,11 +1160,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; archer tile
 .db #<sprite_init_default ; coin tile
 .db #<sprite_init_default ; flame tile
+.db #<sprite_init_default ; bear trap tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1194,6 +1198,7 @@ sprite_ai_lo:
 .db #<sprite_skel_update
 .db #<sprite_pickup_update
 .db #<sprite_flame_update
+.db #<sprite_bear_trap_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1212,6 +1217,7 @@ sprite_ai_hi:
 .db #>sprite_skel_update
 .db #>sprite_pickup_update
 .db #>sprite_flame_update
+.db #>sprite_bear_trap_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1230,6 +1236,7 @@ sprite_collision_lo:
 .db #<sprite_skel_collision
 .db #<sprite_coin_collision
 .db #<sprite_flame_collision
+.db #<sprite_bear_trap_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1248,6 +1255,7 @@ sprite_collision_hi:
 .db #>sprite_skel_collision
 .db #>sprite_coin_collision
 .db #>sprite_flame_collision
+.db #>sprite_bear_trap_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:
