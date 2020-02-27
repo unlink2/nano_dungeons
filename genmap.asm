@@ -15,6 +15,7 @@
 ; inputs:
 ;   level_ptr -> pointing to buffer
 ;   seed -> rng seed for map
+; TODO seed BC5E is softlock seed
 generate_map:
     ; start out center-ish
     ldx #$04
@@ -176,10 +177,10 @@ place_sprites:
 ; inserts exit and start at random location
 insert_other:
     lda #$68 ; exit tile
-    jsr insert_singe
+    jsr insert_single
 
     lda #$60 ; start tile
-    jsr insert_singe
+    jsr insert_single
 
     rts
 
@@ -189,7 +190,7 @@ insert_other:
 ;   a = tile id
 ; returns:
 ;   none
-insert_singe:
+insert_single:
     pha ; store tile id
 ; insert tile
 @loop:
@@ -208,7 +209,7 @@ insert_singe:
     jsr get_tile
     cmp #$60 ; start tile
     beq @loop
-    cmp #$58 ; exit tile
+    cmp #$68 ; exit tile
     beq @loop
 
 
