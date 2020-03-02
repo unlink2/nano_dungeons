@@ -1996,6 +1996,21 @@ sprite_bear_trap_update:
     lda tile_convert_table, x
     sta temp+1
 
+    lda #$4E
+    sta temp+2 ; sprite
+
+    lda player_x
+    cmp sprite_tile_x, y
+    bne @not_player_collision
+    lda player_y
+    cmp sprite_tile_y, y
+    bne @not_player_collision
+
+    lda #$CE
+    sta temp+2 ; cloesd sprite
+
+@not_player_collision:
+
     ; set up sprite values for oov check
     lda sprite_tile_x, y
     sta get_tile_x
@@ -2013,7 +2028,7 @@ sprite_bear_trap_update:
     sta (sprite_ptr), y
 
     iny
-    lda #$4E
+    lda temp+2 
     sta (sprite_ptr), y
 
     ldy #$03
