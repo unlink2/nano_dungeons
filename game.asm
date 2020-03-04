@@ -353,16 +353,10 @@ update_game:
     ; update damage animation
     jsr update_damage_animation
 
-    ; test victory condition
-    ; if only one tile is left to clear the player must be on it
-    lda tiles_to_clear+1
-    cmp #$00
-    bne @done
-    lda tiles_to_clear
-    cmp #$01
+    jsr test_victory_condition
     bne @done
 
-    ; if animation timer is already going do not prceed
+    ; if animation timer is already going do not porceed
     lda delay_timer
     ora delay_timer+1
     bne @done
@@ -640,6 +634,26 @@ update_tiles_to_clear:
     sta tiles_to_clear+1
 @done:
     pla
+    rts
+
+
+; this sub rotuine checks win condition
+; returns:
+;   a == 0 if won
+;   a == 1 if not won
+test_victory_condition:
+    ; test victory condition
+    ; if only one tile is left to clear the player must be on it
+    lda tiles_to_clear+1
+    cmp #$00
+    bne @done
+    lda tiles_to_clear
+    cmp #$01
+    bne @done
+    lda #$00
+    rts
+@done:
+    lda #$01
     rts
 
 ; this sub routine loads the win screen

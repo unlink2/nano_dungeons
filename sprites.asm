@@ -1535,8 +1535,14 @@ sprite_skel_update:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_skel_collision:
+    ; test win conditon to avoid race condition
+    ; if victory happened do not damage player
+    jsr test_victory_condition
+    bne @not_won
+    rts
+@not_won:
     lda iframes
-    beq @hit
+    beq @hit 
     rts ; no hit if iframes are enabled
 
 @hit:
