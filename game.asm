@@ -10,6 +10,12 @@ init_game:
     lda #$00
     sta gfx_flags
 
+    lda #$FF
+    sta last_player_damage
+    sta last_player_armor
+    sta last_keys
+    sta last_coins
+
     ; tile update mode
     lda #%01000000
     sta editor_flags
@@ -100,13 +106,11 @@ init_game:
     ; location and init them
     lda #2 * 8 ; x positions
     sta sprite_data_8+3
-    sta sprite_data_B+3
+    sta sprite_data_C+3 ; sword
     lda #3 * 8
     sta sprite_data_9+3
-    sta sprite_data_C+3
     lda #4 * 8
     sta sprite_data_A+3
-    sta sprite_data_D+3
 
     lda #25 * 8 ; y position
     sta sprite_data_8
@@ -118,11 +122,28 @@ init_game:
     sta sprite_data_9+2
     sta sprite_data_A+2
 
+    lda #$5 * 8
+    sta sprite_data_D+3 ; armor
+
+    lda #$8 * 8
+    sta sprite_data_B+3 ; key
+
+    lda #$5 * 8
+    sta sprite_data_E+3 ; coin
+    lda #$3F
+    sta sprite_data_E+1 ; coin sprite
+
     ; move other UI sprites onscreen
     lda #26 * 8 ; y position
-    sta sprite_data_B
-    sta sprite_data_C
-    sta sprite_data_D
+    sta sprite_data_B ; key 
+    sta sprite_data_C ; sword 
+    sta sprite_data_D ; armor 
+    lda #25 * 8
+    sta sprite_data_E ; coin
+
+    lda #$3C ; armor spirte
+    sta sprite_data_D+1
+
 
     ; jsr init_test_song
 
@@ -140,6 +161,7 @@ init_game:
 ; critical game update
 update_game_crit:
     jsr render_tile_updates
+    jsr update_ui
 
     ; test if actions are to become 0
     ; this flag may be used by some routines that
@@ -224,6 +246,64 @@ update_game_crit:
     lda player_y
     sta player_y_bac
     jmp update_crit_done
+
+; updates UI for key, armor and damage count
+; performs nametable update required to display numbers
+update_ui:
+    lda last_player_damage
+    cmp player_damage
+    beq @no_update_damage
+
+    ; UI is always at same location so it is easy to update
+    lda player_damage
+    sta last_player_damage ; update completed store for next frame
+    jsr convert_hex
+
+    ; update nametable
+    lda #03
+    sta get_tile_x
+    lda #26
+    sta get_tile_y
+    jsr draw_hex_buffer
+
+@no_update_damage:
+
+    lda last_player_armor
+    cmp player_armor
+    beq @no_update_armor
+
+    ; UI is always at same location so it is easy to update
+    lda player_armor
+    sta last_player_armor ; update completed store for next frame
+    jsr convert_hex
+
+    ; update nametable
+    lda #06
+    sta get_tile_x
+    lda #26
+    sta get_tile_y
+    jsr draw_hex_buffer
+
+@no_update_armor:
+
+    lda last_coins
+    cmp coins
+    beq @no_update_coins
+
+    ; UI is always at same location so it is easy to update
+    lda coins
+    sta last_coins ; update completed store for next frame
+    jsr convert_hex
+
+    ; update nametable
+    lda #06
+    sta get_tile_x
+    lda #25
+    sta get_tile_y
+    jsr draw_hex_buffer
+
+@no_update_coins:
+    rts
 
 ; non-critical game updates
 update_game:
@@ -343,12 +423,12 @@ update_game:
     lda weapon_sprite, y
     sta sprite_data_C+1
 
-    ldy #$24 ; empty sprite
-    lda player_armor_base
-    beq @no_armor
-    ldy #$3C
-@no_armor:
-    sty sprite_data_D+1
+    ; ldy #$24 ; empty sprite
+    ; lda player_armor_base
+    ; beq @no_armor
+    ; ldy #$3C
+; @no_armor:
+    ; sty sprite_data_D+1
 
     ; update damage animation
     jsr update_damage_animation

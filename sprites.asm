@@ -926,11 +926,11 @@ sprite_key_update:
     ; corner to indicate a key is in players posession unless key count is 0
 
     ldy #$00
-    lda #$D0
+    lda #$00
     sta (sprite_ptr), y
 
     ldy #$03
-    lda #$10
+    lda #$00
     sta (sprite_ptr), y
 
     ; attributes

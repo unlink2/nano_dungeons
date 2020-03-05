@@ -198,6 +198,12 @@ delay_done 2 ; function pointer to be called when animation finishes, set to 00,
 last_inputs 1 ; inputs of controller 1
 prev_inputs 1 ; inputs of previous frame
 
+; used to test if UI needs updating
+last_keys 1
+last_player_damage 1
+last_player_armor 1
+last_coins 1
+
 ; 16 bit count of tiles that have to be cleared, when both are $00 map is won
 ; this is populated during decompression of a map
 tiles_to_clear 2
