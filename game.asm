@@ -534,7 +534,7 @@ init_win_condition:
     sta load_flags
 
     jsr reload_room
-    ; jsr a_input_main_menu 
+    ; jsr a_input_main_menu
     rts
 
 ; loads the game over message as a menu
@@ -543,7 +543,7 @@ init_game_over:
     sta $2001 ; no rendering
 
     lda #$01
-    sta nametable 
+    sta nametable
     set_nmi_flag
 
     vblank_wait
@@ -553,6 +553,20 @@ init_game_over:
     sta game_mode
     jsr load_menu
     jsr init_message
+
+    ; write level to correct position
+    lda level
+    jsr convert_hex
+
+    ; update nametable
+    lda #16
+    sta get_tile_x
+    lda #10
+    sta get_tile_y
+    jsr draw_hex_buffer
+
+    ; hide all sprites
+    jsr hide_objs
 
     lda #$01 ; set flag to skip update
 

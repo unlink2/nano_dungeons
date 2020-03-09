@@ -895,6 +895,7 @@ map_table_lo:
 .db #<no_start_msg_gfx
 .db #<title_gfx
 .db #<level_1_gfx
+.db #<game_over_gfx
 
 map_table_hi:
 .db #>empty_map
@@ -904,6 +905,7 @@ map_table_hi:
 .db #>no_start_msg_gfx
 .db #>title_gfx
 .db #>level_1_gfx
+.db #>game_over_gfx
 
 ; color attribute lookup table
 attr_table_lo:
@@ -914,6 +916,7 @@ attr_table_lo:
 .db #<test_attr
 .db #<title_attr
 .db #<level_1_attr
+.db #<level_1_attr
 
 attr_table_hi:
 .db #>test_attr
@@ -922,6 +925,7 @@ attr_table_hi:
 .db #>win_attr
 .db #>test_attr
 .db #>title_attr
+.db #>level_1_attr
 .db #>level_1_attr
 
 ; color palette table
@@ -933,6 +937,7 @@ palette_table_lo:
 .db #<palette_data
 .db #<title_pal
 .db #<level_1_pal
+.db #<level_1_pal
 
 palette_table_hi:
 .db #>palette_data
@@ -941,6 +946,7 @@ palette_table_hi:
 .db #>win_pal
 .db #>palette_data
 .db #>title_pal
+.db #>level_1_pal
 .db #>level_1_pal
 
 ; map update routines
