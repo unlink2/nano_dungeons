@@ -100,6 +100,8 @@
 
 .define COLOR_BLACK $1E ; background clear color
 
+.define SHOP_MASK %00001000 ; shop level
+
 .enum $00
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
@@ -739,6 +741,9 @@ game_over_attr:
 game_over_pal:
 .incbin "./graphics/title.pal"
 
+shop_gfx:
+.incbin "./graphics/shop.gfx"
+
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
 .db $01 ; location save 1
@@ -896,6 +901,7 @@ map_table_lo:
 .db #<title_gfx
 .db #<level_1_gfx
 .db #<game_over_gfx
+.db #<shop_gfx
 
 map_table_hi:
 .db #>empty_map
@@ -906,6 +912,7 @@ map_table_hi:
 .db #>title_gfx
 .db #>level_1_gfx
 .db #>game_over_gfx
+.db #>shop_gfx
 
 ; color attribute lookup table
 attr_table_lo:
@@ -917,6 +924,7 @@ attr_table_lo:
 .db #<title_attr
 .db #<level_1_attr
 .db #<level_1_attr
+.db #<test_attr
 
 attr_table_hi:
 .db #>test_attr
@@ -927,6 +935,7 @@ attr_table_hi:
 .db #>title_attr
 .db #>level_1_attr
 .db #>level_1_attr
+.db #>test_attr
 
 ; color palette table
 palette_table_lo:
@@ -938,6 +947,7 @@ palette_table_lo:
 .db #<title_pal
 .db #<level_1_pal
 .db #<level_1_pal
+.db #<dungeon_palette
 
 palette_table_hi:
 .db #>palette_data
@@ -948,9 +958,12 @@ palette_table_hi:
 .db #>title_pal
 .db #>level_1_pal
 .db #>level_1_pal
+.db #>dungeon_palette
 
 ; map update routines
 map_sub_lo:
+.db #<empty_sub
+.db #<empty_sub
 .db #<empty_sub
 .db #<empty_sub
 .db #<empty_sub
@@ -967,7 +980,9 @@ map_sub_hi:
 .db #>empty_sub
 .db #>empty_sub
 .db #>empty_sub
-
+.db #>empty_sub
+.db #>empty_sub
+.db #>empty_sub
 
 ; sub routine for tiles, based on tile index
 tile_sub_lo:
@@ -1008,7 +1023,7 @@ tile_sub_lo:
 .db #<barrier_tile ; barrier tile
 .db #<barrier_tile_invert ; inverted barrier
 .db #<no_collision ; push tile
-.db #<no_collision ; key tile
+.db #<no_collision ; uey tile
 .db #<no_collision ; door tile
 .db #<no_collision ; skel tile
 .db #<no_collision ; sword tile

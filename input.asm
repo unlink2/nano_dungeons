@@ -1318,7 +1318,7 @@ go_right_editor_menu:
     ldx #$00
 @not_invalid:
     txa
-    and #$7F ; only first 128 tiles are valid
+    ; and #$7F ; only first 128 tiles are valid
     sta sprite_data_1+1
     rts
 @not_tile_select:

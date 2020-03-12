@@ -348,6 +348,17 @@ reload_room:
     and #%10000000
     beq @decompress
 
+    lda level ; test if shop is supposed to be loaded
+    and #SHOP_MASK ; every F levels
+    beq @no_shop
+
+    lda #<shop_gfx
+    sta level_data_ptr
+    lda #>shop_gfx
+    sta level_data_ptr+1
+    jmp @decompress
+
+@no_shop:
     jsr generate_map
 
     jmp @map_in_buffer

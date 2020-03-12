@@ -1582,6 +1582,10 @@ game_over:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_sword_collision:
+    lda #$09
+    jsr purchase
+    beq @done ; if purcahse failed return
+
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
     bne @done
@@ -1736,6 +1740,10 @@ sprite_hp_collision:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_armor_collision:
+    lda #$09
+    jsr purchase
+    beq @done
+
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
     bne @done

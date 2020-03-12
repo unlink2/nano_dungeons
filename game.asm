@@ -1126,6 +1126,37 @@ take_damage:
 @done:
     rts
 
+; this sub routine makes a purchase
+; input:
+;   a = price
+; returns:
+;   a = 1 if purchase successful or map is not shop
+;   a = 0 if purchase failed due to lack of funds
+; side effects:
+;   uses x register and temp
+purchase:
+    tax
+    lda level
+    and #SHOP_MASK ; if not shop return true
+    beq @ok
+
+    ; test if funds are ok
+    cpx coins
+    beq @buy
+    bcs @fail ; if smaller fail
+@buy:
+    stx temp
+    lda coins
+    sec
+    sbc temp
+    sta coins
+@ok:
+    lda #$01
+    rts
+@fail:
+    lda #$00
+    rts 
+
 ; cacl_checksum
 ; calculates save data sum
 ; inputs:
