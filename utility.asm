@@ -350,7 +350,8 @@ reload_room:
 
     lda level ; test if shop is supposed to be loaded
     and #SHOP_MASK ; every F levels
-    beq @no_shop
+    cmp #SHOP_MASK
+    bne @no_shop
 
     lda #<shop_gfx
     sta level_data_ptr

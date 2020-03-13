@@ -100,7 +100,7 @@
 
 .define COLOR_BLACK $1E ; background clear color
 
-.define SHOP_MASK %00001000 ; shop level
+.define SHOP_MASK $0F ; shop level
 
 .enum $00
 frame_count 1

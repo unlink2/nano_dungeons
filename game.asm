@@ -1138,7 +1138,8 @@ purchase:
     tax
     lda level
     and #SHOP_MASK ; if not shop return true
-    beq @ok
+    cmp #SHOP_MASK
+    bne @ok
 
     ; test if funds are ok
     cpx coins
