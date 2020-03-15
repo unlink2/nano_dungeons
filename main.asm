@@ -1384,7 +1384,7 @@ period_table_hi:
 .db $00,$00,$00,$00,$00,$00,$00,$00
 
 ; simulates greater than
-.error ($FFFA-$) & $80000000, "Error: Interrupt vector out of range."
+.error $ >= $FFFA, "Error: Interrupt vector out of range."
 .pad $FFFA
 .dw nmi ; nmi
 .dw init ; reset
