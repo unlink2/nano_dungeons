@@ -900,6 +900,11 @@ sprite_key_update:
     lda #$59
     sta (sprite_ptr), y
 
+    ; attributes
+    lda #$00
+    ldy #$02
+    sta (sprite_ptr), y
+
     ldy #$03
     lda temp
     sta (sprite_ptr), y
