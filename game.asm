@@ -247,6 +247,20 @@ update_game_crit:
     sta player_y_bac
     jmp update_crit_done
 
+; forces a complete UI refresh
+; by overwriting the last known values
+force_update_ui:
+    ldx player_damage
+    dex
+    stx last_player_damage
+    ldx player_armor
+    dex
+    stx last_player_armor
+    ldx coins
+    dex
+    stx last_coins
+    rts 
+
 ; updates UI for key, armor and damage count
 ; performs nametable update required to display numbers
 update_ui:
@@ -931,6 +945,9 @@ render_tile_updates:
 
     ldy draw_buffer_len
     beq @done ; if 0 lenght no update is required
+
+    ; force UI re-draw
+    jsr force_update_ui
 
     lda last_move
     cmp #UP
