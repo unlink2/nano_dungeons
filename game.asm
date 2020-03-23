@@ -949,6 +949,8 @@ render_tile_updates:
     ; force UI re-draw
     jsr force_update_ui
 
+    ldx #$00 ; nametable to draw on
+
     lda last_move
     cmp #UP
     bne @not_up
