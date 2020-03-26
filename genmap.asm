@@ -179,6 +179,25 @@ insert_other:
     lda #$68 ; exit tile
     jsr insert_single
 
+    ; advance seed a bit
+    ldx #$FF
+@seed_loop:
+    txa
+    pha
+
+    lda seed
+    jsr random_xor
+    sta seed
+    lda seed+1
+    jsr random_xor
+    sta seed+1
+
+    pla
+    tax
+
+    dex
+    bne @seed_loop
+
     lda #$60 ; start tile
     jsr insert_single
 
@@ -474,8 +493,42 @@ rooms_lo:
 .db <room3x3
 .db <room8x2
 .db <room5x5
+; ===========
+.db <room6x6
+.db <room6x3
+.db <room3x6
+.db <room3x3
+.db <room8x2
+.db <room4x4
+.db <room2x8
+.db <room4x4
+.db <room1x4wall
+.db <room4x1wall
+.db <room6x6
+.db <room6x6_one_way
+.db <room3x6
+.db <room3x3
+.db <room8x2
+.db <room5x5
 
 rooms_hi:
+.db >room6x6
+.db >room6x3
+.db >room3x6
+.db >room3x3
+.db >room8x2
+.db >room4x4
+.db >room2x8
+.db >room4x4
+.db >room1x4wall
+.db >room4x1wall
+.db >room6x6
+.db >room6x6_one_way
+.db >room3x6
+.db >room3x3
+.db >room8x2
+.db >room5x5
+; ===========
 .db >room6x6
 .db >room6x3
 .db >room3x6

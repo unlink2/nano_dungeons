@@ -95,7 +95,7 @@
 
 .define SAVE_DATA_SIZE 11 ; 11 bytes including checksum
 
-.define ROOM_HEADERS $0F ; max room header offset
+.define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
 
 .define COLOR_BLACK $1E ; background clear color
