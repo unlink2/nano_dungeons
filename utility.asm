@@ -249,9 +249,10 @@ random_reg:
 ; slow but more random
 ; inputs:
 ;   a -> seed
-;   x -> seed+1
 ; returns:
-;   new random number in a and x
+;   new random number in a
+; side effects:
+;   uses y and a registers
 random_xor:
     pha ; push seed
     and #$B8
@@ -273,6 +274,31 @@ random_xor:
     rol ; rotate carry in
 
     rts
+
+; 16 bit rng routine LFSR (Galois)
+; used only for seed
+; pretty random
+; inputs:
+;   seed
+; returns:
+;   new values in seed and seed+1, 8 bit value is also returned in a
+; side effects:
+;   uses y and a register
+; Note: based on  bbbradsmith / prng_6502
+random_seed:
+    ldy #8
+	lda seed
+@begin:
+	asl        ; shift the register
+	rol seed+1
+	bcc @carry_clear
+	eor #$39   ; apply XOR feedback whenever a 1 bit is shifted out
+@carry_clear:
+	dey
+	bne @begin
+	sta seed
+	cmp #0     ; reload flags
+	rts
 
 ; this sub routine reloads a room
 ; inputs:

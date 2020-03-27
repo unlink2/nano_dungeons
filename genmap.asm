@@ -33,12 +33,7 @@ generate_map:
     pha ; loop counter
 
     ; advance seed
-    lda seed
-    jsr random_xor
-    sta seed
-    lda seed+1
-    jsr random_xor
-    sta seed+1
+    jsr random_seed
 
     ; which direction do we move
 
@@ -143,12 +138,7 @@ place_sprites:
     pha
 
     ; advance seed
-    lda seed
-    jsr random_xor
-    sta seed
-    lda seed+1
-    jsr random_xor
-    sta seed+1
+    jsr random_seed
 
     jsr get_random_coordinate
     bne @good_tile
@@ -185,12 +175,7 @@ insert_other:
     txa
     pha
 
-    lda seed
-    jsr random_xor
-    sta seed
-    lda seed+1
-    jsr random_xor
-    sta seed+1
+    jsr random_seed
 
     pla
     tax
@@ -214,12 +199,7 @@ insert_single:
 ; insert tile
 @loop:
     ; advance seed
-    lda seed
-    jsr random_xor
-    sta seed
-    lda seed+1
-    jsr random_xor
-    sta seed+1
+    jsr random_seed
 
     jsr get_random_coordinate
     bne @good_tile
