@@ -1520,6 +1520,16 @@ sprite_skel_update:
     ldy #$02
     sta (sprite_ptr), y
 
+    ; check if sprite animation needs to be applied
+    lda frame_count
+    and #$08
+    cmp #$08
+    bcc @no_animation
+    lda temp+2
+    ora #%10000000
+    sta temp+2
+@no_animation:
+
     ldy #$01
     lda temp+2 ; sprite to load
     sta (sprite_ptr), y
