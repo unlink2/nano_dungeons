@@ -457,7 +457,7 @@ sprite_tile_rng:
 ;   Byte 4-N: Raw room tiles
 ;   TODO implement byte 3
 rooms_lo:
-.db <room6x6
+.db <room8x8
 .db <room6x3
 .db <room3x6
 .db <room3x3
@@ -467,8 +467,8 @@ rooms_lo:
 .db <room4x4
 .db <room1x4wall
 .db <room4x1wall
-.db <room6x6
-.db <room6x6_one_way
+.db <room8x8
+.db <room8x8_one_way
 .db <room3x6
 .db <room3x3
 .db <room8x2
@@ -485,14 +485,14 @@ rooms_lo:
 .db <room1x4wall
 .db <room4x1wall
 .db <room6x6
-.db <room6x6_one_way
+.db <room8x8_one_way
 .db <room3x6
 .db <room3x3
 .db <room8x2
 .db <room5x5
 
 rooms_hi:
-.db >room6x6
+.db >room8x8
 .db >room6x3
 .db >room3x6
 .db >room3x3
@@ -502,8 +502,8 @@ rooms_hi:
 .db >room4x4
 .db >room1x4wall
 .db >room4x1wall
-.db >room6x6
-.db >room6x6_one_way
+.db >room8x8
+.db >room8x8_one_way
 .db >room3x6
 .db >room3x3
 .db >room8x2
@@ -520,13 +520,13 @@ rooms_hi:
 .db >room1x4wall
 .db >room4x1wall
 .db >room6x6
-.db >room6x6_one_way
+.db >room8x8_one_way
 .db >room3x6
 .db >room3x3
 .db >room8x2
 .db >room5x5
 
-room6x6:
+room8x8:
 .db $08, $08, $62, $80
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $37, $62, $62, $37, $37, $62
@@ -536,7 +536,7 @@ room6x6:
 .db $62, $37, $62, $62, $62, $62, $37, $62
 .db $62, $37, $37, $62, $62, $37, $37, $62
 .db $62, $62, $62, $62, $62, $62, $62, $62
-room6x6_one_way:
+room8x8_one_way:
 .db $08, $08, $62, $80
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $37, $65, $65, $37, $37, $62
@@ -553,6 +553,16 @@ room5x5:
 .db $62, $62, $62, $62, $62
 .db $62, $4A, $62, $49, $62
 .db $62, $62, $62, $62, $62
+room6x6:
+.db $06, $06, $62, $80
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $37, $37, $62, $62, $37, $37, $62
+.db $62, $37, $62, $62, $62, $62, $37, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
+.db $62, $37, $62, $62, $62, $62, $37, $62
+.db $62, $37, $37, $62, $62, $37, $37, $62
+.db $62, $62, $62, $62, $62, $62, $62, $62
 room6x3:
 .db $06, $03, $62, $00
 room3x6:
