@@ -552,7 +552,7 @@ nmi_flag_not_set:
     ldx iframes
     beq @no_new_turn
     dec iframes
-@no_new_turn
+@no_new_turn:
 
 
     inc frame_count

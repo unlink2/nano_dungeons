@@ -95,7 +95,7 @@ adjust_smooth:
     cmp smooth_left 
     beq @no_dec_left
     dec smooth_left
-@no_dec_left
+@no_dec_left:
 
     cmp smooth_right 
     beq @no_dec_right 
@@ -241,7 +241,7 @@ random_reg:
     lsr
 	bcc @noeor
     eor #$B4
-@noeor
+@noeor:
     rts
 
 ; 8 bit xorshift random number
@@ -510,7 +510,7 @@ calc_distance:
     eor #%11111111
     clc
     adc #$01
-@no_negative
+@no_negative:
 
     rts 
 
@@ -635,6 +635,6 @@ crash_handler:
     sta $2005
     jmp @crash_loop
 ; strings for crash handler
-@error_str
+@error_str:
 .db "OH NO THE GAME CRASHED", $00
-@error_str_end
+@error_str_end:

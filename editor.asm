@@ -435,7 +435,7 @@ update_editor_menu:
     cmp #$0F ; if more than 9, overflow
     bcc @no_overflow
     lda #$00
-@no_overflow
+@no_overflow:
     sta menu_select
 
     tax

@@ -206,7 +206,7 @@ compress_level:
     cpx #$FF
     beq @store_data
     bne @next_byte
-@store_data
+@store_data:
     lda temp
     jsr write_compressed_data
     cpx #$FF ; if we did hit FF we need to go to next byte
@@ -1031,7 +1031,7 @@ update_tile:
     rts ; if max ai is reached return
 @not_max_ai:
     inc sprite_tile_size
-@not_sprite
+@not_sprite:
 
     ; check if previous tile was AI tile
     lda player_x
@@ -1408,7 +1408,7 @@ init_ai_tiles:
     sta src_ptr
 
 @no_init:
-@not_sprite
+@not_sprite:
 
 
     ldx player_x

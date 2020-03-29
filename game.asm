@@ -152,7 +152,7 @@ init_game:
     and #%00100000
     beq @no_load
     jsr load_save
-@no_load
+@no_load:
 
     rts
 
@@ -423,7 +423,7 @@ update_game:
     dey
     cpx #MAX_HP
     bne @damage_display_loop
-@no_damage
+@no_damage:
 
     ; update other UI elements
     ldy #$24 ; empty sprite
@@ -665,7 +665,7 @@ collision_check:
     beq @collision_enabled
     lda #$00
     rts
-@collision_enabled
+@collision_enabled:
 
     lda player_x
     sta get_tile_x

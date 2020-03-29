@@ -233,7 +233,7 @@ a_input_game:
     lda #%00000000 ; no flip
     sta sprite_data_1+2
     rts
-@no_down
+@no_down:
 
     lda weapon_sprite, y ; tile
     ora #%10000000 ; get horizontal version
@@ -1170,14 +1170,14 @@ go_left_editor_menu:
     jsr inc_dec_attr
     ; dec attr_value
     rts
-@not_attr
+@not_attr:
     cmp #EDITOR_MENU_COLOR
     bne @not_color
     dec color_select
     jsr init_color_display
     jsr init_value_display
     rts
-@not_color
+@not_color:
     cmp #EDITOR_MENU_VALUE
     bne @not_value
     ldy color_select
@@ -1267,7 +1267,7 @@ go_right:
     bne @not_main_menu
     jsr go_right_main_menu
     rts
-@not_main_menu
+@not_main_menu:
     cmp #GAME_MODE_GAME
     bne @done
 
@@ -1334,14 +1334,14 @@ go_right_editor_menu:
     ldx #$01 ; inc
     jsr inc_dec_attr
     rts
-@not_attr
+@not_attr:
     cmp #EDITOR_MENU_COLOR
     bne @not_color
     inc color_select
     jsr init_color_display
     jsr init_value_display
     rts
-@not_color
+@not_color:
     cmp #EDITOR_MENU_VALUE
     bne @not_value
     ldy color_select
@@ -1506,7 +1506,7 @@ go_down:
     bne @not_main_menu
     inc menu_select
     rts
-@not_main_menu
+@not_main_menu:
     cmp #GAME_MODE_GAME
     bne @done
 

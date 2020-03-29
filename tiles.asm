@@ -129,9 +129,9 @@ exit_collision:
     beq @.mi.collision
     lda #$00 
     rts 
-@.mi.collision 
-    lda #$01 
-    rts 
+@.mi.collision:
+    lda #$01
+    rts
 .endm
 
 one_way_left:

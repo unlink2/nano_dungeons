@@ -112,7 +112,7 @@ update_main_menu:
     cmp #$08
     bcc @no_overflow
     lda #$00
-@no_overflow
+@no_overflow:
     sta menu_select
 
     ; set sprite at correct position 

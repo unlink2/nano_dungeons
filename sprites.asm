@@ -118,7 +118,7 @@ sprite_pos_adjust:
     sta temp
 
     jmp @adjust_done
-@y_position
+@y_position:
 
     ; y position adjust
     ; test if sbc or adc
@@ -694,7 +694,7 @@ sprite_update_push:
     bne @no_disable
     lda #$24 ; empty tile
     sta temp+2
-@no_disable
+@no_disable:
     
 
     ; set up pointer
@@ -1155,7 +1155,7 @@ sprite_skel_update:
     bne @no_collision
     ; if collision trigger skel collision code
     jsr sprite_skel_collision
-@no_collision
+@no_collision:
 
     ; test hit flag fisrt
     lda sprite_tile_flags, y
@@ -1244,7 +1244,7 @@ sprite_skel_update:
     lda #$34
     sta temp+2 ; sprite gfx
     bne @sprite_picked
-@bat_sprite
+@bat_sprite:
     lda #$35
     sta temp+2 ; bat sprite
     bne @sprite_picked

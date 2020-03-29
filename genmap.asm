@@ -271,7 +271,7 @@ check_oob_coordinates:
     lda get_tile_x
     cmp #31-MAX_ROOM_SIZE+1
     bcc @less_x
-@ret_x
+@ret_x:
     lda #$0A
     sta get_tile_x
     lda #$01
@@ -285,7 +285,7 @@ check_oob_coordinates:
     lda get_tile_y
     cmp #29-MAX_ROOM_SIZE+1
     bcc @less_y
-@ret_y
+@ret_y:
     lda #$0A
     sta get_tile_y
     lda #$01
@@ -575,7 +575,7 @@ room2x8:
 .db $02, $08, $62, $00
 room4x4:
 .db $04, $04, $62, $00
-room1x4wall
+room1x4wall:
 .db $01, $05, $62, $00
-room4x1wall
+room4x1wall:
 .db $05, $01, $62, $00
