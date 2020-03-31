@@ -1082,8 +1082,6 @@ go_left:
     lda #MOVE_DELAY_FRAMES
     sta move_delay
 
-    jsr init_cursor_beep
-
     ; check gamemode
     lda game_mode
     cmp #GAME_MODE_EDITOR
@@ -1244,8 +1242,6 @@ go_right:
 
     lda #MOVE_DELAY_FRAMES
     sta move_delay
-
-    jsr init_cursor_beep
 
     ; check gamemode
     lda game_mode
@@ -1409,8 +1405,6 @@ go_up:
     lda #MOVE_DELAY_FRAMES
     sta move_delay
 
-    jsr init_cursor_beep
-
     ; check gamemode
     lda game_mode
     cmp #GAME_MODE_EDITOR
@@ -1475,8 +1469,6 @@ go_down:
 
     lda #MOVE_DELAY_FRAMES
     sta move_delay
-
-    jsr init_cursor_beep
 
     ; check gamemode
     lda game_mode

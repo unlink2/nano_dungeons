@@ -1340,6 +1340,15 @@ cursor_noise:
 jump_noise:
 .db #%00011111, #%00000111, #%0010000, $FF
 
+hit_noise:
+.db #%00001010, #%00010001, #%0001000, $FF
+
+push_noise:
+.db #%00001010, #%00011111, #%0010000, $FF
+
+coin_noise:
+.db #%11011011, #%11110001, #%0000011, #%11011011, #%11110000, #%0000011,$FF
+
 .define TEST_SONG_DUTY1 #%01000011
 .define TEST_SONG_DUTY2 #%11100011
 test_song_square_1:

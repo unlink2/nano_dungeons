@@ -835,6 +835,8 @@ sprite_push_collision:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_key_collision:
+    jsr init_coin_noise
+
     ; test collected flag
     lda sprite_tile_data, y
     and #%10000000
@@ -1556,15 +1558,17 @@ sprite_skel_collision:
     bne @not_won
     rts
 @not_won:
+    jsr init_hit_noise
+
     lda iframes
-    beq @hit 
+    beq @hit
     rts ; no hit if iframes are enabled
 
 @hit:
     lda level ; 1 damage per level
     jsr take_damage
     beq @reload
-    rts 
+    rts
 @reload:
 game_over:
     ; TODO set up delay timer to play death animation
@@ -1600,6 +1604,8 @@ sprite_sword_collision:
     lda #$09
     jsr purchase
     beq @done ; if purcahse failed return
+
+    jsr init_coin_noise
 
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
@@ -1735,6 +1741,8 @@ sprite_sword_update:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_hp_collision:
+    jsr init_coin_noise
+
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
     bne @done
@@ -1758,6 +1766,8 @@ sprite_armor_collision:
     lda #$09
     jsr purchase
     beq @done
+
+    jsr init_coin_noise
 
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
@@ -1966,6 +1976,7 @@ sprite_flame_update:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_coin_collision:
+    jsr init_coin_noise
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
     bne @done

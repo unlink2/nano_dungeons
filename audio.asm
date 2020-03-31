@@ -222,8 +222,6 @@ init_cursor_beep:
 ;   uses A register
 ;   loads sound into noise channel
 init_sword_noise:
-init_hit_noise:
-init_push_noise:
 init_jump_noise:
     lda #<jump_noise
     sta noise_ptr
@@ -231,6 +229,50 @@ init_jump_noise:
     sta noise_ptr+1
 
     lda #$10
+    sta noise_periode
+
+    lda #$01
+    sta noise_timer
+
+    rts
+
+init_hit_noise:
+    lda #<hit_noise
+    sta noise_ptr
+    lda #>hit_noise
+    sta noise_ptr+1
+
+    lda #$10
+    sta noise_periode
+
+    lda #$01
+    sta noise_timer
+
+    rts
+
+init_push_noise:
+    lda #<push_noise
+    sta noise_ptr
+    lda #>push_noise
+    sta noise_ptr+1
+
+    lda #$20
+    sta noise_periode
+
+    lda #$01
+    sta noise_timer
+
+    rts
+
+
+
+init_coin_noise:
+    lda #<coin_noise
+    sta noise_ptr
+    lda #>coin_noise
+    sta noise_ptr+1
+
+    lda #$15
     sta noise_periode
 
     lda #$01
