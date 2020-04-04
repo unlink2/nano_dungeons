@@ -1204,6 +1204,12 @@ sprite_skel_update:
     sta get_tile_y
     jsr init_damage_animation
 
+    ; add exp
+    lda #$10
+    clc
+    adc player_exp
+    sta player_exp
+
     lda #$00
     sta sprite_tile_hp, y ; 0 hp
 
@@ -2092,7 +2098,7 @@ sprite_bear_trap_update:
     rts
 
 ; this sub routine inits the damage animation
-; uses sprites 04 05 06 07
+; uses sprites 03 04 05 06 07
 ; inputs:
 ;   get_tile_x
 ;   get_tile_y -> location of animation
@@ -2107,6 +2113,10 @@ init_damage_animation:
     adc #$04 ; move half a tile
     sta sprite_data_4+3
     sta sprite_data_5+3
+
+    ; move a bit more for "10"
+    adc #$04
+    sta sprite_data_3+3
 
     inx
     inx
@@ -2124,6 +2134,7 @@ init_damage_animation:
     adc #$04 ; move half a tile
     sta sprite_data_4
     sta sprite_data_6
+    sta sprite_data_3 ; "10"
 
     inx
     inx
@@ -2137,7 +2148,10 @@ init_damage_animation:
     sta sprite_data_4+1
     sta sprite_data_5+1
     sta sprite_data_6+1
-    sta sprite_data_7+1 
+    sta sprite_data_7+1
+    
+    lda #$CB ; tile to use for "10"
+    sta sprite_data_3+1 
 
     rts
 
@@ -2152,6 +2166,9 @@ hide_damage_animation:
     sta sprite_data_6+3
     sta sprite_data_7
     sta sprite_data_7+3
+    sta sprite_data_3
+    sta sprite_data_3+3
+    sta sprite_data_3+1
 
     rts
 
@@ -2164,4 +2181,10 @@ update_damage_animation:
     sta sprite_data_5+2
     sta sprite_data_6+2
     sta sprite_data_7+2
+
+    lda #$CB
+    cmp sprite_data_3+1
+    bne @skip ; skip moving "10"
+    dec sprite_data_3
+@skip:
     rts 

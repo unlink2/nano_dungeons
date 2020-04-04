@@ -15,6 +15,7 @@ init_game:
     sta last_player_armor
     sta last_keys
     sta last_coins
+    sta last_player_exp
 
     ; tile update mode
     lda #%01000000
@@ -51,6 +52,7 @@ init_game:
     sta iframes ; no iframes
     sta move_timer ; reset move timer
     sta coins
+    sta player_exp
 
     lda #<update_game
     sta update_sub
@@ -259,6 +261,9 @@ force_update_ui:
     ldx coins
     dex
     stx last_coins
+    ldx player_exp
+    dex
+    stx last_player_exp
     rts 
 
 ; updates UI for key, armor and damage count
@@ -317,10 +322,31 @@ update_ui:
     jsr draw_hex_buffer
 
 @no_update_coins:
+
+    lda last_player_exp
+    cmp player_exp
+    beq @no_update_exp
+
+    ; UI is always at same location so it is easy to update
+    lda player_exp
+    sta last_player_exp ; update completed store for next frame
+    jsr convert_hex
+
+    ; update nametable
+    lda #03
+    sta get_tile_x
+    lda #24
+    sta get_tile_y
+    jsr draw_hex_buffer
+@no_update_exp:
+
     rts
 
 ; non-critical game updates
 update_game:
+    ; test if level up
+    jsr level_up_check
+
     jsr check_player_move
     cmp #$01
     bne @player_not_moved
@@ -819,6 +845,19 @@ check_player_move:
     rts
 
 
+; tests if player leveled up
+; and runs relevant code
+level_up_check:
+    lda player_exp
+    cmp #LVL_UP_EXP
+    bcc @not_level_up
+    ; TODO add option to select reward
+    lda #$00
+    sta player_exp
+    inc player_damage
+@not_level_up:
+    rts
+
 ; updates the sword sprite (sprite 1)
 ; based on the delay timer
 sword_update:
@@ -1247,6 +1286,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta coins
+
+    iny
+    lda (save_ptr), y
+    sta  player_exp
 @invalid:
     rts
 
@@ -1258,6 +1301,10 @@ load_save:
 store_save:
     ldy #SAVE_DATA_SIZE-1
 
+    lda player_exp
+    sta (save_ptr), y
+
+    dey 
     lda coins
     sta (save_ptr), y
 

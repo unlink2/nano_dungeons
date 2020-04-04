@@ -93,7 +93,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 11 ; 11 bytes including checksum
+.define SAVE_DATA_SIZE 12 ; 12 bytes including checksum
 
 .define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -101,6 +101,8 @@
 .define COLOR_BLACK $1E ; background clear color
 
 .define SHOP_MASK $0F ; shop level
+
+.define LVL_UP_EXP 100
 
 .enum $00
 frame_count 1
@@ -205,6 +207,7 @@ last_keys 1
 last_player_damage 1
 last_player_armor 1
 last_coins 1
+last_player_exp 1
 
 ; 16 bit count of tiles that have to be cleared, when both are $00 map is won
 ; this is populated during decompression of a map
@@ -229,6 +232,8 @@ draw_buffer_y 1
 
 ; money counter
 coins 1
+; player exp
+player_exp 1
 
 ; 2 temp ptrs. not preserved accross calls
 temp1_ptr 2
