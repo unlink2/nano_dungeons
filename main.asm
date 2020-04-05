@@ -115,6 +115,7 @@ game_flags 1
 ; 7th bit = 1 -> barrier disabled, 6th bit = 1 -> no collision (may not always be observed),
 ; 5th bit = 1 -> caught in trap, rng roll to move
 ; 4th bit = 1 -> set actions to 0 on next crit update
+; 3rd bit = 1 -> skip UI update this frame
 map_flags 1
 ; 7th bit = 1 -> enable random map generator in load
 ; 6th bit = 1 -> enable low visibility mode in gameplay

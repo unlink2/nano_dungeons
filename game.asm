@@ -117,7 +117,7 @@ init_game:
     lda #4 * 8
     sta sprite_data_A+3
 
-    lda #25 * 8 ; y position
+    lda #24 * 8 ; y position
     sta sprite_data_8
     sta sprite_data_9
     sta sprite_data_A
@@ -267,11 +267,26 @@ force_update_ui:
     ldx player_exp
     dex
     stx last_player_exp
-    rts 
+    ldx pmagic
+    dex
+    stx last_magic
+
+    lda map_flags ; skip update this frame
+    ora #%00001000
+    sta map_flags
+    rts
 
 ; updates UI for key, armor and damage count
 ; performs nametable update required to display numbers
 update_ui:
+    lda map_flags ; skip update this frame if flag is set
+    and #%00001000
+    beq @no_skip:
+    lda map_flags
+    and #%11110111
+    sta map_flags
+    rts
+@no_skip:   
     lda last_player_damage
     cmp player_damage
     beq @no_update_damage
@@ -336,7 +351,7 @@ update_ui:
     jsr convert_hex
 
     ; update nametable
-    lda #03
+    lda #06
     sta get_tile_x
     lda #24
     sta get_tile_y
