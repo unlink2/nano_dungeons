@@ -856,6 +856,16 @@ level_up_check:
     ; TODO add option to select reward
     lda #$00
     sta player_exp
+
+    ; upgrade the smaller stat
+    lda player_damage
+    cmp player_armor_base
+    bcc @upgrade_damage
+
+    inc player_armor_base
+    inc player_armor
+    rts
+@upgrade_damage:
     inc player_damage
 @not_level_up:
     rts
