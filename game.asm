@@ -18,6 +18,7 @@ init_game:
     sta last_player_exp
     sta last_magic
     sta pmagic
+    sta pmagic_base
 
     ; tile update mode
     lda #%01000000
@@ -1306,6 +1307,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta pmagic
+
+    iny
+    lda (save_ptr), y
+    sta pmagic_base
 @invalid:
     rts
 
@@ -1317,6 +1322,10 @@ load_save:
 store_save:
     ldy #SAVE_DATA_SIZE-1
 
+    lda pmagic_base
+    sta (save_ptr), y
+
+    dey
     lda pmagic
     sta (save_ptr), y
 
