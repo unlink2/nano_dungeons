@@ -780,13 +780,20 @@ b_input:
 @not_editor:
     cmp #GAME_MODE_GAME
     bne @done
+
+    ; debug decrease magic
+    lda pmagic
+    sec
+    sbc #$55
+    sta pmagic
+
     ; debug projectile spawn
     ; TODO remove
-    lda player_x
-    sta get_tile_x
-    lda player_y
-    sta get_tile_y
-    lda last_move
+    ; lda player_x
+    ; sta get_tile_x
+    ; lda player_y
+    ; sta get_tile_y
+    ; lda last_move
     ; jsr spawn_projectile
 @done:
     rts
