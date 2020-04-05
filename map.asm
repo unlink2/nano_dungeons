@@ -764,6 +764,39 @@ draw_hex_buffer:
     sta $2007
 
 
+    rts
+
+; sets a single tile
+; inputs:
+;   x -> decides nametable start address
+;   get_tile_x and get_tile_t -> start tile
+;   a -> the tile
+set_tile:
+    pha
+    lda $2002 ; read PPU status to reset the high/low latch
+
+    lda #$20  ; $2000 = start of ppu address
+    cpx #$01
+    bne @no_add
+    ; if nt is 0 we dont need to change the address
+    clc
+    adc #$04 ; add 4 to get start address of nt1
+@no_add:
+    ldy get_tile_y
+    clc
+    adc tile_update_table_hi, y
+
+    sta $2006
+    lda tile_update_table_lo, y
+    clc
+    adc get_tile_x
+    sta $2006 ; set up ppu for level transfer
+
+    pla
+; sets a single tile skipping the ppu setup
+set_tile_immediate:
+    sta $2007
+
     rts 
 
 ; loads menu background into nametable 1

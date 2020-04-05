@@ -17,7 +17,6 @@ init_game:
     sta last_coins
     sta last_player_exp
     sta last_magic
-    sta pmagic
     sta pmagic_base
 
     ; tile update mode
@@ -56,6 +55,7 @@ init_game:
     sta move_timer ; reset move timer
     sta coins
     sta player_exp
+    sta pmagic
 
     lda #<update_game
     sta update_sub
@@ -303,6 +303,7 @@ update_ui:
     sta get_tile_y
     jsr draw_hex_buffer
 
+    rts
 @no_update_damage:
 
     lda last_player_armor
@@ -321,6 +322,7 @@ update_ui:
     sta get_tile_y
     jsr draw_hex_buffer
 
+    rts
 @no_update_armor:
 
     lda last_coins
@@ -339,6 +341,7 @@ update_ui:
     sta get_tile_y
     jsr draw_hex_buffer
 
+    rts
 @no_update_coins:
 
     lda last_player_exp
@@ -356,8 +359,40 @@ update_ui:
     lda #24
     sta get_tile_y
     jsr draw_hex_buffer
+
+    dec get_tile_x
+    ldx #$00
+    lda #$0E
+    jsr set_tile
+
+    rts
 @no_update_exp:
 
+    lda last_magic
+    cmp pmagic
+    beq @no_update_magic
+
+    lda pmagic
+    sta last_magic
+
+    ; draw single tiles
+    lda #02
+    sta get_tile_x
+    lda #25
+    sta get_tile_y
+
+    lda #$C3
+    ldx #$00
+    jsr set_tile
+
+    lda #$C4
+    jsr set_tile_immediate
+
+    lda #$C5
+    jsr set_tile_immediate
+
+    rts
+@no_update_magic:
     rts
 
 ; non-critical game updates
