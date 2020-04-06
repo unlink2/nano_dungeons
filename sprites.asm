@@ -2005,7 +2005,7 @@ sprite_flame_scroll_collision:
     ora #%10000000
     sta sprite_tile_data, y
 
-    lda #$02
+    lda #$03
     sta spell_type
 @done:
     lda #$00 ; never return a collision value
