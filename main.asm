@@ -55,6 +55,7 @@
 .define START_ARMOR $00
 .define START_DAMAGE $01
 .define START_WEAPON $01
+.define START_MAGIC $03
 
 .define GENERATE_NEW_MAP $00
 
@@ -1335,6 +1336,19 @@ weapon_timer:
 .db #$00
 .db #$0F
 .db #$1F
+
+weapon_timer_16:
+.db #$00
+.db #$00
+.db #$00
+
+; magic UI lookup table
+magic_ui_1:
+.db #$52, #$C3, #$C3, #$C3
+magic_ui_2:
+.db #$53, #$53, #$C4, #$C4
+magic_ui_3:
+.db #$54, #$54, #$54, #$C5
 
 ; converts object index to an address, only the lo byte is given, hi is always $02
 obj_index_to_addr:

@@ -200,7 +200,7 @@ a_input_game:
     lda weapon_done_hi, y
     sta delay_done+1
 
-    lda #$00
+    lda weapon_timer_16, y
     sta delay_timer+1
     lda weapon_timer, y
     sta delay_timer
@@ -803,6 +803,11 @@ b_input_game:
     bne @init
     rts
 @init:
+    lda pmagic
+    bne @magic
+    rts ; if not enough magic
+@magic:
+    dec pmagic ; -1
 
     ; disable blinking animation
     lda sprite_data+1
@@ -821,7 +826,7 @@ b_input_game:
     lda weapon_done_hi, y
     sta delay_done+1
 
-    lda #$00
+    lda weapon_timer_16, y
     sta delay_timer+1
     lda weapon_timer, y
     sta delay_timer

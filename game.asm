@@ -17,7 +17,10 @@ init_game:
     sta last_coins
     sta last_player_exp
     sta last_magic
+
+    lda #START_MAGIC
     sta pmagic_base
+    sta pmagic
 
     ; tile update mode
     lda #%01000000
@@ -55,7 +58,6 @@ init_game:
     sta move_timer ; reset move timer
     sta coins
     sta player_exp
-    sta pmagic
     sta spell_type
 
     lda #<update_game
@@ -382,14 +384,17 @@ update_ui:
     lda #25
     sta get_tile_y
 
-    lda #$C3
+    ldy pmagic
+    lda magic_ui_1, y
     ldx #$00
     jsr set_tile
 
-    lda #$C4
+    ldy pmagic
+    lda magic_ui_2, y
     jsr set_tile_immediate
 
-    lda #$C5
+    ldy pmagic
+    lda magic_ui_3, y
     jsr set_tile_immediate
 
     rts
@@ -583,6 +588,13 @@ init_win_condition:
     sta seed+1
 
     inc level
+
+    ; inc magic every leve unless it is full already
+    lda pmagic_base
+    cmp pmagic
+    beq @no_inc_magic
+    inc pmagic
+@no_inc_magic:
 
     ; store gamestate
     jsr store_save
