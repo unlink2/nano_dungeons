@@ -93,7 +93,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 14 ; 14 bytes including checksum
+.define SAVE_DATA_SIZE 15 ; bytes including checksum
 
 .define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -238,6 +238,7 @@ coins 1
 player_exp 1
 pmagic 1 ; current matgic, regenerates over time
 pmagic_base 1 ; base magic
+spell_type 1 ; id of spell, like weapon_type
 
 ; 2 temp ptrs. not preserved accross calls
 temp1_ptr 2
@@ -297,6 +298,7 @@ last_move 1 ; 0 = up, 1 = down, 2 = left, 3 = right
 weapon_x 1 ; players weapon x and y location
 weapon_y 1
 weapon_type 1 ; id of weapon 0 = sword
+
 iframes 1 ; frames of invincibility after hit
 player_hp 1 ; how much hp has player still got
 player_armor 1 ; armor value, when 0 hp decs

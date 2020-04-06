@@ -56,6 +56,7 @@ init_game:
     sta coins
     sta player_exp
     sta pmagic
+    sta spell_type
 
     lda #<update_game
     sta update_sub
@@ -1361,6 +1362,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta pmagic_base
+
+    iny
+    lda (save_ptr), y
+    sta spell_type
 @invalid:
     rts
 
@@ -1372,6 +1377,10 @@ load_save:
 store_save:
     ldy #SAVE_DATA_SIZE-1
 
+    lda spell_type
+    sta (save_ptr), y
+
+    dey 
     lda pmagic_base
     sta (save_ptr), y
 

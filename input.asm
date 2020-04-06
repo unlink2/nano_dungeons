@@ -782,10 +782,7 @@ b_input:
     bne @done
 
     ; debug decrease magic
-    lda pmagic
-    sec
-    sbc #$55
-    sta pmagic
+    jsr b_input_game
 
     ; debug projectile spawn
     ; TODO remove
@@ -796,6 +793,53 @@ b_input:
     ; lda last_move
     ; jsr spawn_projectile
 @done:
+    rts
+
+
+; in-game a input
+b_input_game:
+    ldy spell_type
+    ; no weapon if 0
+    bne @init
+    rts
+@init:
+
+    ; disable blinking animation
+    lda sprite_data+1
+    and #%01111111
+    sta sprite_data+1
+
+    jsr init_sword_noise
+
+    lda weapon_update_lo, y
+    sta delay_update
+    lda weapon_update_hi, y
+    sta delay_update+1
+
+    lda weapon_done_lo, y
+    sta delay_done
+    lda weapon_done_hi, y
+    sta delay_done+1
+
+    lda #$00
+    sta delay_timer+1
+    lda weapon_timer, y
+    sta delay_timer
+
+    ; disable inputs
+    lda nmi_flags
+    ora #%00100000
+    sta nmi_flags
+
+    ; move weapon x and y based on last inputs
+    lda player_x
+    sta weapon_x
+    lda player_y
+    sta weapon_y
+
+    lda weapon_sprite, y ; tile
+    sta sprite_data_1+1
+
     rts
 
 ; b input for editor menu
