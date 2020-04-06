@@ -1307,21 +1307,25 @@ weapon_update_lo:
 .db #<empty_sub
 .db #<sword_update
 .db #<arrow_update
+.db #<flame_spell_update
 
 weapon_update_hi:
 .db #>empty_sub
 .db #>sword_update
 .db #>arrow_update
+.db #>flame_spell_update
 
 weapon_done_lo:
 .db #<sword_done
 .db #<sword_done
 .db #<arrow_done
+.db #<flame_spell_done
 
 weapon_done_hi:
 .db #>sword_done
 .db #>sword_done
 .db #>arrow_done
+.db #>flame_spell_done
 
 ; sprites based on tile
 ; this number is the vertical sprite
@@ -1330,14 +1334,17 @@ weapon_sprite:
 .db #$24
 .db #$33
 .db #$3D
+.db #$4D
 
 ; delay timer for each weapon type
 weapon_timer:
 .db #$00
 .db #$0F
 .db #$1F
+.db #48
 
 weapon_timer_16:
+.db #$00
 .db #$00
 .db #$00
 .db #$00

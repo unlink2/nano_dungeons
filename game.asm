@@ -1019,6 +1019,64 @@ arrow_done:
     jsr sword_done
     rts
 
+; updates spell
+flame_spell_update:
+    ; set color
+    lda #$01
+    sta sprite_data_1+2
+
+    lda sprite_data_1+1
+    eor #%10000000 ; flip sprite
+    sta sprite_data_1+1
+
+    ldy delay_timer
+    lda weapon_x
+    sec
+    sbc flame_spell_x_lookup, y
+    sta weapon_x
+
+    lda weapon_y
+    sec
+    sbc flame_spell_y_lookup, y
+    sta weapon_y
+
+    jsr sword_update
+    rts
+; lookup table for x and y sbc
+; each frame the spell is active
+; relative to delay timer
+flame_spell_x_lookup:
+.db $00, $00, $00, $00
+.db $00, $00, $00, $00
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $00
+.db $00, $00, $00, $00
+.db $00, $00, $00, $01
+.db $00, $00, $00, $01
+.db $00, $00, $00, $01
+.db $00, $00, $00, $FF
+flame_spell_y_lookup:
+.db $00, $00, $00, $01
+.db $00, $00, $00, $01
+.db $00, $00, $00, $01
+.db $00, $00, $00, $00
+.db $00, $00, $00, $00
+.db $00, $00, $00, $00
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $FF
+.db $00, $00, $00, $00
+.db $00, $00, $00, $02
+
+; flame spell done
+flame_spell_done:
+    jsr sword_done
+    rts
+
 ; this sub routine checks if
 ; a move input should actually mvoe the player
 ; inputs:
