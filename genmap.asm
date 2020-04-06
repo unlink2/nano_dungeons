@@ -440,7 +440,8 @@ sprite_tile_rng:
 ; .db $5C, $5D, $5E, $5F ; jump tiles
 .db $6C, $6C, $6C, $6C, $6C ; switch tile
 .db $68 ; end tile, more than one allowed
-.db $7F, $7F, $7F, $7F, $7F ; flame tiles
+.db $7F, $7F, $7F ; flame tiles
+.db $81 $81 ; flame scroll
 .db $80 ; bear trap
 .mrep 6
 .db $72 ; push block

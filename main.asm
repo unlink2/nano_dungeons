@@ -69,7 +69,7 @@
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
-.define SPRITE_TILES_END $81
+.define SPRITE_TILES_END $82
 .define AI_SPRITES_START 16 ; sprites that may be used for AI
 
 .define PROJECTILES 8
@@ -1199,11 +1199,13 @@ sprite_init_lo:
 .db #<sprite_init_default ; coin tile
 .db #<sprite_init_default ; flame tile
 .db #<sprite_init_default ; bear trap tile
+.db #<sprite_init_default ; flame scroll tile
 
 sprite_init_hi:
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_push
+.db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
 .db #>sprite_init_default
@@ -1237,6 +1239,7 @@ sprite_ai_lo:
 .db #<sprite_pickup_update
 .db #<sprite_flame_update
 .db #<sprite_bear_trap_update
+.db #<sprite_pickup_update
 
 sprite_ai_hi:
 .db #>sprite_update_default
@@ -1256,6 +1259,7 @@ sprite_ai_hi:
 .db #>sprite_pickup_update
 .db #>sprite_flame_update
 .db #>sprite_bear_trap_update
+.db #>sprite_pickup_update
 
 sprite_collision_lo:
 .db #<sprite_on_collision
@@ -1275,6 +1279,7 @@ sprite_collision_lo:
 .db #<sprite_coin_collision
 .db #<sprite_flame_collision
 .db #<sprite_bear_trap_collision
+.db #<sprite_flame_scroll_collision
 
 sprite_collision_hi:
 .db #>sprite_on_collision
@@ -1294,6 +1299,7 @@ sprite_collision_hi:
 .db #>sprite_coin_collision
 .db #>sprite_flame_collision
 .db #>sprite_bear_trap_collision
+.db #>sprite_flame_scroll_collision
 
 ; sub routines for weapon upgrades
 weapon_update_lo:

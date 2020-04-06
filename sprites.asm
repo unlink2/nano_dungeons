@@ -1994,15 +1994,35 @@ sprite_coin_collision:
     lda #$00 ; never return a collision value
     rts
 
+; flame scroll pikcup AI
+; inputs:
+;   y -> pointing to sprite data offset
+sprite_flame_scroll_collision:
+    jsr init_coin_noise
+    lda sprite_tile_data, y
+    and #%10000000 ; disable flag
+    bne @done
+    ora #%10000000
+    sta sprite_tile_data, y
+
+    lda #$02
+    sta spell_type
+@done:
+    lda #$00 ; never return a collision value
+    rts
+
+
+
 ; pickup sprite UI position
 ; TODO make all pickup sprites use this
 pickup_sprite:
 .db $00, $00, $00, $00, $00, $00, $00, $00
 .db $00, $00, $3A, $3C, $00, $00, $3F, $00
+.db $00, $4F
 pickup_attr:
 .db $00, $00, $00, $00, $00, $00, $00, $00
 .db $00, $00, $02, $00, $00, $00, $00, $00
-
+.db $00, $01
 
 ; sprite bear trap collision
 ; inputs:
