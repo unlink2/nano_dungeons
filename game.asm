@@ -397,6 +397,13 @@ update_ui:
     lda magic_ui_3, y
     jsr set_tile_immediate
 
+    ; draw current spell sprite
+    ldy spell_type
+    lda #08
+    sta get_tile_x
+    lda weapon_sprite, y
+    jsr set_tile
+
     rts
 @no_update_magic:
     rts
