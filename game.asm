@@ -10,6 +10,10 @@ init_game:
     lda #$00
     sta gfx_flags
 
+    lda #ACTIONS_PER_TURN
+    sta base_actions
+    sta actions
+
     lda #$FF
     sta last_player_damage
     sta last_player_armor
@@ -200,8 +204,10 @@ update_game_crit:
 
     ; if player did move set remaining actions
     ; to 0. a move ends the turn
-    lda #$00
-    sta actions
+    ; lda #$00
+    ; sta actions
+    lda #$01
+    jsr dec_actions
 
     ; skip tile update if flag is not set
     lda game_flags
@@ -968,11 +974,14 @@ sword_done:
     sta weapon_x
     sta weapon_y
 
-    sta actions
+    ; sta actions
 
     sta sprite_data_1
     sta sprite_data_1+3
     sta sprite_data_1+2
+
+    lda #$02 ; dec by 2
+    jsr dec_actions 
 
     ; disable hit flag for all sprites
     ldx #SPRITE_TILES-1
@@ -1082,6 +1091,24 @@ flame_spell_y_lookup:
 ; flame spell done
 flame_spell_done:
     jsr sword_done
+    rts
+
+; this sub routine decs actions
+; inputs:
+;   a -> amount to dec by
+; side effects:
+;   uses temp
+dec_actions:
+    sta temp
+    ; 2 actions for attack
+    lda actions
+    sec
+    sbc temp
+    sta actions
+    bcs @no_underflow
+    lda #$00
+    sta actions ; if underflow set to 0
+@no_underflow:
     rts
 
 ; this sub routine checks if
@@ -1443,6 +1470,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta spell_type
+
+    iny
+    lda (save_ptr), y
+    sta base_actions
 @invalid:
     rts
 
@@ -1454,6 +1485,10 @@ load_save:
 store_save:
     ldy #SAVE_DATA_SIZE-1
 
+    lda base_actions
+    sta (save_ptr), y
+
+    dey
     lda spell_type
     sta (save_ptr), y
 

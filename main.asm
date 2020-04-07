@@ -85,7 +85,7 @@
 .define TILE_SELECT_MIN_Y $05
 .define TILE_SELECT_MAX_Y $17
 
-.define ACTIONS_PER_TURN $01 ; actions per turn, default value
+.define ACTIONS_PER_TURN $02 ; actions per turn, default value
 
 .define LEFT $00
 .define UP $01
@@ -94,7 +94,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 15 ; bytes including checksum
+.define SAVE_DATA_SIZE 16 ; bytes including checksum
 
 .define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -141,6 +141,7 @@ game_mode 1
 move_delay 1 ; delay between move inputs
 select_delay 1 ; same as move delay, but prevnets inputs for selection keys such as select
 actions 1 ; player's action until "turn" ends. Turn is considered ended when this has a non-zero value
+base_actions 1 ; base action in-game
 
 seed 2 ; 16 bit random number for map generator
 seed_input 2 ; seed cusom input
@@ -558,7 +559,7 @@ nmi_flag_not_set:
     ; check if actions have reached 0
     lda actions
     bne @no_new_turn
-    lda #ACTIONS_PER_TURN
+    lda base_actions
     sta actions ; refresh actions
     ; check if iframes are set, dec every action
     ldx iframes
