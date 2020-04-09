@@ -521,7 +521,7 @@ clear_mem:
     sta save_ptr+1
 
     ; initial value for mask_flags
-    lda #%10000000
+    lda #%01000000
     sta mask_flags
 
 start:
