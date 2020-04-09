@@ -131,6 +131,8 @@ editor_flags 1
 ; 5th bit = 1 -> sprite pattent table
 ; 4th bit = 1 -> bg pattern table
 gfx_flags 1
+; ppu mask mirror ($2001)
+mask_flags 1
 
 errno 1 ; error number, nonzero values are errors
 
@@ -518,6 +520,10 @@ clear_mem:
     lda #>sav_checksum
     sta save_ptr+1
 
+    ; initial value for mask_flags
+    lda #%10000000
+    sta mask_flags
+
 start:
     ; load user defined patterns
     lda gfx_flags
@@ -526,6 +532,7 @@ start:
     sta $2000
 
     lda #%00011110   ; enable sprites
+    ora mask_flags
     sta $2001
 
 main_loop:
@@ -632,6 +639,7 @@ update_crit_done:
     sta $2000
 
     lda #%00011110   ; enable sprites
+    ora mask_flags
     sta $2001
 
     ; if load nmi flag is set skip normal updates until next frame
