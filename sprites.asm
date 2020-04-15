@@ -174,13 +174,13 @@ sprite_offscreen:
     lda player_x
     ldx get_tile_x
     jsr calc_distance
-    cmp #VISIBILITY_RADIUS+1
+    cmp #VISIBILITY_RADIUS
     bcs @offscreen ; if greater it is offscreen
 
     lda player_y
     ldx get_tile_y
     jsr calc_distance
-    cmp #VISIBILITY_RADIUS+1
+    cmp #VISIBILITY_RADIUS
     bcc @done
 @offscreen:
     ldy #$01
