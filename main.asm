@@ -820,14 +820,14 @@ editor_menu_cursor_attr:
 
 ; same as editor menu tables
 main_menu_cursor_x:
-.db $01 ; level select
-.db $01 ; slot 1
-.db $01 ; slot 2
-.db $01 ; slot 3
-.db $01 ; edit menu
-.db $01 ; new map
-.db $01 ; resume
-.db $01 ; seed input
+.db $03 ; level select
+.db $03 ; slot 1
+.db $03 ; slot 2
+.db $03 ; slot 3
+.db $03 ; edit menu
+.db $03 ; new map
+.db $03 ; resume
+.db $03 ; seed input
 
 main_menu_cursor_y:
 .db $08

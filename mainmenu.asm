@@ -65,9 +65,9 @@ init_main_menu:
     sta smooth_down
 
     ; level select display
-    lda #$09*08 ; x position
+    lda #$0B*08 ; x position
     sta sprite_data_1+3
-    lda #$08*08 ; x positon
+    lda #$0A*08 ; x positon
     sta sprite_data_2+3
 
     lda #$08*08 ; y position
@@ -90,13 +90,13 @@ init_main_menu:
     sty sprite_data_4
     sty sprite_data_5
     sty sprite_data_6
-    ldy #$40
+    ldy #$48
     sty sprite_data_3+3
-    ldy #$40+8
+    ldy #$48+8
     sty sprite_data_4+3
-    ldy #$40+8*2
+    ldy #$48+8*2
     sty sprite_data_5+3
-    ldy #$40+8*3
+    ldy #$48+8*3
     sty sprite_data_6+3
 
     rts
