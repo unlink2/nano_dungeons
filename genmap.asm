@@ -283,7 +283,7 @@ check_oob_coordinates:
 
     ; check oob coordinates y
     lda get_tile_y
-    cmp #29-MAX_ROOM_SIZE+1
+    cmp #29-MAX_ROOM_SIZE+1+2
     bcc @less_y
 @ret_y:
     lda #$0A
