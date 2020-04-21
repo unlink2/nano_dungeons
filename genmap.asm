@@ -26,7 +26,7 @@ generate_map:
     sty get_tile_y
     jsr insert_room
     ; jmp @gen_done
-    ldx #$30
+    ldx #$28
     ;ldx #$24 ; generate rooms x  more times
 @gen_loop:
     txa
