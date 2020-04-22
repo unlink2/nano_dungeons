@@ -191,7 +191,7 @@ init_editor_menu:
     ; move sprite 1 to tile select location
     lda #$77
     sta sprite_data_1
-    lda #$38
+    lda #$48
     sta sprite_data_1+3
 
     lda #$00

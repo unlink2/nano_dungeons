@@ -767,12 +767,12 @@ shop_gfx:
 
 ; x and y locations for cursor in editor menu
 editor_menu_cursor_x:
-.db $01 ; location save 1
-.db $01 ; save 2
-.db $01 ; save 3
-.db $01 ; new
-.db $01 ; tile select
-.db $01 ; back
+.db $03 ; location save 1
+.db $03 ; save 2
+.db $03 ; save 3
+.db $03 ; new
+.db $03 ; tile select
+.db $03 ; back
 .db $0C  ; color top left
 .db $0C  ; color bottom left
 .db $12  ; color top right
