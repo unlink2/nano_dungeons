@@ -20,102 +20,77 @@ input_handler:
     lda #$00
     sta last_inputs
 
-    lda $4016 ; p1 - A
-    and #%00000001
+    ; latch all inputs and place them in last input register
+    ldx #$08
+@read_loop:
+    asl
+    sta last_inputs
+    lda $4016 ; read each input in order A, B, select, start, u, d, l, r
+    and #$01
+    ora last_inputs
+    dex
+    bne @read_loop
+    sta last_inputs
+    ; all inputs are now read
+
+    lda last_inputs ; p1 - A
+    and #%10000000
     beq @no_a
     lda prev_inputs
-    and #%00000001
+    and #%10000000
     bne @skip_a ; don't allow held inputs
 
     jsr a_input
 
 @skip_a:
-    ; was pressed
-    lda last_inputs
-    ora #%00000001
-    sta last_inputs
 
 @no_a:
 
-    lda $4016 ; p1 - B
-    and #%00000001
+    lda last_inputs ; p1 - B
+    and #%01000000
     beq @no_b
     lda prev_inputs
-    and #%00000010
+    and #%01000000
     bne @skip_b ; don't allow held input
 
     jsr b_input
 @skip_b:
-    ; was pressed
-    lda last_inputs
-    ora #%00000010
-    sta last_inputs
 @no_b:
 
-    lda $4016 ; p1 - select
-    and #%00000001
+    lda last_inputs ; p1 - select
+    and #%00100000
     beq @no_select
     jsr select_input
-
-    ; was pressed
-    lda last_inputs
-    ora #%00000100
-    sta last_inputs
 @no_select:
 
-    lda $4016 ; p1 - start
-    and #%00000001
+    lda last_inputs ; p1 - start
+    and #%00010000
     beq @no_start
     jsr start_input
-
-    ; was pressed
-    lda last_inputs
-    ora #%00001000
-    sta last_inputs
 @no_start:
 
-    lda $4016 ; p1 - up
-    and #%0000001
+    lda last_inputs ; p1 - up
+    and #%00001000
     beq @no_up
     jsr go_up
-
-    ; was pressed
-    lda last_inputs
-    ora #%00010000
-    sta last_inputs
 @no_up:
 
-    lda $4016 ; p1 - down
-    and #%00000001
+    lda last_inputs ; p1 - down
+    and #%00000100
     beq @no_down
     jsr go_down
-
-    ; was pressed
-    lda last_inputs
-    ora #%00100000
-    sta last_inputs
 @no_down:
 
-    lda $4016 ; p1 - left
-    and #%00000001
+    lda last_inputs ; p1 - left
+    and #%00000010
     beq @no_left
     jsr go_left
-
-    ; was pressed
-    lda last_inputs
-    ora #%01000000
-    sta last_inputs
 @no_left:
 
-    lda $4016 ; p1 - right
+    lda last_inputs ; p1 - right
     and #%00000001
     beq @no_right
     jsr go_right
-
-    ; was pressed
-    lda last_inputs
-    ora #%10000000
-    sta last_inputs
 @no_right:
     rts
 

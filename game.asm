@@ -489,7 +489,7 @@ update_game:
     ; test for movement inputs, if non occured reset
     ; timer
     lda last_inputs
-    and #%11110000
+    and #%00001111
     bne @no_move_timer_reset
     sta move_timer
 @no_move_timer_reset:
@@ -1119,7 +1119,7 @@ dec_actions:
 ; side effect:
 ;   move_timer is incremented every call until check succeeds
 ;   stores value of A in last_move
-;   removes move dlay if no move can go ahead that frame
+;   removes move delay if no move can go ahead that frame
 ; returns:
 ;   a -> 0 for no move
 ;   a -> 1 for move
