@@ -955,7 +955,7 @@ load_menu:
     rts
 @not_game_over:
     cpx #GAME_MODE_PAUSE
-    bne @not_game_over
+    bne @invalid_menu
 
     ; copy palette
     lda #<palette_data
