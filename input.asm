@@ -478,6 +478,12 @@ a_input_main_menu:
     rts
 
 @not_editor:
+    ; at this point all choices will load a map
+    ; load pause menu into nt1
+    ldx #GAME_MODE_PAUSE
+    jsr load_menu
+
+    lda menu_select ; need to restore menu_select in A after load
     cmp #MAIN_MENU_LEVEL
     bne @not_level_select
 
@@ -994,9 +1000,15 @@ select_input:
     rts
 @not_editor_menu:
     cmp #GAME_MODE_GAME
-    bne @done
+    bne @not_game
     dec level ; level -1 to not inc level during reload
     jsr reload_room
+    rts
+@not_game:
+    cmp #GAME_MODE_PAUSE
+    bne @done
+    jsr resume_game
+    jsr start_input_message ; back to main menu
 @done:
     rts
 
@@ -1044,7 +1056,8 @@ start_input:
     cmp #GAME_MODE_GAME
     bne @not_puzzle
 
-    jsr start_input_message
+    ; jsr start_input_message
+    jsr init_pause_menu
 
     rts
 @not_puzzle:
@@ -1054,8 +1067,12 @@ start_input:
     rts
 @not_win:
     cmp #GAME_MODE_TITLE
-    bne @done
+    bne @not_title
     jsr start_input_message
+@not_title:
+    cmp #GAME_MODE_PAUSE
+    bne @done
+    jsr resume_game
 @done:
     rts
 

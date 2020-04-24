@@ -17,6 +17,7 @@
 .define GAME_MODE_MESSAGE 4
 .define GAME_MODE_TITLE 5
 .define GAME_MODE_GAME_OVER 6
+.define GAME_MODE_PAUSE 7
 
 .define LEVEL_SIZE 960 ; uncompressed level size
 .define SAVE_SIZE LEVEL_SIZE+2 ; savegame size
@@ -521,7 +522,7 @@ clear_mem:
     sta save_ptr+1
 
     ; initial value for mask_flags
-    lda #%01000000
+    lda #%01011110
     sta mask_flags
 
 start:
@@ -531,7 +532,7 @@ start:
     ora #%10000000   ; enable NMI, sprites from Pattern Table 0
     sta $2000
 
-    lda #%00011110   ; enable sprites
+    lda #%00000000   ; enable sprites
     ora mask_flags
     sta $2001
 
@@ -638,7 +639,7 @@ update_crit_done:
     ora nametable
     sta $2000
 
-    lda #%00011110   ; enable sprites
+    lda #%00000000   ; enable sprites
     ora mask_flags
     sta $2001
 
@@ -706,6 +707,7 @@ irq:
 .include "./mainmenu.asm"
 .include "./game.asm"
 .include "./title.asm"
+.include "./pause.asm"
 
 .include "./map.asm"
 .include "./genmap.asm"
@@ -736,6 +738,9 @@ win_attr:
 .incbin "./graphics/win.attr"
 win_pal:
 .incbin "./graphics/win.pal"
+
+pause_gfx:
+.incbin "./graphics/pause.gfx"
 
 no_start_msg_gfx:
 .incbin "./graphics/no_start_msg.gfx"
@@ -923,6 +928,7 @@ map_table_lo:
 .db #<level_1_gfx
 .db #<game_over_gfx
 .db #<shop_gfx
+.db #<pause_gfx
 
 map_table_hi:
 .db #>empty_map
@@ -934,6 +940,7 @@ map_table_hi:
 .db #>level_1_gfx
 .db #>game_over_gfx
 .db #>shop_gfx
+.db #>pause_gfx
 
 ; color attribute lookup table
 attr_table_lo:
@@ -946,6 +953,7 @@ attr_table_lo:
 .db #<level_1_attr
 .db #<level_1_attr
 .db #<test_attr
+.db #<test_attr
 
 attr_table_hi:
 .db #>test_attr
@@ -956,6 +964,7 @@ attr_table_hi:
 .db #>title_attr
 .db #>level_1_attr
 .db #>level_1_attr
+.db #>test_attr
 .db #>test_attr
 
 ; color palette table
@@ -969,6 +978,7 @@ palette_table_lo:
 .db #<level_1_pal
 .db #<level_1_pal
 .db #<dungeon_palette
+.db #<palette_data
 
 palette_table_hi:
 .db #>palette_data
@@ -980,6 +990,7 @@ palette_table_hi:
 .db #>level_1_pal
 .db #>level_1_pal
 .db #>dungeon_palette
+.db #>palette_data
 
 ; map update routines
 map_sub_lo:

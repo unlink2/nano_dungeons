@@ -921,7 +921,7 @@ load_menu:
     rts
 @not_title:
     cpx #GAME_MODE_GAME_OVER
-    bne @invalid_menu
+    bne @not_game_over
 
     ; copy palette
     lda #<game_over_pal
@@ -948,7 +948,41 @@ load_menu:
     sta attr_ptr+1
 
     jsr decompress_level
-    jsr load_attr 
+    jsr load_attr
+
+    ldx #$01 ; load into nametable 1
+    jsr load_level
+    rts
+@not_game_over:
+    cpx #GAME_MODE_PAUSE
+    bne @not_game_over
+
+    ; copy palette
+    lda #<palette_data
+    sta palette_ptr
+    lda #>palette_data
+    sta palette_ptr+1
+    jsr load_palette
+
+    ; load win menu compressed tiles
+    lda #<pause_gfx
+    sta level_data_ptr
+    lda #>pause_gfx
+    sta level_data_ptr+1
+
+    ; decompress location, same as level
+    lda #<level_data
+    sta level_ptr
+    lda #>level_data
+    sta level_ptr+1
+
+    lda #<test_attr
+    sta attr_ptr
+    lda #>test_attr
+    sta attr_ptr+1
+
+    jsr decompress_level
+    jsr load_attr
 
     ldx #$01 ; load into nametable 1
     jsr load_level
