@@ -99,6 +99,11 @@ init_main_menu:
     ldy #$48+8*3
     sty sprite_data_6+3
 
+    ; enable sprite rendering
+    lda mask_flags
+    ora #%00010000 ; sprites
+    sta mask_flags
+
     rts
 
 ; update sub routine for main menu

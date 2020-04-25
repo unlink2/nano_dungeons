@@ -88,6 +88,11 @@ init_game:
     ora #%01000000
     sta game_flags ; enable sprite updating, disable tile updating
 
+    ; enable sprite rendering in case it was off
+    lda mask_flags
+    ora #%00010000 ; sprites
+    sta mask_flags
+
     jsr init_ai_tiles
     jsr find_start
     ; check if start was found
