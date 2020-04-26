@@ -22,13 +22,16 @@ init_pause_menu:
     lda #>update_none
     sta update_sub+1
 
-    lda #<update_crit_none
+    lda #<update_pause_crit
     sta update_sub_crit
-    lda #>update_crit_none
+    lda #>update_pause_crit
     sta update_sub_crit+1
 
     lda #GAME_MODE_PAUSE
     sta game_mode
+
+    lda #$00
+    sta menu_select
 
     rts
 
@@ -58,4 +61,7 @@ resume_game:
     lda #GAME_MODE_GAME
     sta game_mode
 
-    rts 
+    rts
+
+update_pause_crit:
+    jmp update_crit_done

@@ -145,8 +145,13 @@ a_input:
     rts
 @not_main_menu:
     cmp #GAME_MODE_GAME
-    bne @done
+    bne @not_game
     jsr a_input_game
+    rts
+@not_game:
+    cmp #GAME_MODE_PAUSE
+    bne @done
+    jsr a_input_pause
 @done:
     rts
 
@@ -739,6 +744,9 @@ a_input_main_menu:
 @done:
     rts
 
+; a input pause menu
+a_input_pause:
+    rts
 
 ; b button input
 ; b loads a map in editor menu
@@ -1485,7 +1493,7 @@ go_up:
     rts
 @not_main_menu:
     cmp #GAME_MODE_GAME
-    bne @done
+    bne @not_game
 
     lda #UP
     jsr check_move_delay
@@ -1494,6 +1502,11 @@ go_up:
     jsr go_up_editor
     lda #$08
     sta smooth_up
+    rts
+@not_game:
+    cmp #GAME_MODE_PAUSE
+    bne @done
+    dec menu_select
 @done:
     rts
 
@@ -1548,7 +1561,7 @@ go_down:
     rts
 @not_main_menu:
     cmp #GAME_MODE_GAME
-    bne @done
+    bne @not_game
 
     lda #DOWN
     jsr check_move_delay
@@ -1557,6 +1570,11 @@ go_down:
     jsr go_down_editor
     lda #$08
     sta smooth_down
+    rts
+@not_game:
+    cmp #GAME_MODE_PAUSE
+    bne @done
+    inc menu_select
 @done:
     rts
 
