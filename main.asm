@@ -98,7 +98,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 16 ; bytes including checksum
+.define SAVE_DATA_SIZE 17 ; bytes including checksum
 
 .define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -245,6 +245,7 @@ draw_buffer_y 1
 coins 1
 ; player exp
 player_exp 1
+player_level 1 ; level of player
 pmagic 1 ; current matgic, regenerates over time
 pmagic_base 1 ; base magic
 spell_type 1 ; id of spell, like weapon_type

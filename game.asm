@@ -63,6 +63,7 @@ init_game:
     sta coins
     sta player_exp
     sta spell_type
+    sta player_level
 
     lda #<update_game
     sta update_sub
@@ -938,6 +939,7 @@ level_up_check:
     ; TODO add option to select reward
     lda #$00
     sta player_exp
+    inc player_level
 
     ; upgrade the smaller stat
     lda player_damage
@@ -1479,6 +1481,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta base_actions
+
+    iny
+    lda (save_ptr), y
+    sta player_level
 @invalid:
     rts
 
@@ -1489,7 +1495,11 @@ load_save:
 ;   uses a and y registers
 store_save:
     ldy #SAVE_DATA_SIZE-1
+    
+    lda player_level 
+    sta (save_ptr), y
 
+    dey 
     lda base_actions
     sta (save_ptr), y
 
