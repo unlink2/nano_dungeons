@@ -52,6 +52,9 @@
 .define MAIN_MENU_RESUME 6
 .define MAIN_MENU_SET_SEED 7
 
+.define PAUSE_MENU_RESUME 0
+.define PAUSE_MENU_QUIT 1
+
 .define MAX_HP $02
 .define START_ARMOR $00
 .define START_DAMAGE $01
@@ -157,6 +160,7 @@ level_ptr_temp 2 ; 16 bit loop index for level loading or memcpy
 temp 4 ; 4 bytes of universal temporary storage
 nametable 1 ; either 0 or 1 depending on which nametable is active
 menu_select 1 ; cursor location in menu
+menu_select_prev 1 ; previous menu select, must be set by uodate rotuine not automatic
 
 collision_counter 1 ; counts amount of sprite collisions in a frame
 
@@ -853,6 +857,14 @@ main_menu_cursor_attr:
 .db $00
 .db $00
 .db $00
+
+pause_menu_cursor_x:
+.db $04 ; resume
+.db $04 ; main menu
+
+pause_menu_cursor_y:
+.db $0A
+.db $0D
 
 ; an empty map
 ; $24 being an empty tile (bg only)

@@ -32,6 +32,8 @@ init_pause_menu:
 
     lda #$00
     sta menu_select
+    lda #$01
+    sta menu_select_prev
 
     rts
 
@@ -64,4 +66,38 @@ resume_game:
     rts
 
 update_pause_crit:
+    ldx menu_select ; place cursor on screen
+    ; oob check
+    cpx #$02
+    bcc @not_oob
+    ldx #$00
+    stx menu_select
+@not_oob:
+
+    ; see if previous matches with current select
+    cpx menu_select_prev
+    beq @done
+
+    lda pause_menu_cursor_x, x
+    sta get_tile_x
+    lda pause_menu_cursor_y, x
+    sta get_tile_y
+    lda #$31 ; arrow tile
+    ldx #$01 ; nt1
+    jsr set_tile
+
+    ; clear previous tile
+    ldx menu_select_prev
+    lda pause_menu_cursor_x, x
+    sta get_tile_x
+    lda pause_menu_cursor_y, x
+    sta get_tile_y
+    lda #$24 ; arrow tile
+    ldx #$01 ; nt1
+    jsr set_tile
+
+    ; set previous menu select
+    lda menu_select
+    sta menu_select_prev
+@done:
     jmp update_crit_done

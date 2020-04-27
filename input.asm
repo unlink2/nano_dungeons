@@ -746,6 +746,19 @@ a_input_main_menu:
 
 ; a input pause menu
 a_input_pause:
+    lda menu_select
+    cmp #PAUSE_MENU_RESUME
+    bne @not_resume:
+    jsr resume_game
+    rts
+@not_resume:
+    cmp #PAUSE_MENU_QUIT
+    bne @not_quit
+    jsr resume_game
+    jsr start_input_message ; back to main menu
+    rts
+@not_quit:
+@done:
     rts
 
 ; b button input
