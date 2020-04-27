@@ -9,7 +9,7 @@ MAIN = main.asm
 # main
 
 nesblox: | init
-	$(CC) -o$(BINDIR)/$(BIN) -l${BINDIR}/${LST} -m${BINDIR}/${MSN} -msram $(MAIN)
+	$(CC) -o$(BINDIR)/$(BIN) -l${BINDIR}/${LST} -m${BINDIR}/${MSN} -msram $(MAIN) -wall
 
 # other useful things
 

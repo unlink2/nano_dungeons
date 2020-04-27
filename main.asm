@@ -109,7 +109,7 @@
 
 .define LVL_UP_EXP 100
 
-.enum $00
+.enum $00, $FF
 frame_count 1
 ; 7th bit = 1 -> loading; 6th bit = 1 -> nmi active, clear at end of nmi, 5th bit = 1 -> disable inputs
 nmi_flags 1
