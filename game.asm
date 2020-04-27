@@ -64,6 +64,7 @@ init_game:
     sta player_exp
     sta spell_type
     sta player_level
+    sta player_flags
 
     lda #<update_game
     sta update_sub
@@ -1485,6 +1486,10 @@ load_save:
     iny
     lda (save_ptr), y
     sta player_level
+
+    iny
+    lda (save_ptr), y
+    sta player_flags
 @invalid:
     rts
 
@@ -1495,7 +1500,11 @@ load_save:
 ;   uses a and y registers
 store_save:
     ldy #SAVE_DATA_SIZE-1
-    
+
+    lda player_flags
+    sta (save_ptr), y
+
+    dey 
     lda player_level 
     sta (save_ptr), y
 

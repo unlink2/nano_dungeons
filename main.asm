@@ -98,7 +98,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 17 ; bytes including checksum
+.define SAVE_DATA_SIZE 18 ; bytes including checksum
 
 .define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -249,6 +249,7 @@ player_level 1 ; level of player
 pmagic 1 ; current matgic, regenerates over time
 pmagic_base 1 ; base magic
 spell_type 1 ; id of spell, like weapon_type
+player_flags 1 ; 8 bits of flags for player choises made during gameplay
 
 ; 2 temp ptrs. not preserved accross calls
 temp1_ptr 2
@@ -273,7 +274,7 @@ projectile_data PROJECTILES
 .ende
 
 ; sprite memory
-.enum $0200
+.enum $0200, $600
 sprite_data 4 ; all sprite data
 sprite_data_1 4 ; sprite 2
 sprite_data_2 4 ; sprite 3
