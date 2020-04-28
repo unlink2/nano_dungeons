@@ -835,8 +835,6 @@ set_attr:
     adc temp
     sta temp
 
-    sta src_ptr
-
     lda $2002 ; read PPU status to reset the high/low latch
     ; lda #$00
     ; sta $2005
