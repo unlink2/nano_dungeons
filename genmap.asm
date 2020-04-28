@@ -17,6 +17,15 @@
 ;   seed -> rng seed for map
 ; TODO seed BC5E is softlock seed
 generate_map:
+    ; set attrs to 0
+    ldy #ATTR_SIZE
+    lda attr_ptr
+    sta dest_ptr
+    lda attr_ptr+1
+    sta dest_ptr+1
+    lda #$00
+    jsr memset
+
     ; start out center-ish
     ldx #$04
     ldy #$04
@@ -71,7 +80,7 @@ generate_map:
     sta get_tile_y
 
     ; oob check
-    jsr check_oob_coordinates
+    jsr check_oob_coordinates_attr
     cmp #$01
     bne @not_oob
     pla
@@ -296,6 +305,23 @@ check_oob_coordinates:
     bcc @ret_y
 
     lda #$00
+    rts
+
+; checks oob coordinate and also
+; verifies that coordinates are aligned at
+; a bg attribute bounds
+; side effects:
+;   aligns get_tile_x and y to 4 (discords lower 2 bits)
+check_oob_coordinates_attr:
+    ; check if aligns to attribute
+    lda get_tile_x
+    and #%11111100
+    sta get_tile_x
+    lda get_tile_y
+    and #%11111100
+    sta get_tile_y
+@ok:
+    jsr check_oob_coordinates
     rts
 
 ; this sub routine copies a room of a certain id

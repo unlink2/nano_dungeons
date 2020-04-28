@@ -390,6 +390,8 @@ magic 16 ; hard-coded sequence of sram magic values, if they are not present run
 ;   key_count 1,
 ;   seed 2
 sav_checksum SAVE_DATA_SIZE
+
+sram_attr ATTR_SIZE
 .ende
 
 .macro vblank_wait
@@ -959,7 +961,7 @@ map_table_hi:
 ; color attribute lookup table
 attr_table_lo:
 .db #<test_attr
-.db #<test_attr
+.db #<sram_attr ; attribute can be used by mapgen
 .db #<test_attr
 .db #<win_attr
 .db #<test_attr
@@ -971,7 +973,7 @@ attr_table_lo:
 
 attr_table_hi:
 .db #>test_attr
-.db #>test_attr
+.db #>sram_attr
 .db #>test_attr
 .db #>win_attr
 .db #>test_attr
