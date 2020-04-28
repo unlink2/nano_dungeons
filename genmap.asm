@@ -34,6 +34,11 @@ generate_map:
     stx get_tile_x
     sty get_tile_y
     jsr insert_room
+
+    ldx get_tile_x
+    ldy get_tile_y
+    lda #$00
+    jsr insert_room_attributes
     ; jmp @gen_done
     ldx #$28
     ;ldx #$24 ; generate rooms x  more times
@@ -102,7 +107,12 @@ generate_map:
     ldx get_tile_x
     ldy get_tile_y
     lda temp ; room header ptr
+    pha ; save it for later
     jsr insert_room
+    ldx get_tile_x
+    ldy get_tile_y
+    pla ; room header ptr
+    jsr insert_room_attributes
 
     pla
     tax  ; loop counter
@@ -327,8 +337,8 @@ check_oob_coordinates_attr:
 ; this sub routine copies a room of a certain id
 ; into level_data
 ; inputs:
-;   x -> x location
-;   y -> y location
+;   x/get_tile_x -> x location
+;   y/get_tile_y -> y location
 ;   a -> room id from room table
 ; side effects:
 ;   uses temp, temp+1, temp+2, temp1_ptr, temp2_ptr and dst_ptr
@@ -380,7 +390,7 @@ insert_room:
     sta temp ; fill tile
 
     ; ptr index for tile loading if required
-    lda #$04
+    lda #$05
     sta temp1_index
 @y_loop:
     ldy temp+2 ; load x value
@@ -401,7 +411,7 @@ insert_room:
     tay ; original y restored
 
 @not_pre_defined:
-    lda temp ; load tile value 
+    lda temp ; load tile value
     sta (dest_ptr), y
 
     dey
@@ -423,6 +433,16 @@ insert_room:
 
     rts
 
+; inserts a room's attributes at attr_ptr
+; inputs:
+;   x -> x position
+;   y -> y position
+;   a -> room index
+;   attr_ptr -> attribute table
+; side effects:
+;   uses temp, temp+1, temp+2, temp1_ptr, temp2_ptr and dst_ptr
+insert_room_attributes:
+    rts
 
 ; places a tile in the map data
 ; inputs:
@@ -481,7 +501,8 @@ sprite_tile_rng:
 ;   Byte 2: Fill Tile
 ;   Byte 3: Options
 ;       7th bit = 1 -> pre-defined room, tiles follow the header (tiles are mirrored horizontally)
-;   Byte 4-N: Raw room tiles
+;   Byte 4: Attribute
+;   Byte 5-N: Raw room tiles
 ;   TODO implement byte 3
 rooms_lo:
 .db <room8x8
@@ -554,7 +575,7 @@ rooms_hi:
 .db >room5x5
 
 room8x8:
-.db $08, $08, $62, $80
+.db $08, $08, $62, $80, $00
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $37, $62, $62, $37, $37, $62
 .db $62, $37, $62, $62, $62, $62, $37, $62
@@ -564,7 +585,7 @@ room8x8:
 .db $62, $37, $37, $62, $62, $37, $37, $62
 .db $62, $62, $62, $62, $62, $62, $62, $62
 room8x8_one_way:
-.db $08, $08, $62, $80
+.db $08, $08, $62, $80, $00
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $37, $65, $65, $37, $37, $62
 .db $62, $37, $62, $62, $62, $62, $37, $62
@@ -574,14 +595,14 @@ room8x8_one_way:
 .db $62, $37, $37, $65, $65, $37, $37, $62
 .db $62, $62, $62, $62, $62, $62, $62, $62
 room5x5:
-.db $05, $05, $62, $80
+.db $05, $05, $62, $80, $00
 .db $62, $62, $62, $62, $62
 .db $62, $48, $62, $47, $62
 .db $62, $62, $62, $62, $62
 .db $62, $4A, $62, $49, $62
 .db $62, $62, $62, $62, $62
 room6x6:
-.db $06, $06, $62, $80
+.db $06, $06, $62, $80, $00
 .db $62, $62, $62, $62, $62, $62
 .db $62, $37, $62, $62, $62, $62
 .db $62, $37, $37, $62, $62, $62
@@ -590,20 +611,20 @@ room6x6:
 .db $62, $62, $62, $62, $62, $62
 .db $62, $62, $62, $62, $62, $62
 room6x3:
-.db $06, $03, $62, $00
+.db $06, $03, $62, $00, $00
 room3x6:
-.db $03, $06, $62, $00
+.db $03, $06, $62, $00, $00
 room3x3:
-.db $03, $03, $62, $00
+.db $03, $03, $62, $00, $00
 room8x2:
-.db $08, $02, $62, $00
+.db $08, $02, $62, $00, $00
 room2x8:
-.db $02, $08, $62, $00
+.db $02, $08, $62, $00, $00
 room4x4:
-.db $04, $04, $62, $00
+.db $04, $04, $62, $00, $00
 room1x4wall:
-.db $02, $05, $62, $80
+.db $02, $05, $62, $80, $00
 .db $62, $62, $62, $62, $62
 .db $37, $37, $37, $37, $62
 room4x1wall:
-.db $05, $01, $62, $00
+.db $05, $01, $62, $00, $00
