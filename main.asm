@@ -620,7 +620,7 @@ update_crit_done:
     ; sprite DMA
     lda #<sprite_data
     sta $2003  ; set the low byte (00) of the RAM address
-    lda #$>sprite_data
+    lda #>sprite_data
     sta $4014  ; set the high byte (02) of the RAM address, start the transfer
 
     lda #$00
