@@ -126,7 +126,7 @@ generate_map:
     ; TODO pretty draw walls
 
     jsr place_sprites
-
+@insert_other_tiles:
     jsr insert_other
 
 @gen_done:
@@ -441,7 +441,86 @@ insert_room:
 ;   attr_ptr -> attribute table
 ; side effects:
 ;   uses temp, temp+1, temp+2, temp1_ptr, temp2_ptr and dst_ptr
+;   make sure attr_ptr does not cross a 256 byte page
 insert_room_attributes:
+    pha ; store room id for now
+
+    lda attr_ptr
+    sta dest_ptr
+    lda attr_ptr+1
+    sta dest_ptr+1
+
+    ; calculate start location of attribute ptr
+    lda attr_update_table_y, y
+    clc
+    adc dest_ptr
+    sta dest_ptr
+
+    lda attr_update_table_x, x
+    clc
+    adc dest_ptr
+    sta dest_ptr
+
+    pla ; room id
+    tay
+
+    lda rooms_lo, y
+    sta temp1_ptr ; ptr
+    lda rooms_hi, y
+    sta temp1_ptr+1 ; temp now is the pointer to data
+
+    ldy #$00
+    lda (temp1_ptr), y ; size x
+    lsr
+    lsr ; divide by 4
+    sta temp
+    dec temp ; -1 for loop
+    cmp #$00
+    beq @done
+
+    iny
+    lda (temp1_ptr), y ; size y
+    lsr
+    lsr  ; divide by 4
+    sta temp+1
+    cmp #$00
+    beq @done
+
+    ldy #$03 ; options
+    lda (temp1_ptr), y
+    and #%00000001 ; if disabled attributes
+    beq @not_disabled
+    rts ; get out
+@not_disabled:
+
+    iny  ; attribute byte
+    lda (temp1_ptr), y
+    sta temp+2
+
+    ldx temp+1 ; y value
+@y_loop:
+    ldy temp ; x value
+@x_loop:
+    lda temp+2
+    sta (dest_ptr), y ; store attribute
+
+    dey
+    cpy #$FF
+    bne @x_loop
+
+    ; +1 row
+    lda dest_ptr ; 16 bit add to get next row
+    clc
+    adc #$08 ; 8 attributes per row
+    sta dest_ptr
+    lda dest_ptr+1
+    adc #$00 ; add carry
+    sta dest_ptr+1
+
+    dex
+    bne @y_loop
+
+@done: 
     rts
 
 ; places a tile in the map data
@@ -501,6 +580,7 @@ sprite_tile_rng:
 ;   Byte 2: Fill Tile
 ;   Byte 3: Options
 ;       7th bit = 1 -> pre-defined room, tiles follow the header (tiles are mirrored horizontally)
+;       0th bit = 1 -> no attributes
 ;   Byte 4: Attribute
 ;   Byte 5-N: Raw room tiles
 ;   TODO implement byte 3
@@ -575,7 +655,7 @@ rooms_hi:
 .db >room5x5
 
 room8x8:
-.db $08, $08, $62, $80, $00
+.db $08, $08, $62, $80, $FF
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $37, $62, $62, $37, $37, $62
 .db $62, $37, $62, $62, $62, $62, $37, $62
@@ -585,7 +665,7 @@ room8x8:
 .db $62, $37, $37, $62, $62, $37, $37, $62
 .db $62, $62, $62, $62, $62, $62, $62, $62
 room8x8_one_way:
-.db $08, $08, $62, $80, $00
+.db $08, $08, $62, $80, $FF
 .db $62, $62, $62, $62, $62, $62, $62, $62
 .db $62, $37, $37, $65, $65, $37, $37, $62
 .db $62, $37, $62, $62, $62, $62, $37, $62
@@ -595,14 +675,14 @@ room8x8_one_way:
 .db $62, $37, $37, $65, $65, $37, $37, $62
 .db $62, $62, $62, $62, $62, $62, $62, $62
 room5x5:
-.db $05, $05, $62, $80, $00
+.db $05, $05, $62, $80, $FF
 .db $62, $62, $62, $62, $62
 .db $62, $48, $62, $47, $62
 .db $62, $62, $62, $62, $62
 .db $62, $4A, $62, $49, $62
 .db $62, $62, $62, $62, $62
 room6x6:
-.db $06, $06, $62, $80, $00
+.db $06, $06, $62, $80, $FF
 .db $62, $62, $62, $62, $62, $62
 .db $62, $37, $62, $62, $62, $62
 .db $62, $37, $37, $62, $62, $62
