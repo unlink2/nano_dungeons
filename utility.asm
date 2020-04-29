@@ -379,6 +379,9 @@ reload_room:
     cmp #SHOP_MASK
     bne @no_shop
 
+    ; clear sram attributes
+    jsr clear_sram_attr
+
     lda #<shop_gfx
     sta level_data_ptr
     lda #>shop_gfx

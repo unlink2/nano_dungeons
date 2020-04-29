@@ -17,14 +17,7 @@
 ;   seed -> rng seed for map
 ; TODO seed BC5E is softlock seed
 generate_map:
-    ; set attrs to 0
-    ldy #ATTR_SIZE
-    lda attr_ptr
-    sta dest_ptr
-    lda attr_ptr+1
-    sta dest_ptr+1
-    lda #$00
-    jsr memset
+    jsr clear_sram_attr
 
     ; start out center-ish
     ldx #$04
@@ -433,6 +426,18 @@ insert_room:
 
     rts
 
+; clears sram attributes to 0
+clear_sram_attr:
+    ; set attrs to 0
+    ldy #ATTR_SIZE
+    lda attr_ptr
+    sta dest_ptr
+    lda attr_ptr+1
+    sta dest_ptr+1
+    lda #$00
+    jsr memset
+    rts
+
 ; inserts a room's attributes at attr_ptr
 ; inputs:
 ;   x -> x position
@@ -705,6 +710,6 @@ room4x4:
 room1x4wall:
 .db $02, $05, $62, $80, $00
 .db $62, $62, $62, $62, $62
-.db $37, $37, $37, $37, $62
+.db $62, $62, $62, $62, $62
 room4x1wall:
 .db $05, $01, $62, $00, $00
