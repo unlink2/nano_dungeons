@@ -1429,6 +1429,8 @@ load_save:
     ldy #$00 ; offset
     cmp (save_ptr), y
     beq @valid
+    lda #ERROR_INVALID_SAVE_CHECKSUM
+    sta errno
     jmp @invalid
 @valid:
     iny

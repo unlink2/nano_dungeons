@@ -71,6 +71,7 @@
 .define CLEARABLE_MIRROR_END $FF
 
 .define ERROR_NO_START_TILE 1
+.define ERROR_INVALID_SAVE_CHECKSUM 2
 
 .define SPRITE_TILES 32
 .define SPRITE_TILES_START $70
@@ -1217,10 +1218,12 @@ tile_sub_hi:
 error_lo:
 .db $00
 .db #<load_map_start_error
+.db #<crash_handler ; invalid save file TODO display error message instead of hard crashing
 
 error_hi:
 .db $00
 .db #>load_map_start_error
+.db #>crash_handler
 
 sprite_init_lo:
 .db #<sprite_init_default ; barrier
