@@ -10,6 +10,12 @@ init_game:
     lda #$00
     sta gfx_flags
 
+    ; clear all character flags
+    ; unrolled loop
+.mrep CHAR_FLAGS
+    sta character_flags + .ri.
+.endrep
+
     lda #ACTIONS_PER_TURN
     sta base_actions
     sta actions
@@ -1422,8 +1428,9 @@ load_save:
     jsr calc_checksum
     ldy #$00 ; offset
     cmp (save_ptr), y
-    bne @invalid
-
+    beq @valid
+    jmp @invalid
+@valid:
     iny
     lda (save_ptr), y
     sta player_damage
@@ -1490,6 +1497,40 @@ load_save:
     iny
     lda (save_ptr), y
     sta player_flags
+
+    ; load character flags unrolled loop
+    iny
+    lda (save_ptr), y
+    sta character_flags + 7
+
+    iny
+    lda (save_ptr), y
+    sta character_flags + 6
+
+    iny
+    lda (save_ptr), y
+    sta character_flags + 5
+
+    iny
+    lda (save_ptr), y
+    sta character_flags + 4
+
+    iny
+    lda (save_ptr), y
+    sta character_flags + 3
+
+    iny
+    lda (save_ptr), y
+    sta character_flags + 2
+
+    iny
+    lda (save_ptr), y
+    sta character_flags + 1
+
+    iny
+    lda (save_ptr), y
+    sta character_flags
+
 @invalid:
     rts
 
@@ -1501,11 +1542,43 @@ load_save:
 store_save:
     ldy #SAVE_DATA_SIZE-1
 
+    lda character_flags
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 1
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 2
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 3
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 4
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 5
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 6
+    sta (save_ptr), y
+
+    dey
+    lda character_flags + 7
+    sta (save_ptr), y
+
+    dey
     lda player_flags
     sta (save_ptr), y
 
-    dey 
-    lda player_level 
+    dey
+    lda player_level
     sta (save_ptr), y
 
     dey 

@@ -79,7 +79,7 @@
 
 .define PROJECTILES 8
 .define PROJECTILES_START $30 ; start sprite slots
-
+.define CHAR_FLAGS 8 ; 8 bytes for character FLAGS
 
 .define SPACE_TILE $24 ; space tile index, required for editor
 
@@ -98,7 +98,7 @@
 
 .define VISIBILITY_RADIUS $04 ; raiduis for in-game map loading
 
-.define SAVE_DATA_SIZE 18 ; bytes including checksum
+.define SAVE_DATA_SIZE 18+CHAR_FLAGS ; bytes including checksum
 
 .define ROOM_HEADERS $1F ; max room header offset
 .define MAX_ROOM_SIZE $08 ; max size a single room can be
@@ -271,6 +271,10 @@ projectile_obj PROJECTILES
 projectile_flags PROJECTILES
 ; timer
 projectile_data PROJECTILES
+
+; flags used for character
+; enough storage for anything that may need to be stored about the chracter
+character_flags CHAR_FLAGS 
 .ende
 
 ; sprite memory

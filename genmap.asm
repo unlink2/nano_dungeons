@@ -314,7 +314,7 @@ check_oob_coordinates:
 ; verifies that coordinates are aligned at
 ; a bg attribute bounds
 ; side effects:
-;   aligns get_tile_x and y to 4 (discords lower 2 bits)
+;   aligns get_tile_x and y to 4 (discards lower 2 bits)
 check_oob_coordinates_attr:
     ; check if aligns to attribute
     lda get_tile_x
