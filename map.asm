@@ -1054,7 +1054,7 @@ load_menu:
 ;   decompresses a map,
 ;   overwrites nt1
 ;   registers/flags changed
-load_map_start_error:
+load_errno_message:
     lda #$00
     sta $2001 ; no rendering
 
@@ -1077,9 +1077,10 @@ load_map_start_error:
     sta update_sub_crit+1
 
     ; load editor menu compressed tiles
-    lda #<no_start_msg_gfx
+    ldx errno
+    lda @errno_message_lo, x
     sta level_data_ptr
-    lda #>no_start_msg_gfx
+    lda @errno_message_hi, x
     sta level_data_ptr+1
 
     ; decompress location, same as level
@@ -1096,6 +1097,15 @@ load_map_start_error:
     vblank_wait
 
     rts
+; message based on current errno
+@errno_message_lo:
+.db #$00
+.db #<no_start_msg_gfx
+.db #<corrupted_save_gfx
+@errno_message_hi:
+.db #$00
+.db #>no_start_msg_gfx
+.db #>corrupted_save_gfx
 
 ; increments level ptr by FF
 inc_level_temp_ptr:

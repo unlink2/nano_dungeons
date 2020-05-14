@@ -757,6 +757,8 @@ pause_gfx:
 
 no_start_msg_gfx:
 .incbin "./graphics/no_start_msg.gfx"
+corrupted_save_gfx:
+.incbin "./graphics/badsave.gfx"
 
 ; include all levels
 level_1_gfx:
@@ -950,6 +952,7 @@ map_table_lo:
 .db #<game_over_gfx
 .db #<shop_gfx
 .db #<pause_gfx
+.db #<corrupted_save_gfx
 
 map_table_hi:
 .db #>empty_map
@@ -962,6 +965,7 @@ map_table_hi:
 .db #>game_over_gfx
 .db #>shop_gfx
 .db #>pause_gfx
+.db #>corrupted_save_gfx
 
 ; color attribute lookup table
 attr_table_lo:
@@ -975,6 +979,7 @@ attr_table_lo:
 .db #<level_1_attr
 .db #<test_attr
 .db #<test_attr
+.db #<test_attr
 
 attr_table_hi:
 .db #>test_attr
@@ -985,6 +990,7 @@ attr_table_hi:
 .db #>title_attr
 .db #>level_1_attr
 .db #>level_1_attr
+.db #>test_attr
 .db #>test_attr
 .db #>test_attr
 
@@ -1000,6 +1006,7 @@ palette_table_lo:
 .db #<level_1_pal
 .db #<dungeon_palette
 .db #<palette_data
+.db #<palette_data
 
 palette_table_hi:
 .db #>palette_data
@@ -1011,6 +1018,7 @@ palette_table_hi:
 .db #>level_1_pal
 .db #>level_1_pal
 .db #>dungeon_palette
+.db #>palette_data
 .db #>palette_data
 
 ; map update routines
@@ -1217,13 +1225,13 @@ tile_sub_hi:
 ; error handlers
 error_lo:
 .db $00
-.db #<load_map_start_error
-.db #<crash_handler ; invalid save file TODO display error message instead of hard crashing
+.db #<load_errno_message
+.db #<load_errno_message
 
 error_hi:
 .db $00
-.db #>load_map_start_error
-.db #>crash_handler
+.db #>load_errno_message
+.db #>load_errno_message
 
 sprite_init_lo:
 .db #<sprite_init_default ; barrier
