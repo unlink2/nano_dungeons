@@ -215,7 +215,7 @@ verify_sprite_move:
     bne @not_empty
 
     ldy temp ; need y value again
-    ; if it is an empty tile set the disable flag,
+    ; if it is an empty tile set the disable flag (or falling flag),
     ; this will remove the sprite when the offset in
     ; tile_data reaches 0
     lda sprite_tile_data, y
@@ -676,13 +676,43 @@ sprite_update_push:
     txa
     pha
 
+    ; is being hit? destroy
+    lda sprite_tile_x, y
+    cmp weapon_x
+    bne @no_weapon_hit
+    lda sprite_tile_y, y
+    cmp weapon_y
+    bne @no_weapon_hit
+
+    ; test if hit flag is set
+    lda sprite_tile_flags, y
+    and #%01000000
+    bne @no_weapon_hit
+
+    lda sprite_tile_flags, y
+    ora #%01000000
+    sta sprite_tile_flags, y ; set hit flag
+
+    lda sprite_tile_hp, y
+    tax
+    dex
+    txa
+    sta sprite_tile_hp, y
+    bne @no_weapon_hit ; if not 0 hp do not move
+
+    lda #$00 ; if hit move offscreen
+    sta sprite_tile_x, y
+    sta sprite_tile_y, y
+@no_weapon_hit:
+
     jsr sprite_pos_adjust
 
     lda #$37
     sta temp+2 ; sprite value
     ; check data flag to see if we need to disable
     lda sprite_tile_data, y
-    and #%00100000 ; both flag needs to be set and the offset needs to be 0
+    ; check falling flag (disable flag)
+    and #%00100000 ; both flag needs to be set and the offset needs to be 0 
     beq @no_disable
 
     ; load smaller sprite
@@ -695,7 +725,7 @@ sprite_update_push:
     lda #$24 ; empty tile
     sta temp+2
 @no_disable:
-    
+
 
     ; set up pointer
     lda sprite_tile_obj, y
@@ -1404,7 +1434,7 @@ sprite_skel_update:
     jsr verify_sprite_move
     cmp #$01
     beq @collision
-    ; if 6th bit of data is set restore positon and dont have any movement
+    ; if 6th bit of data is set restore positon and dont have any movement (falling flag)
     lda sprite_tile_data, y
     and #%00100000
     beq @no_empty_tile
@@ -1423,7 +1453,7 @@ sprite_skel_update:
     sta sprite_tile_temp, y ; store invalid move to allow next move to proceed regardless
 
     lda #$00
-    sta sprite_tile_data, y ; no animation
+    sta sprite_tile_data, y ; no animation, reset all movement flags and offset values
 
     pla
     sta sprite_tile_x, y
