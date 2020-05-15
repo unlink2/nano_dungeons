@@ -323,6 +323,7 @@ update_ui:
     sta get_tile_x
     lda #26
     sta get_tile_y
+    ldx nametable
     jsr draw_hex_buffer
 
     rts
@@ -342,6 +343,7 @@ update_ui:
     sta get_tile_x
     lda #26
     sta get_tile_y
+    ldx nametable
     jsr draw_hex_buffer
 
     rts
@@ -361,6 +363,7 @@ update_ui:
     sta get_tile_x
     lda #25
     sta get_tile_y
+    ldx nametable
     jsr draw_hex_buffer
 
     rts
@@ -380,11 +383,13 @@ update_ui:
     sta get_tile_x
     lda #24
     sta get_tile_y
+    ldx nametable
     jsr draw_hex_buffer
 
     dec get_tile_x
     ldx #$00
     lda #$0E
+    ldx nametable
     jsr set_tile
 
     rts
@@ -421,6 +426,7 @@ update_ui:
     lda #08
     sta get_tile_x
     lda weapon_sprite, y
+    ldx nametable
     jsr set_tile
 
     rts
@@ -671,6 +677,11 @@ init_win_condition:
 
 ; loads the game over message as a menu
 init_game_over:
+    ; re-enable inputs
+    lda nmi_flags
+    and #%11011111
+    sta nmi_flags
+
     lda #$00
     sta $2001 ; no rendering
 
