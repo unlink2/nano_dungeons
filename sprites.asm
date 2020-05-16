@@ -700,6 +700,12 @@ sprite_update_push:
     sta sprite_tile_hp, y
     bne @no_weapon_hit ; if not 0 hp do not move
 
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+    jsr init_damage_animation
+
     lda #$00 ; if hit move offscreen
     sta sprite_tile_x, y
     sta sprite_tile_y, y
