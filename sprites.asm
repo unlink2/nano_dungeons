@@ -1082,6 +1082,17 @@ sprite_door_update:
     ora #%01000000
     sta sprite_tile_flags, y
 
+    ; test for 0 hp
+    lda #$00
+    cmp sprite_tile_hp, y
+    bne @no_weapon_hit:
+
+    ; if 0 hp load damange animation
+    lda sprite_tile_x, y
+    sta get_tile_x
+    lda sprite_tile_y, y
+    sta get_tile_y
+    jsr init_damage_animation
 @no_weapon_hit:
 
     ; load tile
