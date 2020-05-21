@@ -704,6 +704,7 @@ sprite_update_push:
     sta get_tile_x
     lda sprite_tile_y, y
     sta get_tile_y
+    lda #$00
     jsr init_damage_animation
 
     lda #$00 ; if hit move offscreen
@@ -1092,6 +1093,7 @@ sprite_door_update:
     sta get_tile_x
     lda sprite_tile_y, y
     sta get_tile_y
+    lda #$00
     jsr init_damage_animation
 @no_weapon_hit:
 
@@ -1249,6 +1251,7 @@ sprite_skel_update:
     sta get_tile_x
     lda sprite_tile_y, y
     sta get_tile_y
+    lda #$01 ; load +10
     jsr init_damage_animation
 
     ; add exp
@@ -2169,9 +2172,11 @@ sprite_bear_trap_update:
 ; inputs:
 ;   get_tile_x
 ;   get_tile_y -> location of animation
+;   a -> 0 = disable +10 display
 ; side effects:
 ;   overwrites x and a register
 init_damage_animation:
+    pha ; push +10 option
     ldx get_tile_x
     ; set up x coordinate
     dex
@@ -2216,10 +2221,15 @@ init_damage_animation:
     sta sprite_data_5+1
     sta sprite_data_6+1
     sta sprite_data_7+1
-    
-    lda #$CB ; tile to use for "10"
-    sta sprite_data_3+1 
 
+    pla
+    beq @no_exp_gain
+    lda #$CB ; tile to use for "10"
+    sta sprite_data_3+1
+    rts
+@no_exp_gain:
+    lda #$24
+    sta sprite_data_3+1 ; invisibile exp gain
     rts
 
 ; moves damage animation off-screen
