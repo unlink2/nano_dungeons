@@ -700,6 +700,8 @@ sprite_update_push:
     sta sprite_tile_hp, y
     bne @no_weapon_hit ; if not 0 hp do not move
 
+    jsr init_hit_noise ; noise for hit
+
     lda sprite_tile_x, y
     sta get_tile_x
     lda sprite_tile_y, y
@@ -1087,6 +1089,9 @@ sprite_door_update:
     lda #$00
     cmp sprite_tile_hp, y
     bne @no_weapon_hit:
+
+    ; hit noise
+    jsr init_hit_noise
 
     ; if 0 hp load damange animation
     lda sprite_tile_x, y
