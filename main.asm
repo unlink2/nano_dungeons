@@ -1053,7 +1053,7 @@ tile_sub_lo:
 
 .db #<space_collision ; space tile
 
-.mrep CLEARABLE_TILES_START-4+$25
+.mrep CLEARABLE_TILES_START-4-$25
 .db #<collision
 .endrep
 
@@ -1096,7 +1096,7 @@ tile_sub_lo:
 .db #<no_collision ; arrow tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+29
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START-29
 .db #<no_collision
 .endrep
 
@@ -1141,7 +1141,7 @@ tile_sub_hi:
 
 .db #>space_collision ; space tile
 
-.mrep CLEARABLE_TILES_START-4+$25
+.mrep CLEARABLE_TILES_START-4-$25
 .db #>collision
 .endrep
 
@@ -1184,7 +1184,7 @@ tile_sub_hi:
 .db #>no_collision ; arrow tile
 
 ; remainder of clearable tiles
-.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START+29
+.mrep CLEARABLE_MIRROR_START-CLEARABLE_TILES_START-29
 .db #>no_collision
 .endrep
 

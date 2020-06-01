@@ -281,7 +281,7 @@ get_random_coordinate:
 check_oob_coordinates:
     ; check oob coodrinates x
     lda get_tile_x
-    cmp #31-MAX_ROOM_SIZE+1
+    cmp #31-(MAX_ROOM_SIZE+1)
     bcc @less_x
 @ret_x:
     lda #$0A
@@ -295,7 +295,7 @@ check_oob_coordinates:
 
     ; check oob coordinates y
     lda get_tile_y
-    cmp #29-MAX_ROOM_SIZE+1+2
+    cmp #29-(MAX_ROOM_SIZE+1+2)
     bcc @less_y
 @ret_y:
     lda #$0A
