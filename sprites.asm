@@ -874,6 +874,9 @@ sprite_push_collision:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_key_collision:
+    jsr sprite_chest_collision
+    bne @collision
+
     jsr init_coin_noise
 
     ; test collected flag
@@ -889,6 +892,9 @@ sprite_key_collision:
 @done:
     lda #$00
     rts
+@collision:
+    lda #$01 
+    rts 
 
 ; this sub routine updates key sprites
 ; inputs:
@@ -932,6 +938,13 @@ sprite_key_update:
     sta get_tile_x
     lda sprite_tile_y, y
     sta get_tile_y
+
+    ; if hp is not zero display chest
+    lda sprite_tile_hp, y
+    beq @no_chest
+    jsr sprite_chest_update
+    jmp @offscreen_check
+@no_chest:
 
     ldy #$00
     lda temp+1
@@ -1662,6 +1675,9 @@ game_over:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_sword_collision:
+    jsr sprite_chest_collision
+    bne @collision
+
     lda #$09
     jsr purchase
     beq @done ; if purcahse failed return
@@ -1691,6 +1707,9 @@ sprite_sword_collision:
     sta weapon_type
 @done:
     lda #$00 ; never return a collision value
+    rts
+@collision:
+    lda #$01
     rts
 
 ; sprite pickup update
@@ -1767,6 +1786,13 @@ sprite_sword_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; if hp is not zero display chest
+    lda sprite_tile_hp, y
+    beq @no_chest
+    jsr sprite_chest_update
+    jmp @oov
+@no_chest:
+
     ldy #$00
     lda temp+1
     sta (sprite_ptr), y
@@ -1784,6 +1810,7 @@ sprite_sword_update:
     ldy #$02
     sta (sprite_ptr), y
 
+@oov:
     lda temp+2 ; holds enable flag
     beq @no_offscreen
     jsr sprite_offscreen
@@ -1802,6 +1829,9 @@ sprite_sword_update:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_hp_collision:
+    jsr sprite_chest_collision
+    bne @collision
+
     jsr init_coin_noise
 
     lda sprite_tile_data, y
@@ -1819,11 +1849,17 @@ sprite_hp_collision:
 @done:
     lda #$00 ; never return a collision value
     rts
+@collision:
+    lda #$01
+    rts
 
 ; armor pikcup AI
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_armor_collision:
+    jsr sprite_chest_collision
+    bne @collision
+
     lda #$09
     jsr purchase
     beq @done
@@ -1841,6 +1877,57 @@ sprite_armor_collision:
 @done:
     lda #$00 ; never return a collision value
     rts
+@collision:
+    lda #$01
+    rts
+
+; checks if chest is active
+; inputs:
+;   y -> pointing to sprite data offset
+; returns:
+;   is hp nonzero?
+sprite_chest_collision:
+    lda sprite_tile_hp, y
+    rts 
+
+; updates chest sprite
+; generally called from pickup if
+; hp is not zero
+; inputs:
+;   y -> pointing to sprite data offset
+;   temp+1 -> y pos
+;   temp -> x pos
+;   sprite_ptr -> pointing to correct sprite
+sprite_chest_update:
+    lda sprite_tile_x, y
+    cmp weapon_x
+    bne @no_hit
+    lda sprite_tile_y, y
+    cmp weapon_y
+    bne @no_hit
+    ; on hit set hp to 0
+    lda #$00
+    sta sprite_tile_hp, y
+@no_hit:
+    ; chest sprite
+    ldy #$00
+    lda temp+1
+    sta (sprite_ptr), y
+
+    iny
+    lda  #$56 ; chest sprite
+    sta (sprite_ptr), y
+
+    ldy #$03
+    lda temp
+    sta (sprite_ptr), y
+
+    ; attributes
+    lda #$01
+    ldy #$02
+    sta (sprite_ptr), y
+
+    rts
 
 ; sprite pickup update
 ; inputs:
@@ -1853,7 +1940,6 @@ sprite_pickup_update:
     pha
     txa
     pha
-
 
     lda sprite_tile_data, y
     and #%10000000
@@ -1898,8 +1984,19 @@ sprite_pickup_update:
     lda obj_index_to_addr, x
     sta sprite_ptr
 
+    ; check if this tile can be in chest
     lda sprite_tile_ai, y
     tax ; ai
+    lda pickup_chest, x
+    beq @no_chest
+
+    ; if hp is not zero display chest
+    lda sprite_tile_hp, y
+    beq @no_chest
+    jsr sprite_chest_update
+    jmp @oov
+@no_chest:
+
 
     ldy #$00
     lda temp+1
@@ -1918,11 +2015,13 @@ sprite_pickup_update:
     ldy #$02
     sta (sprite_ptr), y
 
+@oov:
     lda temp+2 ; holds enable flag
     beq @no_offscreen
     jsr sprite_offscreen
 
 @no_offscreen:
+@pull:
     pla
     tax
     pla
@@ -2053,6 +2152,9 @@ sprite_coin_collision:
 ; inputs:
 ;   y -> pointing to sprite data offset
 sprite_flame_scroll_collision:
+    jsr sprite_chest_collision
+    bne @collision
+
     jsr init_coin_noise
     lda sprite_tile_data, y
     and #%10000000 ; disable flag
@@ -2065,7 +2167,9 @@ sprite_flame_scroll_collision:
 @done:
     lda #$00 ; never return a collision value
     rts
-
+@collision:
+    lda #$01
+    rts
 
 
 ; pickup sprite UI position
@@ -2078,6 +2182,11 @@ pickup_attr:
 .db $00, $00, $00, $00, $00, $00, $00, $00
 .db $00, $00, $02, $00, $00, $00, $00, $00
 .db $00, $01
+; is this tile in chest on spawn?
+pickup_chest:
+.db $00, $00, $00, $00, $00, $00, $00, $00
+.db $00, $00, $01, $01, $00, $00, $00, $00
+.db $01, $01
 
 ; sprite bear trap collision
 ; inputs:
