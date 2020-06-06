@@ -1888,13 +1888,14 @@ sprite_armor_collision:
 ;   is hp nonzero?
 sprite_chest_collision:
     lda sprite_tile_hp, y
-    rts 
+    rts
 
 ; updates chest sprite
 ; generally called from pickup if
 ; hp is not zero
 ; inputs:
 ;   y -> pointing to sprite data offset
+;   get_tile_x and get_tile_y for damage animation
 ;   temp+1 -> y pos
 ;   temp -> x pos
 ;   sprite_ptr -> pointing to correct sprite
@@ -1908,6 +1909,9 @@ sprite_chest_update:
     ; on hit set hp to 0
     lda #$00
     sta sprite_tile_hp, y
+    jsr init_hit_noise
+    jsr init_damage_animation
+
 @no_hit:
     ; chest sprite
     ldy #$00
