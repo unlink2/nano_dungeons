@@ -833,6 +833,13 @@ b_input_game:
     lda weapon_timer, y
     sta delay_timer
 
+    ; store player damage and load
+    ; spell damage
+    lda player_damage
+    sta seed_input ; unused area in ram, use it as temp storage
+    lda spell_damage, y ; damage
+    sta player_damage
+
     ; disable inputs
     lda nmi_flags
     ora #%00100000

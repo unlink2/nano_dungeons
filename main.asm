@@ -1400,6 +1400,13 @@ weapon_timer_16:
 .db #$00
 .db #$00
 
+; damage for spells
+spell_damage:
+.db #$00
+.db #$00
+.db #$00
+.db #$FF ; flame spell
+
 ; magic UI lookup table
 magic_ui_1:
 .db #$52, #$C3, #$C3, #$C3

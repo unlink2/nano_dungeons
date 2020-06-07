@@ -1115,6 +1115,9 @@ flame_spell_y_lookup:
 
 ; flame spell done
 flame_spell_done:
+    ; load actual damage and store it again
+    lda seed_input
+    sta player_damage
     jsr sword_done
     rts
 
