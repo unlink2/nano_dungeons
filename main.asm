@@ -151,7 +151,7 @@ actions 1 ; player's action until "turn" ends. Turn is considered ended when thi
 base_actions 1 ; base action in-game
 
 seed 2 ; 16 bit random number for map generator
-seed_input 2 ; seed cusom input
+seed_input 2 ; seed cusom input (also used to backup weapon damage during spells)
 
 level_ptr 2 ; points to the current level in ram, lo byte always needs to be $00
 level_data_ptr 2 ; pointer to rom/sram of level
