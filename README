@@ -43,6 +43,7 @@ is a value is an offset in the periode lookup table.
 Duty is the duty setting for this note.
 Sweep is a value for the sweep unit that is unused as of now.
 If duty is $FF no update will happen.
+If duty if $FE no update will happen, but the audio pointer will still increment.
 
 Noise:
 =======

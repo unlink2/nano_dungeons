@@ -59,6 +59,10 @@ update_audio:
     ldx pulse_periode_1
     stx pulse_timer_1 ; store periode again
 
+    ; skip update
+    cmp #$FE
+    beq @skip_note_pulse1
+
     sta $4000 ; store channel settings
 
     iny
@@ -71,6 +75,11 @@ update_audio:
     lda period_table_lo, x
     sta $4002
 
+
+    lda pulse_sweep_1
+    sta $4001
+
+@skip_note_pulse1:
     lda pulse_ptr_1
     clc
     adc #$02 ; add 2 for next pair
@@ -79,8 +88,6 @@ update_audio:
     adc #$00
     sta pulse_ptr_1+1
 
-    lda pulse_sweep_1
-    sta $4001
 
 @not_pulse_1:
 
@@ -98,6 +105,10 @@ update_audio:
     ldx pulse_periode_2
     stx pulse_timer_2 ; store periode again
 
+    ; skip update
+    cmp #$FE
+    beq @skip_note_pulse2:
+
     sta $4004 ; store channel settings
 
     iny
@@ -110,6 +121,10 @@ update_audio:
     lda period_table_lo, x
     sta $4006
 
+    lda pulse_sweep_2
+    sta $4005
+
+@skip_note_pulse2:
     lda pulse_ptr_2
     clc
     adc #$02 ; add 2 for next pair
@@ -117,9 +132,6 @@ update_audio:
     lda pulse_ptr_2+1
     adc #$00
     sta pulse_ptr_2+1
-
-    lda pulse_sweep_2
-    sta $4005
 
 @not_pulse_2:
 
@@ -137,6 +149,9 @@ update_audio:
     ldx triangle_periode
     stx triangle_timer ; store periode again
 
+    cmp #$FE
+    beq @skip_note_triangle:
+
     sta $4008 ; store channel settings
     sta $4017
 
@@ -150,6 +165,7 @@ update_audio:
     lda period_table_lo+12, x
     sta $400A
 
+@skip_note_triangle:
     lda triangle_ptr
     clc
     adc #$02 ; add 2 for next pair
@@ -174,6 +190,9 @@ update_audio:
     ldx noise_periode
     stx noise_timer ; store periode again
 
+    cmp #$FE
+    beq @skip_note_noise ; skip note if FE
+
     sta $400C ; store channel settings
 
     iny
@@ -185,6 +204,7 @@ update_audio:
     lda (noise_ptr), y
     sta $400F
 
+@skip_note_noise:
     lda noise_ptr
     clc
     adc #$03 ; add 3 for next pair
@@ -286,10 +306,10 @@ init_coin_noise:
 ;   loads sound into both square wave channels
 ;   and the triangle channel
 init_test_song:
-    lda #$0C ; periode
+    lda #$1F ; periode
     sta pulse_periode_1
     sta pulse_periode_2
-    sta triangle_timer
+    sta triangle_periode
 
     lda #$01
     sta pulse_timer_1
@@ -301,10 +321,10 @@ init_test_song:
     lda #>test_song_square_1
     sta pulse_ptr_1+1
 
-    ;lda #<test_song_square_2
-    ;sta pulse_ptr_2
-    ;lda #>test_song_square_2
-    ;sta pulse_ptr_2+1
+    lda #<test_song_square_2
+    sta pulse_ptr_2
+    lda #>test_song_square_2
+    sta pulse_ptr_2+1
 
     lda #<test_song_triangle
     sta triangle_ptr

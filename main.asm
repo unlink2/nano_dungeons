@@ -1456,13 +1456,28 @@ test_song_square_1:
 .db $00, $00 ; 00
 .db TEST_SONG_DUTY1, 6+12*3 ; F3
 .db TEST_SONG_DUTY1, 4+12*3 ; E4
-.db TEST_SONG_DUTY1, 4+12*3 ; E4
 .db $00, $00, $FF, $FF
 
 test_song_square_2:
+.db TEST_SONG_DUTY1, 4+12*5 ; E4
+.db TEST_SONG_DUTY1, 10+12*5 ; B4
+.db $00, $00 ; 00
+.db TEST_SONG_DUTY1, 4+12*5 ; E4
+.db TEST_SONG_DUTY1, 2+12*6 ; D5
+.db $00, $00 ; 00
+.db TEST_SONG_DUTY1, 6+12*5 ; F4
+.db TEST_SONG_DUTY1, 4+12*5 ; E5
 .db $00, $00, $FF, $FF
 
 test_song_triangle:
+.db TEST_SONG_DUTY1, 4+12*4 ; E4
+.db TEST_SONG_DUTY1, 10+12*4 ; B4
+.db $00, $00 ; 00
+.db TEST_SONG_DUTY1, 4+12*4 ; E4
+.db TEST_SONG_DUTY1, 2+12*5 ; D5
+.db $00, $00 ; 00
+.db TEST_SONG_DUTY1, 6+12*4 ; F4
+.db TEST_SONG_DUTY1, 4+12*4 ; E5
 .db $00, $00, $FF, $FF
 
 
