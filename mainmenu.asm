@@ -9,6 +9,8 @@
 ;   nametables are updated, sprites changed
 ;   registers changed
 init_main_menu:
+    jsr stop_audio
+
     lda #$00
     sta gfx_flags
 

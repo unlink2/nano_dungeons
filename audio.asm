@@ -16,6 +16,18 @@ init_audio_channels:
     lda #$40
     sta $4017
 
+    jsr stop_audio
+
+    rts
+@regs:
+.db $30,$08,$00,$00
+.db $30,$08,$00,$00
+.db $80,$00,$00,$00
+.db $30,$00,$00,$00
+.db $00,$00,$00,$00
+
+; stops all sounds on all channels
+stop_audio:
     ; set up audio pointers
     lda #<no_audio
     sta pulse_ptr_1
@@ -28,14 +40,7 @@ init_audio_channels:
     sta pulse_ptr_2+1
     sta triangle_ptr+1
     sta noise_ptr+1
-
-    rts
-@regs:
-.db $30,$08,$00,$00
-.db $30,$08,$00,$00
-.db $80,$00,$00,$00
-.db $30,$00,$00,$00
-.db $00,$00,$00,$00
+    rts 
 
 ; this sub routine update all audio playback
 ; inputs:

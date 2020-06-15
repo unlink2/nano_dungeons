@@ -1425,7 +1425,7 @@ obj_index_to_addr:
 
 ; timer value is FF therefore no audio will play
 no_audio:
-.db $FF
+.db $00, $00, $FF, $FF
 
 cursor_beep:
 .db #%10011111, $0F, $00, $00, $FF
