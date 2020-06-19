@@ -253,7 +253,7 @@ init_jump_noise:
     lda #>jump_noise
     sta noise_ptr+1
 
-    lda #$10
+    lda #$30
     sta noise_periode
 
     lda #$01
@@ -267,7 +267,7 @@ init_hit_noise:
     lda #>hit_noise
     sta noise_ptr+1
 
-    lda #$10
+    lda #$30
     sta noise_periode
 
     lda #$01
@@ -297,7 +297,7 @@ init_coin_noise:
     lda #>coin_noise
     sta noise_ptr+1
 
-    lda #$15
+    lda #$20
     sta noise_periode
 
     lda #$01
