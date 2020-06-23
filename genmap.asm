@@ -586,7 +586,7 @@ sprite_tile_rng:
 ;   Byte 3: Options
 ;       7th bit = 1 -> pre-defined room, tiles follow the header (tiles are mirrored horizontally)
 ;       0th bit = 1 -> no attributes
-;   Byte 4: Attribute
+;   Byte 4: Attribute (Color)
 ;   Byte 5-N: Raw room tiles
 ;   TODO implement byte 3
 rooms_lo:
@@ -622,7 +622,7 @@ rooms_lo:
 .db <room3x6
 .db <room3x3
 .db <room8x2
-.db <room5x5
+.db <room2x3
 
 rooms_hi:
 .db >room8x8
@@ -657,7 +657,7 @@ rooms_hi:
 .db >room3x6
 .db >room3x3
 .db >room8x2
-.db >room5x5
+.db >room2x3
 
 room8x8:
 .db $08, $08, $62, $80, $FF
@@ -713,3 +713,5 @@ room1x4wall:
 .db $62, $62, $62, $62, $62
 room4x1wall:
 .db $05, $01, $62, $00, $00
+room2x3:
+.db $02, $03, $62, $00, $FF
