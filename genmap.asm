@@ -404,8 +404,14 @@ insert_room:
     tay ; original y restored
 
 @not_pre_defined:
+    ; test if dest_ptr is already filled
+    lda (dest_ptr), y
+    cmp #$24
+    bne @skip_insert
+
     lda temp ; load tile value
     sta (dest_ptr), y
+@skip_insert:
 
     dey
     cpy #$FF ; underflow

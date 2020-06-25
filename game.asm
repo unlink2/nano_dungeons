@@ -265,7 +265,6 @@ update_game_crit:
     sta player_x
 @skip_tile_update:
 @player_not_moved:
-    jsr update_player_animation
 
     ; store previous position
     lda player_x
@@ -301,6 +300,8 @@ force_update_ui:
 ; updates UI for key, armor and damage count
 ; performs nametable update required to display numbers
 update_ui:
+    jsr update_player_animation
+
     lda map_flags ; skip update this frame if flag is set
     and #%00001000
     beq @no_skip:
@@ -308,7 +309,7 @@ update_ui:
     and #%11110111
     sta map_flags
     rts
-@no_skip:   
+@no_skip:
     lda last_player_damage
     cmp player_damage
     beq @no_update_damage
@@ -1180,6 +1181,10 @@ render_tile_updates:
 
     ldy draw_buffer_len
     beq @done ; if 0 lenght no update is required
+
+    ; delay tile update until move delay is over
+    ldy move_delay
+    bne @done
 
     ; force UI re-draw
     jsr force_update_ui
