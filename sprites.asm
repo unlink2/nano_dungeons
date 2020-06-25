@@ -485,7 +485,9 @@ sprite_update_default:
 
     ; positon sprite
     ldy #$00
-    lda temp+1
+    ldx temp+1
+    dex
+    txa
     sta (sprite_ptr), y
 
     ; attributes
@@ -591,7 +593,9 @@ sprite_update_barrier_invert:
 
     ; positon sprite
     ldy #$00
-    lda temp+1
+    ldx temp+1 ; adjust by -1
+    dex
+    txa
     sta (sprite_ptr), y
 
     ldy #$03
