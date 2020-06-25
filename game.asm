@@ -265,6 +265,7 @@ update_game_crit:
     sta player_x
 @skip_tile_update:
 @player_not_moved:
+    jsr update_player_animation
 
     ; store previous position
     lda player_x
@@ -300,8 +301,6 @@ force_update_ui:
 ; updates UI for key, armor and damage count
 ; performs nametable update required to display numbers
 update_ui:
-    jsr update_player_animation
-
     lda map_flags ; skip update this frame if flag is set
     and #%00001000
     beq @no_skip:
