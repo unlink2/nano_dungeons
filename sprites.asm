@@ -1154,7 +1154,9 @@ sprite_door_update:
     sta get_tile_y
 
     ldy #$00
-    lda temp+1
+    ldx temp+1
+    dex
+    txa
     sta (sprite_ptr), y
 
     iny
