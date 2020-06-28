@@ -122,11 +122,28 @@ generate_map:
 @insert_other_tiles:
     jsr insert_other
 
+    jsr generate_sprite_rand
+
 @gen_done:
     ; just place a start tile for testing purposes
     ; lda #$60
     ; ldy #$00
     ; sta (dest_ptr), y
+
+    rts
+
+; rolls some values for sprite random
+; values
+generate_sprite_rand:
+    ldx #SPRITE_TILES-1
+@loop:
+    ; advance seed
+    jsr random_seed
+    lda seed
+    sta sprite_tile_rand, x
+    dex
+    cpx #$FF ; loop full amount
+    bne @loop
 
     rts
 

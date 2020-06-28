@@ -275,7 +275,13 @@ projectile_data PROJECTILES
 
 ; flags used for character
 ; enough storage for anything that may need to be stored about the chracter
-character_flags CHAR_FLAGS 
+character_flags CHAR_FLAGS
+
+; random element for each sprite tile
+; filled during map generation
+; adds another deterministic layer of randomness to items
+; TODO use this 
+sprite_tile_rand SPRITE_TILES 
 .ende
 
 ; sprite memory
