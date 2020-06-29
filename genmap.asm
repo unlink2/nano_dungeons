@@ -136,11 +136,15 @@ generate_map:
 ; values
 generate_sprite_rand:
     ldx #SPRITE_TILES-1
+    ldy #$01 ; switch between 0 and 1 to sometimes use both seed values
 @loop:
     ; advance seed
     jsr random_seed
-    lda seed
+    lda seed, y
     sta sprite_tile_rand, x
+    tya
+    eor #$01
+    tay ; swap y
     dex
     cpx #$FF ; loop full amount
     bne @loop
