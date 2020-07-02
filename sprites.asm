@@ -202,6 +202,7 @@ sprite_offscreen:
 ;   a = 0 -> no collision
 ;   a = 1 -> collision
 ;   sets bit 6 of sprite_tile_data to 1 if collision occured with empty tile
+;   sets sprite_tile_data lower 4 bits to fine-tune offset
 ; side effects:
 ;   sprtie position is updated if no collision occurs
 verify_sprite_move:
@@ -1696,7 +1697,12 @@ sprite_sword_collision:
     ora #%10000000
     sta sprite_tile_data, y
 
-    inc player_damage
+    lda sprite_tile_rand, y
+    and #$01 ; max 2 incs
+    clc
+    adc player_damage
+    sta player_damage
+    inc player_damage ; inc once anyway
 
     ; test which weapon type to give
     lda sprite_tile_ai, y
