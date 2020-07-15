@@ -1698,7 +1698,7 @@ sprite_sword_collision:
     sta sprite_tile_data, y
 
     lda sprite_tile_rand, y
-    and #$01 ; max 2 incs
+    and #$03 ; max 2 incs
     clc
     adc player_damage
     sta player_damage
